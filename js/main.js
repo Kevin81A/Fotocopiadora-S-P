@@ -1,5 +1,5 @@
-/* =========================================================
-   FOTOCOPIADORAS SyP — Lógica principal (front-end puro)
+﻿/* =========================================================
+   Fotocopiadora SyP — Lógica principal (front-end puro)
    MEJORAS v2:
    - Carrito persistente en localStorage (sobrevive navegación)
    - Checkout real: abre WhatsApp con resumen del pedido
@@ -212,7 +212,7 @@ function initCartDrawer() {
    CHECKOUT MODAL + WHATSAPP
    ============================================================ */
 function buildWhatsAppMessage() {
-  const lines = ['🛒 *Pedido SyP Fotocopiadoras*\n'];
+  const lines = ['🛒 *Pedido Fotocopiadora SyP*\n'];
   state.cart.forEach((item) => {
     const p = PRODUCTS.find((x) => x.id === item.id);
     if (p) lines.push(`• ${p.name} x${item.qty} — ${formatCOP(p.price * item.qty)}`);
@@ -258,7 +258,7 @@ function openCheckoutModal() {
     </div>
     <div class="modal-foot">
       <button class="btn btn-outline" id="modalCancel">Volver al carrito</button>
-      <a href="https://wa.me/573145046459?text=${buildWhatsAppMessage()}" target="_blank" rel="noopener" class="btn btn-primary" id="confirmWA">
+      <a href="https://wa.me/573178204193?text=${buildWhatsAppMessage()}" target="_blank" rel="noopener" class="btn btn-primary" id="confirmWA">
         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-1 1-1 2.3 0 1.4 1 2.7 1.1 2.9.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.3A10 10 0 1 0 12 2z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
         Confirmar por WhatsApp
       </a>

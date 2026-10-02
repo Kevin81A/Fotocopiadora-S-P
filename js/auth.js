@@ -1,5 +1,5 @@
-/* =========================================================
-   FOTOCOPIADORAS SyP — Autenticación y Solicitudes de Servicio
+﻿/* =========================================================
+   Fotocopiadora SyP — Autenticación y Solicitudes de Servicio
    (simulado con localStorage mientras no existe back-end)
 
    IMPORTANTE PARA LA FASE DE BACK-END (PHP + MySQL):

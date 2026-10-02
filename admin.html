@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Administrativo | Fotocopiadoras SyP</title>
+<title>Panel Administrativo | Fotocopiadora SyP</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -114,7 +114,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><line x1="8" y1="8" x2="16" y2="16"/></svg>
       </div>
       <h3>Acceso restringido</h3>
-      <p>Esta sección es solo para el equipo administrativo de Fotocopiadoras SyP.</p>
+      <p>Esta sección es solo para el equipo administrativo de Fotocopiadora SyP.</p>
       <a href="login.html" class="btn btn-primary">Iniciar sesión como administrador</a>
     </div>
   </div>
@@ -146,7 +146,7 @@
   }
 
   function buildWAClientMsg(r) {
-    const msg = `Hola ${r.clienteNombre}, somos Fotocopiadoras SyP 👋\n\n` +
+    const msg = `Hola ${r.clienteNombre}, somos Fotocopiadora SyP 👋\n\n` +
       `Su solicitud de *${r.tipo}* para el equipo *${r.equipo}* ` +
       `ha sido actualizada al estado: *${r.estado}*.\n\n` +
       `Fecha programada: ${r.fecha} a las ${r.hora}.\n\n` +
@@ -186,7 +186,7 @@
           </select>
         </td>
         <td>
-          <a href="https://wa.me/573145046459?text=${encodeURIComponent(
+          <a href="https://wa.me/573178204193?text=${encodeURIComponent(
             `Recordatorio SyP: ${r.clienteNombre}, su ${r.tipo} está programado para el ${r.fecha} a las ${r.hora}. Equipo: ${r.equipo}.`
           )}" target="_blank" rel="noopener"
             title="Notificar cliente por WhatsApp"

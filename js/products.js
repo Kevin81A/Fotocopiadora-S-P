@@ -1,5 +1,5 @@
-/* =========================================================
-   FOTOCOPIADORAS SyP — Datos de productos (demo front-end)
+﻿/* =========================================================
+   Fotocopiadora SyP — Datos de productos (demo front-end)
    En la fase de back-end, este arreglo será reemplazado por
    una consulta a la base de datos MySQL vía PHP (ej. fetch
    a api/productos.php que devuelva JSON).

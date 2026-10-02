@@ -1,4 +1,4 @@
-package main
+﻿package main
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ func main() {
 	http.Handle("/", fs)
 
 	fmt.Println("╔══════════════════════════════════════════════╗")
-	fmt.Println("║   SyP Fotocopiadoras — Servidor local        ║")
+	fmt.Println("║   Fotocopiadora SyP — Servidor local        ║")
 	fmt.Println("╠══════════════════════════════════════════════╣")
 	fmt.Printf( "║   URL: http://localhost:%s/index.html       ║\n", port)
 	fmt.Println("║   Presiona Ctrl+C para detener               ║")

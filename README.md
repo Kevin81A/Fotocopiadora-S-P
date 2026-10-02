@@ -1,7 +1,7 @@
-# SyP Fotocopiadoras — Web App
+﻿# Fotocopiadora SyP — Web App
 
 > **"Precisión de planta. Servicio de barrio."**
-> A modern, fully functional front-end web application for **SyP Fotocopiadoras**, a photocopier and printer sales & repair shop based in **Neiva, Huila, Colombia**.
+> A modern, fully functional front-end web application for **Fotocopiadora SyP**, a photocopier and printer sales & repair shop based in **Neiva, Huila, Colombia**.
 
 ---
 
@@ -91,7 +91,7 @@ npx live-server --port=5500
 
 | Role | Email | Password |
 |------|-------|----------|
-| **Admin** | `admin@sypfotocopiadoras.com` | `admin123` |
+| **Admin** | `admin@fotocopiadorasyp.com` | `admin123` |
 | **Client** | Register a new account on `/login.html` | — |
 
 > ⚠️ Auth is simulated with `localStorage`. No real backend — passwords are **not** hashed. Do not use real credentials.
@@ -165,9 +165,9 @@ The site uses a custom **"Registration Mark"** design concept inspired by print 
 
 ## 🤝 Business
 
-**Fotocopiadoras SyP**
+**Fotocopiadora SyP**
 - 📍 Av La Toma # 3-30, Neiva, Huila, Colombia
-- 📞 +57 314 504 6459
+- 📞 +57 314 380 4967 (Gladys) / +57 317 820 4193 (Juan)
 - 📘 [Facebook](https://web.facebook.com/copycaes/)
 - 📸 [Instagram](https://www.instagram.com/copycaess/)
 - 🕐 Mon–Fri: 8am–12pm · 2pm–6pm | Sat: 8am–12pm
@@ -176,5 +176,5 @@ The site uses a custom **"Registration Mark"** design concept inspired by print 
 
 ## 📝 License
 
-This project is proprietary software developed for **Fotocopiadoras SyP**.
-All rights reserved © 2026 SyP Fotocopiadoras.
+This project is proprietary software developed for **Fotocopiadora SyP**.
+All rights reserved © 2026 Fotocopiadora SyP.

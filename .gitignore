@@ -1,0 +1,49 @@
+# Old duplicate subfolder (ignore)
+syp-web/
+
+# Node / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Build output
+dist/
+build/
+out/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Go build artifacts
+*.exe
+*.out
+/tmp/
+
+# VS Code (keep settings but not personal)
+.vscode/launch.json
+
+# PHP backend (future)
+/api/config.php
+/api/.env
+
+# Logs
+*.log
+
+# Editor backups
+*.swp
+*.swo
+*~
+
+# Temporary
+*.tmp
+*.bak

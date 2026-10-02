@@ -166,7 +166,7 @@ The site uses a custom **"Registration Mark"** design concept inspired by print 
 ## 🤝 Business
 
 **Fotocopiadora SyP**
-- 📍 Av La Toma # 3-30, Neiva, Huila, Colombia
+- 📍 Avenida la Toma #3A-20, Neiva, Huila, Colombia
 - 📞 +57 314 380 4967 (Gladys) / +57 317 820 4193 (Juan)
 - 📘 [Facebook](https://web.facebook.com/copycaes/)
 - 📸 [Instagram](https://www.instagram.com/copycaess/)

@@ -1,0 +1,21 @@
+{
+  "name": "Fotocopiadora SyP Neiva",
+  "short_name": "SyP Fotocopiadora",
+  "description": "Venta, alquiler y servicio técnico de fotocopiadoras e impresoras en Neiva, Huila.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0B0B0C",
+  "theme_color": "#E4002B",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='18' fill='%230B0B0C'/%3E%3Ccircle cx='20' cy='20' r='12' stroke='%23FAFAF8' stroke-width='1.5' fill='none'/%3E%3Cline x1='20' y1='2' x2='20' y2='38' stroke='%23FAFAF8' stroke-width='1.5'/%3E%3Cline x1='2' y1='20' x2='38' y2='20' stroke='%23FAFAF8' stroke-width='1.5'/%3E%3Ccircle cx='20' cy='20' r='7' stroke='%23E4002B' stroke-width='2' fill='none'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='18' fill='%230B0B0C'/%3E%3Ccircle cx='20' cy='20' r='12' stroke='%23FAFAF8' stroke-width='1.5' fill='none'/%3E%3Cline x1='20' y1='2' x2='20' y2='38' stroke='%23FAFAF8' stroke-width='1.5'/%3E%3Cline x1='2' y1='20' x2='38' y2='20' stroke='%23FAFAF8' stroke-width='1.5'/%3E%3Ccircle cx='20' cy='20' r='7' stroke='%23E4002B' stroke-width='2' fill='none'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

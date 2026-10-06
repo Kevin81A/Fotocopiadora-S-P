@@ -414,6 +414,53 @@ ul { list-style: none; }
 .section-head p { color: var(--steel); max-width: 48ch; }
 .section-dark .section-head p { color: rgba(250,250,248,0.65); }
 
+/* Finder de Compatibilidad de Tóner y Repuestos */
+.compat-finder {
+  background: var(--paper-dim);
+  border: 1px solid var(--line);
+  padding: 24px 28px;
+  margin-bottom: 32px;
+  border-left: 3px solid var(--red);
+}
+.compat-finder-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.compat-finder-head h3 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.compat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr auto;
+  gap: 14px;
+  align-items: center;
+}
+.compat-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13.5px;
+  border-radius: var(--radius);
+  font-family: inherit;
+}
+.compat-select:focus {
+  border-color: var(--red);
+  outline: none;
+}
+@media (max-width: 760px) {
+  .compat-grid { grid-template-columns: 1fr; }
+}
+
 /* ---------- Category chips ---------- */
 .chip-row {
   display: flex;

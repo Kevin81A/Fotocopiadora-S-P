@@ -1,8 +1,5 @@
-﻿/* =========================================================
-   Fotocopiadora SyP — Datos de productos (demo front-end)
-   En la fase de back-end, este arreglo será reemplazado por
-   una consulta a la base de datos MySQL vía PHP (ej. fetch
-   a api/productos.php que devuelva JSON).
+/* =========================================================
+   Fotocopiadora SyP — Catálogo y Matriz de Compatibilidad
    ========================================================= */
 
 const CATEGORIES = [
@@ -14,7 +11,34 @@ const CATEGORIES = [
   { id: 'mantenimiento', label: 'Mantenimiento' },
 ];
 
-/* Íconos de línea (originales, trazo simple) por categoría */
+/* Marcas y Modelos soportados para el Buscador de Compatibilidad */
+const BRAND_MODELS = {
+  Ricoh: [
+    'Aficio MP 301',
+    'MP 2554 / 3054 / 3554',
+    'MP 4501 / 5001',
+    'MP C306 / C406 Color',
+    'MP C2003 / C2503 Color',
+    'Pro 8100 / 8200'
+  ],
+  Kyocera: [
+    'Ecosys M2040dn',
+    'Ecosys M2135dn',
+    'TaskAlfa 3011i / 3511i',
+    'TaskAlfa 2552ci Color'
+  ],
+  Canon: [
+    'imageRUNNER 2206 / 2520',
+    'imageRUNNER ADVANCE C3525i',
+    'imageRUNNER 1643i'
+  ],
+  HP: [
+    'LaserJet Pro M404 / M428',
+    'LaserJet Enterprise M607 / M608',
+    'Color LaserJet Pro MFP M479'
+  ]
+};
+
 const ICONS = {
   fotocopiadoras: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="16" width="32" height="18" rx="1.5"/><rect x="13" y="6" width="22" height="10" rx="1"/><rect x="17" y="28" width="14" height="10" rx="0.5"/><circle cx="13" cy="21" r="1.4" fill="currentColor" stroke="none"/><line x1="18" y1="21" x2="30" y2="21"/></svg>`,
   impresoras: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="17" width="28" height="14" rx="1.5"/><rect x="14" y="7" width="20" height="10"/><rect x="15" y="31" width="18" height="10"/><circle cx="32" cy="23" r="1.4" fill="currentColor" stroke="none"/></svg>`,
@@ -27,134 +51,176 @@ const ICONS = {
 const PRODUCTS = [
   {
     id: 'sp-2554c',
-    name: 'Multifuncional Láser Color 2554',
+    name: 'Multifuncional Láser Ricoh MP 2554',
     cat: 'fotocopiadoras',
     price: 3400000,
     spec: '35 ppm · copia, imprime y escanea · hasta 20.000 pág/mes',
     stock: 'ok',
+    models: ['MP 2554 / 3054 / 3554'],
+    brand: 'Ricoh',
   },
   {
     id: 'sp-600bn',
-    name: 'Multifuncional Láser B/N 600',
+    name: 'Multifuncional Láser B/N MP 301',
     cat: 'fotocopiadoras',
-    price: 3600000,
-    spec: '60 ppm · equipo de escritorio compacto',
-    stock: 'low',
+    price: 1850000,
+    spec: '31 ppm · dúplex automático · escáner a color',
+    stock: 'ok',
+    models: ['Aficio MP 301'],
+    brand: 'Ricoh',
   },
   {
     id: 'sp-c306',
-    name: 'Multifuncional Color Compacta 306',
+    name: 'Multifuncional Color Compacta C306',
     cat: 'fotocopiadoras',
     price: 2600000,
-    spec: '30 ppm · ideal para oficina pequeña',
+    spec: '30 ppm · pantalla táctil 10.1" · red gigabit',
     stock: 'ok',
+    models: ['MP C306 / C406 Color'],
+    brand: 'Ricoh',
+  },
+  {
+    id: 'sp-m2040',
+    name: 'Kyocera Ecosys M2040dn Multifuncional',
+    cat: 'fotocopiadoras',
+    price: 2100000,
+    spec: '40 ppm B/N · tambor de larga duración (100.000 pág)',
+    stock: 'ok',
+    models: ['Ecosys M2040dn'],
+    brand: 'Kyocera',
   },
   {
     id: 'sp-p400',
-    name: 'Impresora Láser Monocromática P400',
+    name: 'Impresora Láser Monocromática HP M404',
     cat: 'impresoras',
     price: 980000,
-    spec: '40 ppm · dúplex automático',
+    spec: '40 ppm · dúplex automático · bajo consumo',
     stock: 'ok',
+    models: ['LaserJet Pro M404 / M428'],
+    brand: 'HP',
   },
   {
     id: 'sp-p220c',
-    name: 'Impresora Láser Color P220',
+    name: 'Impresora Color Ricoh SP C250',
     cat: 'impresoras',
     price: 1450000,
-    spec: '22 ppm color · red inalámbrica integrada',
+    spec: '22 ppm color · WiFi y Ethernet integrados',
     stock: 'ok',
+    models: ['MP C2003 / C2503 Color'],
+    brand: 'Ricoh',
   },
   {
     id: 'sp-ton301',
-    name: 'Tóner Compatible Serie 301',
+    name: 'Tóner Compatible Ricoh MP 301 (Tipo 301)',
     cat: 'tintas',
     price: 34000,
-    spec: 'Rendimiento aprox. 9.000 páginas',
+    spec: 'Rendimiento aprox. 8.000 páginas al 5%',
     stock: 'ok',
+    models: ['Aficio MP 301'],
+    brand: 'Ricoh',
+  },
+  {
+    id: 'sp-ton2554',
+    name: 'Tóner Negro Ricoh MP 2554 / 3054 / 3554',
+    cat: 'tintas',
+    price: 78000,
+    spec: 'Rendimiento aprox. 24.000 páginas',
+    stock: 'ok',
+    models: ['MP 2554 / 3054 / 3554'],
+    brand: 'Ricoh',
+  },
+  {
+    id: 'sp-ton2040',
+    name: 'Tóner Kyocera TK-1175 Compatible',
+    cat: 'tintas',
+    price: 65000,
+    spec: 'Rendimiento aprox. 12.000 páginas',
+    stock: 'ok',
+    models: ['Ecosys M2040dn', 'Ecosys M2135dn'],
+    brand: 'Kyocera',
   },
   {
     id: 'sp-ton4501c',
-    name: 'Tóner Color Compatible Serie 4501',
+    name: 'Kit Tóner Color Ricoh MP C306 / C406 (CMYK)',
     cat: 'tintas',
     price: 216000,
-    spec: '23.000 pág. negro / 17.000 pág. color',
+    spec: '17.000 pág. negro / 12.000 pág. colores',
     stock: 'ok',
+    models: ['MP C306 / C406 Color'],
+    brand: 'Ricoh',
   },
   {
     id: 'sp-recarga1000',
-    name: 'Recarga de Tóner 1000gr Premium',
+    name: 'Polvo de Tóner Universal 1000gr Premium',
     cat: 'tintas',
-    price: 100000,
-    spec: 'Alta densidad · compatible OEM y aftermarket',
-    stock: 'low',
+    price: 95000,
+    spec: 'Micro-filtrado de alta densidad · negro profundo',
+    stock: 'ok',
+    models: ['Aficio MP 301', 'MP 2554 / 3054 / 3554', 'Ecosys M2040dn', 'imageRUNNER 2206 / 2520'],
+    brand: 'Ricoh',
   },
   {
     id: 'sp-cil2554',
-    name: 'Cilindro OPC Universal 2554',
+    name: 'Cilindro Tambor OPC Ricoh MP 2554 / 3554',
     cat: 'repuestos',
     price: 61000,
-    spec: 'Compatible con múltiples modelos',
+    spec: 'Duración certificada 60.000 páginas',
     stock: 'ok',
+    models: ['MP 2554 / 3054 / 3554'],
+    brand: 'Ricoh',
+  },
+  {
+    id: 'sp-cil301',
+    name: 'Cilindro OPC + Cuchilla Ricoh MP 301',
+    cat: 'repuestos',
+    price: 48000,
+    spec: 'Kit completo de revelado y limpieza',
+    stock: 'ok',
+    models: ['Aficio MP 301'],
+    brand: 'Ricoh',
   },
   {
     id: 'sp-banda',
-    name: 'Banda de Transferencia Heavy Duty',
+    name: 'Banda de Transferencia Ricoh MP C2503 / C306',
     cat: 'repuestos',
-    price: 300000,
-    spec: 'Vida útil 150.000–200.000 impresiones',
+    price: 280000,
+    spec: 'Vida útil 120.000–150.000 copias',
     stock: 'ok',
-  },
-  {
-    id: 'sp-chip',
-    name: 'Chip de Tóner Reset Universal',
-    cat: 'repuestos',
-    price: 15000,
-    spec: 'Compatible con múltiples series',
-    stock: 'ok',
+    models: ['MP C306 / C406 Color', 'MP C2003 / C2503 Color'],
+    brand: 'Ricoh',
   },
   {
     id: 'sp-correa',
-    name: 'Correa ADF Universal',
-    cat: 'accesorios',
-    price: 35000,
-    spec: 'Alimentador automático de documentos',
+    name: 'Gomas de Alimentación de Papel (Pick Up Rollers)',
+    cat: 'repuestos',
+    price: 28000,
+    spec: 'Set x3 unidades antideslizantes',
     stock: 'ok',
-  },
-  {
-    id: 'sp-bandeja',
-    name: 'Bandeja de Papel Adicional 500h',
-    cat: 'accesorios',
-    price: 420000,
-    spec: 'Amplía capacidad de alimentación',
-    stock: 'low',
+    models: ['Aficio MP 301', 'MP 2554 / 3054 / 3554', 'Ecosys M2040dn'],
+    brand: 'Ricoh',
   },
   {
     id: 'sp-kitstd',
-    name: 'Kit de Mantenimiento Preventivo Estándar',
+    name: 'Mantenimiento Preventivo Completo en Taller',
     cat: 'mantenimiento',
-    price: 180000,
-    spec: 'Cauchos, cuchillas y sellos de repuesto',
+    price: 120000,
+    spec: 'Desarme, soplado, lubricación y calibración óptica',
     stock: 'ok',
-  },
-  {
-    id: 'sp-kitpremium',
-    name: 'Kit de Mantenimiento Preventivo Premium',
-    cat: 'mantenimiento',
-    price: 260000,
-    spec: 'Incluye cilindro y film de fusora',
-    stock: 'ok',
+    models: ['Aficio MP 301', 'MP 2554 / 3054 / 3554', 'Ecosys M2040dn'],
+    brand: 'Ricoh',
   },
   {
     id: 'sp-visita',
-    name: 'Visita Técnica de Diagnóstico',
+    name: 'Visita Técnica de Emergencia / Diagnóstico',
     cat: 'mantenimiento',
     price: 45000,
-    spec: 'Revisión completa en sitio · Neiva y alrededores',
+    spec: 'Atención prioritaria en sitio · Neiva y perímetro',
     stock: 'ok',
+    models: ['Aficio MP 301', 'MP 2554 / 3054 / 3554', 'Ecosys M2040dn', 'imageRUNNER 2206 / 2520'],
+    brand: 'Ricoh',
   },
 ];
 
 function formatCOP(value) {
-  return '$' + value.toLocaleString('es-CO');
+  return '$' + Number(value).toLocaleString('es-CO');
 }

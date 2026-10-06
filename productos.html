@@ -68,6 +68,32 @@
       <button class="chip" data-cat="mantenimiento">Mantenimiento</button>
     </div>
 
+    <!-- Buscador Inteligente de Compatibilidad de Tóner y Repuestos -->
+    <div class="compat-finder">
+      <div class="compat-finder-head">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Buscador de Tóner y Repuestos por Modelo de tu Máquina
+        </h3>
+        <span style="font-size:12.5px;color:var(--steel);">Encuentra insumos 100% compatibles con tu equipo</span>
+      </div>
+      <div class="compat-grid">
+        <div>
+          <select id="compatBrandSelect" class="compat-select" aria-label="Seleccionar Marca">
+            <option value="">1. Selecciona la marca (Ricoh, Kyocera, HP...)</option>
+          </select>
+        </div>
+        <div>
+          <select id="compatModelSelect" class="compat-select" aria-label="Seleccionar Modelo" disabled>
+            <option value="">2. Primero elige la marca</option>
+          </select>
+        </div>
+        <div>
+          <button id="compatClearBtn" class="btn btn-outline" style="padding:9px 16px;font-size:13px;display:none;">Limpiar filtro</button>
+        </div>
+      </div>
+    </div>
+
     <div class="product-toolbar">
       <div class="search-box">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
@@ -165,8 +191,8 @@
 <script src="js/auth.js"></script>
 <script src="js/main.js"></script>
 <script>
-  /* ---------- Lógica de catálogo: filtro por categoría + búsqueda con Debounce ---------- */
-  const catalogState = { cat: 'all', query: '' };
+  /* ---------- Lógica de catálogo: categorías + búsqueda + buscador de compatibilidad ---------- */
+  const catalogState = { cat: 'all', query: '', modelFilter: null };
 
   function debounce(fn, delay = 220) {
     let timer = null;
@@ -198,19 +224,30 @@
 
   function renderFilteredList() {
     let list = PRODUCTS;
+
+    // Filtro por Modelo de Máquina (Compatibilidad)
+    if (catalogState.modelFilter) {
+      list = list.filter((p) => p.models && p.models.includes(catalogState.modelFilter));
+    }
+
+    // Filtro por Categoría
     if (catalogState.cat !== 'all') {
       list = list.filter((p) => p.cat === catalogState.cat);
     }
+
+    // Filtro por Texto de Búsqueda
     if (catalogState.query.trim() !== '') {
       const q = catalogState.query.trim().toLowerCase();
       list = list.filter(
-        (p) => p.name.toLowerCase().includes(q) || p.spec.toLowerCase().includes(q)
+        (p) => p.name.toLowerCase().includes(q) || p.spec.toLowerCase().includes(q) || (p.brand && p.brand.toLowerCase().includes(q))
       );
     }
+
     renderProductGrid(document.getElementById('productGrid'), list);
     const count = document.getElementById('resultsCount');
     if (count) {
-      count.textContent = `${list.length} producto${list.length === 1 ? '' : 's'} encontrado${list.length === 1 ? '' : 's'}`;
+      const modelNote = catalogState.modelFilter ? ` compatibles con ${catalogState.modelFilter}` : '';
+      count.textContent = `${list.length} producto${list.length === 1 ? '' : 's'} encontrado${list.length === 1 ? '' : 's'}${modelNote}`;
     }
   }
 
@@ -218,6 +255,63 @@
     catalogState.query = val;
     applyFilters(false);
   }, 200);
+
+  /* ---------- Inicialización de Buscador de Compatibilidad ---------- */
+  function initCompatFinder() {
+    const brandSel = document.getElementById('compatBrandSelect');
+    const modelSel = document.getElementById('compatModelSelect');
+    const clearBtn = document.getElementById('compatClearBtn');
+    if (!brandSel || !modelSel || typeof BRAND_MODELS === 'undefined') return;
+
+    // Llenar marcas
+    Object.keys(BRAND_MODELS).forEach((brand) => {
+      const opt = document.createElement('option');
+      opt.value = brand;
+      opt.textContent = brand;
+      brandSel.appendChild(opt);
+    });
+
+    brandSel.addEventListener('change', () => {
+      const selectedBrand = brandSel.value;
+      modelSel.innerHTML = '<option value="">2. Selecciona el modelo exacto</option>';
+      if (selectedBrand && BRAND_MODELS[selectedBrand]) {
+        modelSel.disabled = false;
+        BRAND_MODELS[selectedBrand].forEach((mod) => {
+          const opt = document.createElement('option');
+          opt.value = mod;
+          opt.textContent = mod;
+          modelSel.appendChild(opt);
+        });
+      } else {
+        modelSel.disabled = true;
+        catalogState.modelFilter = null;
+        clearBtn.style.display = 'none';
+        applyFilters(true);
+      }
+    });
+
+    modelSel.addEventListener('change', () => {
+      if (modelSel.value) {
+        catalogState.modelFilter = modelSel.value;
+        clearBtn.style.display = 'inline-block';
+        showToast(`Mostrando insumos para: ${modelSel.value}`);
+      } else {
+        catalogState.modelFilter = null;
+        clearBtn.style.display = 'none';
+      }
+      applyFilters(true);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      brandSel.value = '';
+      modelSel.innerHTML = '<option value="">2. Primero elige la marca</option>';
+      modelSel.disabled = true;
+      catalogState.modelFilter = null;
+      clearBtn.style.display = 'none';
+      applyFilters(true);
+      showToast('Filtro de compatibilidad limpiado');
+    });
+  }
 
   document.addEventListener('DOMContentLoaded', () => {
     catalogState.cat = getCatFromURL();
@@ -241,6 +335,7 @@
       });
     }
 
+    initCompatFinder();
     applyFilters(false);
   });
 </script>

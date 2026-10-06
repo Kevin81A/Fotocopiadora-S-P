@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
    Fotocopiadora SyP — Design System
    Concepto: "Marca de registro" de imprenta (rojo + negro)
    ========================================================= */
@@ -25,6 +25,77 @@
   --max-w: 1200px;
   --radius: 2px;
   --header-h: 76px;
+  color-scheme: light;
+}
+
+/* ---------- Dark Theme ---------- */
+[data-theme="dark"] {
+  --ink: #F4F4F2;
+  --paper: #121214;
+  --paper-dim: #1A1A1E;
+  --steel: #9D9EA3;
+  --line: #2B2B30;
+  --line-dark: rgba(255, 255, 255, 0.14);
+  color-scheme: dark;
+}
+
+/* Skip link accesibilidad */
+.skip-link {
+  position: absolute;
+  top: -60px;
+  left: 20px;
+  background: var(--red);
+  color: #fff;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 1000;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 15px;
+}
+
+/* ---------- Theme Switcher Button ---------- */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: var(--paper);
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+}
+.theme-toggle-btn:hover {
+  border-color: var(--ink);
+  color: var(--red);
+}
+.theme-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Skeleton Loaders */
+.skeleton-card {
+  background: var(--paper-dim);
+  height: 360px;
+  border: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+}
+.skeleton-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  animation: skeleton-shimmer 1.5s infinite;
+}
+@keyframes skeleton-shimmer {
+  100% { transform: translateX(100%); }
 }
 
 /* ---------- Reset ---------- */
@@ -38,6 +109,7 @@ body {
   background: var(--paper);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 img { max-width: 100%; display: block; }

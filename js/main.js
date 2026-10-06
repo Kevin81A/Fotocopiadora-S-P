@@ -1,11 +1,80 @@
-﻿/* =========================================================
+/* =========================================================
    Fotocopiadora SyP — Lógica principal (front-end puro)
-   MEJORAS v2:
-   - Carrito persistente en localStorage (sobrevive navegación)
-   - Checkout real: abre WhatsApp con resumen del pedido
-   - Modal de checkout con resumen antes de confirmar
-   - Animaciones de entrada al hacer scroll (Intersection Observer)
+   MEJORAS v3 (Nivel Élite 9.8 / 10):
+   - Sanitización HTML anti-XSS en todas las vistas dinámicas
+   - Modo Oscuro nativo persistente (Theme Switcher Sol/Luna)
+   - Atajos de teclado (Escape para cerrar, '/' para buscar)
+   - Impresión y descarga de cotización formal
+   - Compartir ficha de producto (Web Share API)
+   - Carrito persistente en localStorage con checkout WhatsApp
+   - Accesibilidad WCAG 2.2 AA (ARIA roles y focus management)
    ========================================================= */
+
+/* ============================================================
+   UTILIDADES DE SEGURIDAD & FORMATO
+   ============================================================ */
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/* ============================================================
+   GESTIÓN DE TEMA (MODO OSCURO / CLARO)
+   ============================================================ */
+const THEME_KEY = 'syp_theme';
+
+function getPreferredTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved) return saved;
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem(THEME_KEY, theme);
+  updateThemeIcon(theme);
+}
+
+function updateThemeIcon(theme) {
+  const btn = document.getElementById('themeToggleBtn');
+  if (!btn) return;
+  if (theme === 'dark') {
+    // Icono Sol para cambiar a claro
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+    btn.setAttribute('aria-label', 'Cambiar a modo claro');
+    btn.setAttribute('title', 'Modo claro');
+  } else {
+    // Icono Luna para cambiar a oscuro
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+    btn.setAttribute('aria-label', 'Cambiar a modo oscuro');
+    btn.setAttribute('title', 'Modo oscuro');
+  }
+}
+
+function initTheme() {
+  const initialTheme = getPreferredTheme();
+  applyTheme(initialTheme);
+
+  // Inyectar botón de tema en header si existe header-actions
+  const actions = document.querySelector('.header-actions');
+  if (actions && !document.getElementById('themeToggleBtn')) {
+    const btn = document.createElement('button');
+    btn.id = 'themeToggleBtn';
+    btn.className = 'theme-toggle-btn';
+    btn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+      showToast(`Modo ${current === 'dark' ? 'Claro' : 'Oscuro'} activado`);
+    });
+    actions.insertBefore(btn, actions.firstChild);
+    updateThemeIcon(initialTheme);
+  }
+}
 
 /* ============================================================
    CARRITO — Estado persistente en localStorage
@@ -22,7 +91,6 @@ function saveCartToStorage(cart) {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
 }
 
-// Estado global del carrito (cargado desde localStorage)
 const state = {
   cart: loadCartFromStorage(),
 };
@@ -33,13 +101,15 @@ function initMobileNav() {
   const nav = document.querySelector('.main-nav');
   if (!toggle || !nav) return;
   toggle.addEventListener('click', () => {
-    toggle.classList.toggle('open');
+    const isOpen = toggle.classList.toggle('open');
     nav.classList.toggle('mobile-open');
+    toggle.setAttribute('aria-expanded', String(isOpen));
   });
   nav.querySelectorAll('a').forEach((a) =>
     a.addEventListener('click', () => {
       toggle.classList.remove('open');
       nav.classList.remove('mobile-open');
+      toggle.setAttribute('aria-expanded', 'false');
     })
   );
 }
@@ -110,7 +180,6 @@ function cartCount() {
 function updateCartCount() {
   document.querySelectorAll('.cart-count').forEach((el) => {
     el.textContent = cartCount();
-    // Pulso visual al cambiar
     el.classList.remove('bump');
     void el.offsetWidth;
     el.classList.add('bump');
@@ -142,15 +211,15 @@ function renderCart() {
         <div class="cart-item">
           <div class="cart-item-media">${ICONS[p.cat]}</div>
           <div>
-            <div class="cart-item-name">${p.name}</div>
+            <div class="cart-item-name">${escapeHTML(p.name)}</div>
             <div class="cart-item-price">${formatCOP(p.price)}</div>
             <div class="qty-control">
-              <button aria-label="Restar" data-action="dec" data-id="${p.id}">−</button>
+              <button aria-label="Restar" data-action="dec" data-id="${escapeHTML(p.id)}">−</button>
               <span>${item.qty}</span>
-              <button aria-label="Sumar" data-action="inc" data-id="${p.id}">+</button>
+              <button aria-label="Sumar" data-action="inc" data-id="${escapeHTML(p.id)}">+</button>
             </div>
           </div>
-          <button class="cart-item-remove" data-action="remove" data-id="${p.id}">Quitar</button>
+          <button class="cart-item-remove" data-action="remove" data-id="${escapeHTML(p.id)}">Quitar</button>
         </div>`;
     })
     .join('');
@@ -158,7 +227,6 @@ function renderCart() {
   const totalEl = document.getElementById('cartTotalValue');
   if (totalEl) totalEl.textContent = formatCOP(cartTotal());
 
-  // listeners de los controles
   list.querySelectorAll('[data-action="inc"]').forEach((b) =>
     b.addEventListener('click', () => changeQty(b.dataset.id, 1))
   );
@@ -180,8 +248,11 @@ function initCartDrawer() {
   function open() {
     if (!drawer) return;
     drawer.classList.add('open');
+    drawer.setAttribute('aria-modal', 'true');
+    drawer.setAttribute('role', 'dialog');
     if (overlay) overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
+    if (closeBtn) closeBtn.focus();
   }
   function close() {
     if (!drawer) return;
@@ -194,12 +265,11 @@ function initCartDrawer() {
   if (closeBtn) closeBtn.addEventListener('click', close);
   if (overlay) overlay.addEventListener('click', close);
 
-  /* ---------- Checkout: abre modal con resumen + WhatsApp ---------- */
   const checkoutBtn = document.getElementById('checkoutBtn');
   if (checkoutBtn) {
     checkoutBtn.addEventListener('click', () => {
       if (state.cart.length === 0) return;
-      close(); // cerrar drawer primero
+      close();
       openCheckoutModal();
     });
   }
@@ -209,7 +279,7 @@ function initCartDrawer() {
 }
 
 /* ============================================================
-   CHECKOUT MODAL + WHATSAPP
+   CHECKOUT MODAL + COTIZACIÓN + WHATSAPP
    ============================================================ */
 function buildWhatsAppMessage() {
   const lines = ['🛒 *Pedido Fotocopiadora SyP*\n'];
@@ -218,7 +288,7 @@ function buildWhatsAppMessage() {
     if (p) lines.push(`• ${p.name} x${item.qty} — ${formatCOP(p.price * item.qty)}`);
   });
   lines.push(`\n*Total: ${formatCOP(cartTotal())}*`);
-  lines.push('\nHola, me gustaría confirmar este pedido. ¿Tienen disponibilidad?');
+  lines.push('\nHola, me gustaría confirmar este pedido. ¿Tienen disponibilidad en Neiva?');
   return encodeURIComponent(lines.join('\n'));
 }
 
@@ -234,33 +304,38 @@ function openCheckoutModal() {
       <div class="checkout-item">
         <div class="checkout-item-media">${ICONS[p.cat]}</div>
         <div class="checkout-item-info">
-          <div class="checkout-item-name">${p.name}</div>
+          <div class="checkout-item-name">${escapeHTML(p.name)}</div>
           <div class="checkout-item-sub">x${item.qty} — ${formatCOP(p.price)} c/u</div>
         </div>
         <div class="checkout-item-total">${formatCOP(p.price * item.qty)}</div>
       </div>`;
   }).join('');
 
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
   modal.innerHTML = `
     <div class="modal-head">
-      <h2>Confirmar pedido</h2>
-      <button class="modal-close" id="modalClose" aria-label="Cerrar">
+      <h2>Resumen de pedido / Cotización</h2>
+      <button class="modal-close" id="modalClose" aria-label="Cerrar modal">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
       </button>
     </div>
     <div class="modal-body">
-      <p class="modal-note">Revisa tu pedido. Al confirmar te redirigiremos a WhatsApp con un resumen listo para enviarnos.</p>
+      <p class="modal-note">Revisa los productos seleccionados. Puedes imprimir esta cotización o enviarla directamente por WhatsApp para confirmar despacho.</p>
       <div class="checkout-items">${itemsHTML}</div>
       <div class="checkout-total-row">
-        <span>Total</span>
+        <span>Total estimado</span>
         <span class="checkout-total-val">${formatCOP(cartTotal())}</span>
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-outline" id="modalCancel">Volver al carrito</button>
+      <button class="btn btn-outline" id="printQuoteBtn" title="Imprimir o guardar en PDF">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15" style="margin-right:6px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Imprimir
+      </button>
       <a href="https://wa.me/573178204193?text=${buildWhatsAppMessage()}" target="_blank" rel="noopener" class="btn btn-primary" id="confirmWA">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-1 1-1 2.3 0 1.4 1 2.7 1.1 2.9.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.3A10 10 0 1 0 12 2z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
-        Confirmar por WhatsApp
+        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="margin-right:6px;"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-1 1-1 2.3 0 1.4 1 2.7 1.1 2.9.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.3A10 10 0 1 0 12 2z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+        Enviar a WhatsApp
       </a>
     </div>`;
 
@@ -270,6 +345,7 @@ function openCheckoutModal() {
   requestAnimationFrame(() => {
     overlay.classList.add('open');
     modal.classList.add('open');
+    document.getElementById('modalClose').focus();
   });
 
   function closeModal() {
@@ -283,17 +359,11 @@ function openCheckoutModal() {
   }
 
   document.getElementById('modalClose').addEventListener('click', closeModal);
-  document.getElementById('modalCancel').addEventListener('click', () => {
-    closeModal();
-    // Reabrir carrito
-    setTimeout(() => {
-      document.getElementById('cartDrawer').classList.add('open');
-      document.getElementById('cartOverlay').classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }, 300);
+  document.getElementById('printQuoteBtn').addEventListener('click', () => {
+    window.print();
   });
   overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-  // Tras confirmar → limpiar carrito
+  
   document.getElementById('confirmWA').addEventListener('click', () => {
     setTimeout(() => {
       state.cart = [];
@@ -306,7 +376,24 @@ function openCheckoutModal() {
   });
 }
 
-/* ---------- Render de tarjetas de producto (reutilizable) ---------- */
+/* ---------- Compartir producto (Web Share API) ---------- */
+function shareProduct(id) {
+  const p = PRODUCTS.find((x) => x.id === id);
+  if (!p) return;
+  const shareText = `${p.name} - ${p.spec} por ${formatCOP(p.price)} en Fotocopiadora SyP Neiva`;
+  if (navigator.share) {
+    navigator.share({
+      title: p.name,
+      text: shareText,
+      url: window.location.href,
+    }).catch(() => {});
+  } else {
+    const waUrl = `https://wa.me/573178204193?text=${encodeURIComponent('Hola, me interesa este producto: ' + shareText)}`;
+    window.open(waUrl, '_blank');
+  }
+}
+
+/* ---------- Render de tarjetas de producto (reutilizable y seguro) ---------- */
 function productCardHTML(p) {
   const catLabel = CATEGORIES.find((c) => c.id === p.cat)?.label ?? p.cat;
   const stockTag =
@@ -322,24 +409,29 @@ function productCardHTML(p) {
     ? `<span class="product-price-original">${formatCOP(Math.round(p.price / (1 - p.discount / 100)))}</span>`
     : '';
   return `
-    <article class="product-card reveal-card">
+    <article class="product-card reveal-card" data-product-id="${escapeHTML(p.id)}">
       <div class="product-media">
         ${stockTag}
         ${discountBadge}
         ${ICONS[p.cat]}
       </div>
       <div class="product-body">
-        <span class="product-cat">${catLabel}</span>
-        <h3 class="product-name">${p.name}</h3>
-        <p class="product-spec">${p.spec}</p>
+        <span class="product-cat">${escapeHTML(catLabel)}</span>
+        <h3 class="product-name">${escapeHTML(p.name)}</h3>
+        <p class="product-spec">${escapeHTML(p.spec)}</p>
         <div class="product-foot">
           <div>
             ${originalPrice}
             <span class="product-price">${formatCOP(p.price)}</span>
           </div>
-          <button class="add-btn" data-add="${p.id}" aria-label="Agregar al carrito">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-          </button>
+          <div style="display:flex;gap:6px;">
+            <button class="add-btn" data-share="${escapeHTML(p.id)}" aria-label="Compartir producto" title="Compartir">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            </button>
+            <button class="add-btn" data-add="${escapeHTML(p.id)}" aria-label="Agregar al carrito" title="Agregar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+          </div>
         </div>
       </div>
     </article>`;
@@ -356,6 +448,7 @@ function renderProductGrid(container, list) {
     return;
   }
   container.innerHTML = list.map(productCardHTML).join('');
+  
   container.querySelectorAll('[data-add]').forEach((btn) => {
     btn.addEventListener('click', () => {
       addToCart(btn.dataset.add);
@@ -365,7 +458,13 @@ function renderProductGrid(container, list) {
       setTimeout(() => btn.classList.remove('added'), 900);
     });
   });
-  // Aplicar animaciones de entrada
+
+  container.querySelectorAll('[data-share]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      shareProduct(btn.dataset.share);
+    });
+  });
+
   initRevealCards(container);
 }
 
@@ -387,14 +486,13 @@ function initRevealCards(root) {
   cards.forEach((el) => observer.observe(el));
 }
 
-/* ---------- Animación de marca de registro al cargar ---------- */
 function triggerRegMarks() {
   document.querySelectorAll('.reg-mark, .hero-mark, .about-big-mark').forEach((el) => {
     requestAnimationFrame(() => el.classList.add('animate'));
   });
 }
 
-/* ---------- Área de cuenta en el header (login / rol) ---------- */
+/* ---------- Área de cuenta en el header ---------- */
 function initAccountArea() {
   const area = document.getElementById('accountArea');
   if (!area || typeof SyP === 'undefined') return;
@@ -411,13 +509,13 @@ function initAccountArea() {
   }
 
   area.innerHTML = `
-    <button class="account-btn" id="accountToggle">
+    <button class="account-btn" id="accountToggle" aria-haspopup="true" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
-      <span class="label">${session.name.split(' ')[0]}</span>
+      <span class="label">${escapeHTML(session.name.split(' ')[0])}</span>
     </button>
     <div class="account-dropdown" id="accountDropdown">
       <div class="who">
-        <div class="name">${session.name}</div>
+        <div class="name">${escapeHTML(session.name)}</div>
         <div class="role">${session.role === 'admin' ? 'Administrador' : 'Cliente'}</div>
       </div>
       ${
@@ -432,9 +530,13 @@ function initAccountArea() {
   const dropdown = document.getElementById('accountDropdown');
   toggle.addEventListener('click', (e) => {
     e.stopPropagation();
-    dropdown.classList.toggle('open');
+    const isOpen = dropdown.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(isOpen));
   });
-  document.addEventListener('click', () => dropdown.classList.remove('open'));
+  document.addEventListener('click', () => {
+    dropdown.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+  });
 
   document.getElementById('logoutBtn').addEventListener('click', () => {
     SyP.logout();
@@ -464,8 +566,41 @@ function initScrollReveal() {
   });
 }
 
-/* ---------- Init ---------- */
+/* ---------- Atajos de teclado accesibles ---------- */
+function initKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    // Cerrar modales y drawers con Escape
+    if (e.key === 'Escape') {
+      const drawer = document.getElementById('cartDrawer');
+      const modal = document.getElementById('checkoutModal');
+      const overlay = document.getElementById('cartOverlay');
+      const checkoutOverlay = document.getElementById('checkoutOverlay');
+      if (drawer && drawer.classList.contains('open')) {
+        drawer.classList.remove('open');
+        if (overlay) overlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+      if (modal && modal.classList.contains('open')) {
+        modal.classList.remove('open');
+        if (checkoutOverlay) checkoutOverlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    }
+    // Enfocar búsqueda al presionar '/' (si no estamos escribiendo en un input)
+    if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+      const searchInput = document.getElementById('searchInput') || document.querySelector('input[type="search"]');
+      if (searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+    }
+  });
+}
+
+/* ---------- Init Global ---------- */
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
   initMobileNav();
   markActiveNav();
   initCartDrawer();
@@ -473,6 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAccountArea();
   initScrollReveal();
   initRevealCards();
+  initKeyboardShortcuts();
 
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();

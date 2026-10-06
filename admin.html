@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -173,13 +173,13 @@
       .map(
         (r) => `
       <tr>
-        <td><strong>${r.clienteNombre}</strong><br><span style="color:var(--steel); font-size:11.5px;">${r.clienteEmail}</span></td>
-        <td>${r.equipo}</td>
-        <td>${r.tipo}</td>
-        <td>${r.fecha}<br>${r.hora}</td>
-        <td style="max-width:200px;">${r.descripcion || '—'}</td>
+        <td><strong>${escapeHTML(r.clienteNombre)}</strong><br><span style="color:var(--steel); font-size:11.5px;">${escapeHTML(r.clienteEmail)}</span></td>
+        <td>${escapeHTML(r.equipo)}</td>
+        <td>${escapeHTML(r.tipo)}</td>
+        <td>${escapeHTML(r.fecha)}<br>${escapeHTML(r.hora)}</td>
+        <td style="max-width:200px;">${escapeHTML(r.descripcion || '—')}</td>
         <td>
-          <select data-id="${r.id}" class="status-select">
+          <select data-id="${escapeHTML(r.id)}" class="status-select">
             ${['Pendiente', 'Confirmada', 'En proceso', 'Completada', 'Cancelada']
               .map((s) => `<option value="${s}" ${s === r.estado ? 'selected' : ''}>${s}</option>`)
               .join('')}
@@ -187,7 +187,7 @@
         </td>
         <td>
           <a href="https://wa.me/573178204193?text=${encodeURIComponent(
-            `Recordatorio SyP: ${r.clienteNombre}, su ${r.tipo} está programado para el ${r.fecha} a las ${r.hora}. Equipo: ${r.equipo}.`
+            `Recordatorio Fotocopiadora SyP: ${r.clienteNombre}, su ${r.tipo} está programado para el ${r.fecha} a las ${r.hora}. Equipo: ${r.equipo}.`
           )}" target="_blank" rel="noopener"
             title="Notificar cliente por WhatsApp"
             style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--red);font-family:var(--font-mono);">

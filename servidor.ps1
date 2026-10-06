@@ -3,7 +3,8 @@ $carpeta = $PSScriptRoot
 $url = "http://localhost:$puerto/"
 
 $listener = New-Object System.Net.HttpListener
-$listener.Prefixes.Add($url)
+$listener.Prefixes.Add("http://localhost:$puerto/")
+$listener.Prefixes.Add("http://127.0.0.1:$puerto/")
 $listener.Start()
 
 Write-Host "Servidor iniciado en: http://localhost:$puerto/index.html" -ForegroundColor Green

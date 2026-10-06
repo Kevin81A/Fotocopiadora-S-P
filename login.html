@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -90,17 +90,17 @@
       <form class="auth-panel" id="registerForm" data-panel="registro" novalidate>
         <div class="form-group" id="regNameGroup">
           <label for="regName">Nombre completo</label>
-          <input type="text" id="regName" placeholder="Ej. María Pérez">
+          <input type="text" id="regName" placeholder="" autocomplete="name">
           <span class="form-error"></span>
         </div>
         <div class="form-group" id="regEmailGroup">
           <label for="regEmail">Correo electrónico</label>
-          <input type="email" id="regEmail" placeholder="tucorreo@ejemplo.com">
+          <input type="email" id="regEmail" placeholder="" autocomplete="email">
           <span class="form-error"></span>
         </div>
         <div class="form-group" id="regPhoneGroup">
           <label for="regPhone">Teléfono / WhatsApp</label>
-          <input type="tel" id="regPhone" placeholder="Ej. 3145046459">
+          <input type="tel" id="regPhone" placeholder="" autocomplete="tel" inputmode="numeric">
           <span class="form-error"></span>
         </div>
         <div class="form-group" id="regPasswordGroup">
@@ -247,21 +247,46 @@
     setTimeout(() => redirectAfterAuth(result.session), 700);
   });
 
+  /* ---------- Filtros de entrada en tiempo real (registro) ---------- */
+  const regNameInput = document.getElementById('regName');
+  const regPhoneInput = document.getElementById('regPhone');
+
+  regNameInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '');
+  });
+
+  regPhoneInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/[^0-9+\s-]/g, '');
+  });
+
   /* ---------- Submit: registro ---------- */
   document.getElementById('registerForm').addEventListener('submit', (e) => {
     e.preventDefault();
     ['regNameGroup', 'regEmailGroup', 'regPhoneGroup', 'regPasswordGroup'].forEach((id) => setError(id, ''));
 
-    const name = document.getElementById('regName').value.trim();
+    const name = regNameInput.value.trim();
     const email = document.getElementById('regEmail').value.trim();
-    const phone = document.getElementById('regPhone').value.trim();
+    const phone = regPhoneInput.value.trim();
     const password = document.getElementById('regPassword').value;
 
     let valid = true;
-    if (name.length < 3) { setError('regNameGroup', 'Ingresa tu nombre completo.'); valid = false; }
-    if (!/^\S+@\S+\.\S+$/.test(email)) { setError('regEmailGroup', 'Correo no válido.'); valid = false; }
-    if (phone.length < 7) { setError('regPhoneGroup', 'Ingresa un teléfono válido.'); valid = false; }
-    if (password.length < 6) { setError('regPasswordGroup', 'Mínimo 6 caracteres.'); valid = false; }
+    if (name.length < 3) { 
+      setError('regNameGroup', 'Ingresa tu nombre completo (solo letras).'); 
+      valid = false; 
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email)) { 
+      setError('regEmailGroup', 'Correo no válido.'); 
+      valid = false; 
+    }
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length < 7 || cleanPhone.length > 15) { 
+      setError('regPhoneGroup', 'Ingresa un teléfono válido (solo dígitos, mín 7).'); 
+      valid = false; 
+    }
+    if (password.length < 6) { 
+      setError('regPasswordGroup', 'Mínimo 6 caracteres.'); 
+      valid = false; 
+    }
     if (!valid) return;
 
     const result = SyP.registerUser({ name, email, phone, password });

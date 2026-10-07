@@ -293,9 +293,6 @@
           </div>
         </div>
       </div>
-          </div>
-        </div>
-      </div>
 
     </div>
 
@@ -542,6 +539,97 @@
     </div>
   </section>
 
+  <!-- ===================== CALCULADORA DE RENTING & AHORRO ===================== -->
+  <section class="section" id="calculadora-renting" style="padding-top:20px; padding-bottom:50px;">
+    <div class="container">
+      <div class="renting-calc-container" id="rentingCalculator">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:28px;">
+          <div>
+            <span class="eyebrow" style="color:var(--red);">Simulador de Ahorro para Empresas</span>
+            <h2 style="font-size:24px; margin-top:4px;">Calculadora de Renting y Alquiler Corporativo</h2>
+            <p style="font-size:14px; color:var(--steel); margin-top:4px;">Ajusta el volumen mensual de tu oficina y descubre cuánto ahorras con nuestros planes todo incluido en Neiva.</p>
+          </div>
+          <div class="renting-mode-selector">
+            <button class="renting-mode-btn active" id="rentingModeMono">Monocromático (B/N)</button>
+            <button class="renting-mode-btn" id="rentingModeColor">Color Full HD</button>
+          </div>
+        </div>
+
+        <div class="renting-calc-grid">
+          <!-- Columna Izquierda: Slider interactivo -->
+          <div class="renting-slider-box">
+            <div>
+              <div class="renting-slider-header">
+                <span style="font-size:14px; font-weight:600; color:var(--ink);">Volumen mensual estimado:</span>
+                <span class="renting-vol-number" id="rentingVolumeVal">5.000 pág/mes</span>
+              </div>
+              <p style="font-size:12.5px; color:var(--steel); margin-top:4px;">Desliza para calcular según el número de impresiones y fotocopias de tu equipo:</p>
+            </div>
+
+            <div style="padding:10px 0;">
+              <input type="range" id="rentingVolumeRange" class="renting-range-slider" min="1000" max="50000" step="500" value="5000" aria-label="Volumen mensual de páginas">
+              <div style="display:flex; justify-content:space-between; font-size:11.5px; font-family:var(--font-mono); color:var(--steel); margin-top:8px;">
+                <span>1.000 pág</span>
+                <span>15.000 pág</span>
+                <span>30.000 pág</span>
+                <span>50.000 pág</span>
+              </div>
+            </div>
+
+            <div style="background:var(--paper-dim); border:1px solid var(--line); border-radius:8px; padding:16px;">
+              <strong style="font-size:13px; display:block; margin-bottom:8px; color:var(--ink);">¿Qué incluye todo plan de renting SyP?</strong>
+              <ul class="renting-perks-list" style="margin-bottom:0;">
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span><strong>Tóner y recargas 100% ilimitadas</strong> sin costo por cartucho.</span>
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Mantenimiento preventivo mensual y cambio de repuestos en sitio.</span>
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>Reemplazo inmediato del equipo en caso de falla mayor en Neiva.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Tarjeta de recomendación dinámica -->
+          <div class="renting-output-card">
+            <div class="renting-rec-header">
+              <img id="rentingRecImg" class="renting-rec-img" src="img/prod_copier.jpg" alt="Equipo Recomendado" loading="lazy">
+              <div>
+                <span style="font-size:11px; font-family:var(--font-mono); font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:0.06em;">Equipo Sugerido</span>
+                <div class="renting-rec-title" id="rentingRecModelName">Ricoh MP 2554 / 3054</div>
+                <span style="font-size:12px; color:var(--steel);">Multifuncional Láser Alto Rendimiento</span>
+              </div>
+            </div>
+
+            <div class="renting-savings-badge" id="rentingSavingsBadge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              Calculando ahorro...
+            </div>
+
+            <div class="renting-price-row">
+              <span class="renting-fee-value" id="rentingRecFee">$160.000 COP</span>
+              <span class="renting-fee-period">/ mes (Todo incluido)</span>
+            </div>
+
+            <div style="font-size:12.5px; color:var(--steel); margin-bottom:20px; line-height:1.5;">
+              • <span id="rentingIncludedPages">4.000 páginas base incluidas con insumos</span><br>
+              • <span id="rentingExtraPrice">$28 COP por página adicional</span>
+            </div>
+
+            <a href="https://wa.me/573143804967" id="rentingWhatsAppBtn" target="_blank" rel="noopener" class="btn btn-primary btn-block" style="text-align:center;">
+              Cotizar este plan de Renting con Gladys
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ===================== CATEGORÍAS ===================== -->
   <section class="section section-dim">
     <div class="container">
@@ -637,57 +725,18 @@
     </div>
   </section>
 
-  <!-- ===================== TESTIMONIOS ===================== -->
-  <section class="section">
+  <!-- ===================== CASOS DE ÉXITO & TESTIMONIOS ===================== -->
+  <section class="testimonials-section" id="testimonios">
     <div class="container">
       <div class="section-head">
         <div>
-          <span class="eyebrow">Opiniones reales</span>
-          <h2>Empresas e instituciones que confían en nosotros</h2>
+          <span class="eyebrow" style="color:var(--red);">Prueba Social Verificada</span>
+          <h2>Empresas e instituciones del Huila que confían en nosotros</h2>
+          <p style="font-size:14px; color:var(--steel); margin-top:4px;">Conoce la experiencia de colegios, notarías y oficinas que trabajan a diario con equipos SyP.</p>
         </div>
       </div>
-      <div class="testimonial-grid">
-        <div class="testimonial-card">
-          <div>
-            <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"Llevamos más de 4 años alquilando dos multifuncionales Ricoh para nuestra institución educativa. El soporte técnico de Juan es inmediato; nunca hemos parado de imprimir exámenes ni documentos."</p>
-          </div>
-          <div class="testimonial-author">
-            <div class="author-avatar">CS</div>
-            <div>
-              <div class="author-name">Colegio San Juan Bosco</div>
-              <div class="author-role">Área Administrativa · Neiva</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="testimonial-card">
-          <div>
-            <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"La atención de doña Gladys es impecable. Los tóners compatibles que nos suministran tienen un rendimiento idéntico al original y nos han permitido ahorrar más del 40% en costos de papelería."</p>
-          </div>
-          <div class="testimonial-author">
-            <div class="author-avatar">NP</div>
-            <div>
-              <div class="author-name">Notaría Primera de Neiva</div>
-              <div class="author-role">Gerencia de Operaciones · Huila</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="testimonial-card">
-          <div>
-            <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">"Excelente servicio de mantenimiento. Teníamos una impresora Kyocera trabada y en menos de 2 horas vinieron al taller, cambiaron los rodillos y quedó como nueva. Recomendados 100%."</p>
-          </div>
-          <div class="testimonial-author">
-            <div class="author-avatar">LC</div>
-            <div>
-              <div class="author-name">Litografía y Papelería Central</div>
-              <div class="author-role">Producción Gráfica · Neiva</div>
-            </div>
-          </div>
-        </div>
+      <div class="testimonials-grid" id="testimonialsGrid">
+        <!-- Renderizado dinámico vía JS -->
       </div>
     </div>
   </section>
@@ -825,6 +874,7 @@
         <span class="value" id="cartTotalValue">$0</span>
       </div>
       <button class="btn btn-primary btn-block" id="checkoutBtn">Proceder al pago</button>
+      <button class="btn btn-outline btn-block" id="printQuoteBtn" style="margin-top:8px; font-size:12.5px; border-color:var(--line);">📄 Descargar Cotización Formal (PDF)</button>
       <p class="cart-note">Serás redirigido a WhatsApp para confirmar tu pedido.</p>
     </div>
   </aside>

@@ -81,6 +81,35 @@
   </div>
 </section>
 
+<!-- ===================== ASISTENTE VISUAL DE DIAGNÓSTICO (Smart Troubleshooter) ===================== -->
+<section class="section" id="diagnostico-interactivo" style="padding-top:20px; padding-bottom:40px;">
+  <div class="container">
+    <div class="troubleshooter-wrapper" id="smartTroubleshooter">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+        <div>
+          <span class="eyebrow" style="color:var(--red);">Diagnóstico Rápido Inteligente</span>
+          <h2 style="font-size:24px; margin-top:4px;">¿Qué problema presenta tu fotocopiadora o impresora?</h2>
+          <p style="font-size:14px; color:var(--steel); margin-top:4px;">Selecciona el síntoma visual para conocer la causa probable, la pieza requerida y reportarlo directamente a nuestro jefe de taller.</p>
+        </div>
+        <span class="live-status-pill" style="background:rgba(228,0,43,0.1); border-color:rgba(228,0,43,0.3); color:var(--red);">
+          <span class="live-dot" style="background:var(--red);"></span>
+          Taller Directo Neiva
+        </span>
+      </div>
+
+      <!-- Selector de Síntomas Grid -->
+      <div class="symptoms-selector-grid" id="troubleSymptomsGrid">
+        <!-- Renderizado dinámico vía JS -->
+      </div>
+
+      <!-- Panel de Diagnóstico Resultante -->
+      <div class="diagnostic-result-panel" id="troubleResultPanel">
+        <!-- Renderizado dinámico vía JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ===================== PROCESO ===================== -->
 <section class="section" style="padding-bottom:56px;">
   <div class="container">
@@ -265,6 +294,7 @@
       <span class="value" id="cartTotalValue">$0</span>
     </div>
     <button class="btn btn-primary btn-block" id="checkoutBtn">Proceder al pago</button>
+    <button class="btn btn-outline btn-block" id="printQuoteBtn" style="margin-top:8px; font-size:12.5px; border-color:var(--line);">📄 Descargar Cotización Formal (PDF)</button>
     <p class="cart-note">Serás redirigido a WhatsApp para confirmar tu pedido.</p>
   </div>
 </aside>

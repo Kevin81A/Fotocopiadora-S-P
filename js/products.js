@@ -63,6 +63,14 @@ const PRODUCTS = [
     reviews: 42,
     badge: 'Más Vendido',
     discount: 10,
+    speed: '35 ppm',
+    dutyCycle: '20.000 pág/mes',
+    paperSize: 'Carta, Oficio, Doble Carta (A3 / A4)',
+    connectivity: 'Red Gigabit Ethernet, USB 2.0, SD Card',
+    functions: 'Copia, Impresión de Red, Escáner Dúplex Color',
+    tonerYield: '24.000 páginas al 5%',
+    costPerPage: '$8 COP / página',
+    compatibleIds: ['sp-ton2554', 'sp-cil2554', 'sp-correa'],
   },
   {
     id: 'sp-600bn',
@@ -77,6 +85,14 @@ const PRODUCTS = [
     rating: 4.8,
     reviews: 36,
     badge: 'Recomendado',
+    speed: '31 ppm',
+    dutyCycle: '10.000 pág/mes',
+    paperSize: 'Carta, Oficio, Legal (A4)',
+    connectivity: 'Red Ethernet 10/100, USB 2.0',
+    functions: 'Copia, Impresión, Escáner a Color, Dúplex',
+    tonerYield: '8.000 páginas',
+    costPerPage: '$9 COP / página',
+    compatibleIds: ['sp-ton301', 'sp-cil301', 'sp-correa'],
   },
   {
     id: 'sp-c306',
@@ -91,6 +107,14 @@ const PRODUCTS = [
     rating: 5.0,
     reviews: 19,
     badge: 'Color HD',
+    speed: '30 ppm Color / B&N',
+    dutyCycle: '15.000 pág/mes',
+    paperSize: 'Carta, Oficio, Folio',
+    connectivity: 'Pantalla Smart 10.1", Gigabit LAN, WiFi opcional',
+    functions: 'Multifuncional Color Láser, Escáner de Alta Definición',
+    tonerYield: '17.000 pág (Negro) / 12.000 (Color)',
+    costPerPage: '$35 COP / pág color',
+    compatibleIds: ['sp-ton4501c', 'sp-banda'],
   },
   {
     id: 'sp-m2040',
@@ -106,6 +130,14 @@ const PRODUCTS = [
     reviews: 58,
     badge: 'Alto Rendimiento',
     discount: 5,
+    speed: '40 ppm',
+    dutyCycle: '50.000 pág/mes',
+    paperSize: 'Carta, Oficio, Legal',
+    connectivity: 'Red Gigabit, USB Host 2.0',
+    functions: 'Copia, Impresión, Escaneo Dúplex simultáneo de 1 pasada',
+    tonerYield: '12.000 páginas',
+    costPerPage: '$7 COP / página',
+    compatibleIds: ['sp-ton2040', 'sp-correa'],
   },
   {
     id: 'sp-p400',
@@ -120,6 +152,14 @@ const PRODUCTS = [
     rating: 4.7,
     reviews: 24,
     badge: 'Económica',
+    speed: '40 ppm',
+    dutyCycle: '80.000 pág/mes',
+    paperSize: 'Carta, Oficio, Ejecutivo',
+    connectivity: 'Red Ethernet, USB 2.0 de alta velocidad',
+    functions: 'Impresora Láser Monocromática de Red',
+    tonerYield: '10.000 páginas',
+    costPerPage: '$11 COP / página',
+    compatibleIds: ['sp-recarga1000'],
   },
   {
     id: 'sp-p220c',
@@ -134,6 +174,14 @@ const PRODUCTS = [
     rating: 4.8,
     reviews: 15,
     badge: 'WiFi Direct',
+    speed: '22 ppm Color / B&N',
+    dutyCycle: '30.000 pág/mes',
+    paperSize: 'Carta, Oficio, A4',
+    connectivity: 'WiFi Direct, Ethernet, USB 2.0',
+    functions: 'Impresión Láser Color inalámbrica',
+    tonerYield: '6.000 páginas',
+    costPerPage: '$38 COP / página',
+    compatibleIds: ['sp-ton4501c'],
   },
   {
     id: 'sp-ton301',
@@ -287,6 +335,133 @@ const PRODUCTS = [
   },
 ];
 
+/* ============================================================
+   MATRIZ DE DIAGNÓSTICO DE FALLAS (Smart Troubleshooter)
+   ============================================================ */
+const TROUBLESHOOTING_DATA = [
+  {
+    id: 'falla-rayas',
+    symptom: 'Líneas negras verticales o rayas repetitivas',
+    category: 'Calidad de Copia',
+    severity: 'Media',
+    desc: 'La hoja sale con una o varias líneas negras continuas que manchan el documento a lo largo de la página.',
+    diagnosis: 'Cilindro Tambor OPC rayado o cuchilla de limpieza (Cleaning Blade) con desgaste/muescas por residuos de grapas o polvo.',
+    solution: 'Reemplazo del Cilindro OPC y Cuchilla de limpieza, más aspirado técnico de la tolva residual.',
+    productId: 'sp-cil2554',
+    serviceId: 'sp-kitstd',
+    urgency: 'Atención en 24h para evitar contaminar la unidad reveladora',
+  },
+  {
+    id: 'falla-atasco',
+    symptom: 'Atasco continuo de papel en Bandeja 1 o Alimentador Dúplex',
+    category: 'Mecánica de Alimentación',
+    severity: 'Alta',
+    desc: 'La máquina intenta tomar la hoja pero patina, se arruga en la entrada o reporta error "Atasco de Papel" de inmediato.',
+    diagnosis: 'Gomas de arrastre (Pick-up Rollers) cristalizadas, lisas o con suciedad acumulada de papel bond.',
+    solution: 'Cambio de set de gomas de alimentación (3 rodillos antideslizantes) y calibración de resorte de presión.',
+    productId: 'sp-correa',
+    serviceId: 'sp-visita',
+    urgency: 'Solución rápida en sitio (< 30 min)',
+  },
+  {
+    id: 'falla-codigo',
+    symptom: 'Código de error SC en pantalla (ej. SC 542 / SC 320 / SC 401)',
+    category: 'Electrónica y Fusor',
+    severity: 'Crítica',
+    desc: 'La fotocopiadora se bloquea con una pantalla roja o mensaje de servicio que impide realizar copias o impresiones.',
+    diagnosis: 'Falla térmica en termistor/fusor o desincronización de motor poligonal láser. Bloqueo de seguridad preventivo.',
+    solution: 'Diagnóstico con multímetro/código de servicio en taller o domicilio, reseteo SP y recambio de pieza averiada.',
+    productId: null,
+    serviceId: 'sp-visita',
+    urgency: 'Prioridad de emergencia inmediata',
+  },
+  {
+    id: 'falla-palido',
+    symptom: 'Impresión muy clara, pálida o fondo grisáceo sucio',
+    category: 'Densidad y Tóner',
+    severity: 'Baja',
+    desc: 'El texto no sale negro profundo o el fondo de la hoja queda con sombra de polvo residual.',
+    diagnosis: 'Polvo de tóner descalibrado, rodillo magnético sucio o sensor ID de densidad óptico obstruido.',
+    solution: 'Recarga con polvo microfiltrado Grado A+ y calibración óptica de sensor TD/ID.',
+    productId: 'sp-ton2554',
+    serviceId: 'sp-kitstd',
+    urgency: 'Mantenimiento preventivo recomendado',
+  },
+  {
+    id: 'falla-ruido',
+    symptom: 'Ruido fuerte de carraca / chasquido de engranajes',
+    category: 'Tracción Mecánica',
+    severity: 'Media',
+    desc: 'Al presionar botón de copia se escucha un sonido metálico o chasquido de piñones forzados.',
+    diagnosis: 'Engranaje de fusión roto o buje de registro trabado por falta de lubricación de alta temperatura.',
+    solution: 'Desarme de módulo de tracción, lubricación sintética y sustitución de piñón desgastado.',
+    productId: null,
+    serviceId: 'sp-kitstd',
+    urgency: 'Requiere revisión para no romper el motor principal',
+  },
+];
+
+/* ============================================================
+   PRUEBA SOCIAL Y CASOS DE ÉXITO EN EL HUILA
+   ============================================================ */
+const TESTIMONIALS_DATA = [
+  {
+    id: 'test-1',
+    author: 'Dra. Carmen Cecilia Andrade',
+    role: 'Administradora · Notaría Segunda de Neiva',
+    entity: 'Notaría Segunda de Neiva',
+    quote: 'Llevamos más de 4 años con el servicio de renting de Ricoh MP 2554 con Fotocopiadora SyP. El soporte técnico cuando se requiere es inmediato y el suministro de tóner nunca falta.',
+    rating: 5,
+    city: 'Neiva, Huila',
+    metric: '+45.000 copias notariales/mes sin interrupciones',
+  },
+  {
+    id: 'test-2',
+    author: 'Lic. Miller González',
+    role: 'Coordinador Académico',
+    entity: 'Colegio Cooperativo Campestre',
+    quote: 'Para la época de exámenes y talleres escolares el volumen de copiado es altísimo. Gladys y Sebastián nos asesoraron con una Kyocera de alto rendimiento que redujo nuestros costos en más del 40%.',
+    rating: 5,
+    city: 'Neiva, Huila',
+    metric: '40% de ahorro frente a compra tradicional',
+  },
+  {
+    id: 'test-3',
+    author: 'Ing. Fernando Perdomo',
+    role: 'Director de Obra',
+    entity: 'Constructora & Proyectos del Huila',
+    quote: 'Imprimimos planos, memorias de cálculo y contratos a diario. La calidad de las recargas y el tóner compatible es indistinguible del original, con garantía total.',
+    rating: 5,
+    city: 'Neiva, Huila',
+    metric: '100% de nitidez en planos y contratos',
+  },
+  {
+    id: 'test-4',
+    author: 'Sandra Milena Rojas',
+    role: 'Propietaria',
+    entity: 'Papelería & Centro de Copiado La Toma',
+    quote: 'Excelente respaldo en la Av. La Toma. Si una máquina falla, el técnico llega el mismo día. La confianza y el trato familiar son incomparables.',
+    rating: 5,
+    city: 'Neiva, Huila',
+    metric: 'Respuesta técnica en menos de 3 horas',
+  },
+];
+
+/* ============================================================
+   PARÁMETROS PARA LA CALCULADORA DE RENTING
+   ============================================================ */
+const RENTING_TIERS = {
+  mono: [
+    { maxVol: 4000, modelId: 'sp-600bn', name: 'Plan Básico Pyme (Ricoh MP 301)', monthlyFee: 190000, includedPages: 3000, extraPagePrice: 28, buyMonthlyEstimate: 290000 },
+    { maxVol: 12000, modelId: 'sp-2554c', name: 'Plan Corporativo Pro (Ricoh MP 2554)', monthlyFee: 320000, includedPages: 8000, extraPagePrice: 22, buyMonthlyEstimate: 510000 },
+    { maxVol: 50000, modelId: 'sp-m2040', name: 'Plan Alto Volumen Industrial (Kyocera 40ppm)', monthlyFee: 480000, includedPages: 16000, extraPagePrice: 18, buyMonthlyEstimate: 780000 },
+  ],
+  color: [
+    { maxVol: 6000, modelId: 'sp-c306', name: 'Plan Color Studio (Ricoh C306 HD)', monthlyFee: 380000, includedPages: 2500, extraPagePrice: 75, buyMonthlyEstimate: 620000 },
+    { maxVol: 50000, modelId: 'sp-c306', name: 'Plan Color Corporativo Pro (Ricoh C2503)', monthlyFee: 560000, includedPages: 6000, extraPagePrice: 65, buyMonthlyEstimate: 940000 },
+  ]
+};
+
 function getCategoryDefaultImage(cat) {
   switch (cat) {
     case 'fotocopiadoras': return 'img/prod_copier.jpg';
@@ -329,6 +504,14 @@ async function syncProductsFromBackend() {
             rating: item.rating || 4.9,
             reviews: item.reviews_count || 25,
             badge: item.badge || '',
+            speed: item.speed || '35 ppm',
+            dutyCycle: item.duty_cycle || '20.000 pág/mes',
+            paperSize: item.paper_size || 'Carta, Oficio, A4',
+            connectivity: item.connectivity || 'Red Gigabit, USB 2.0',
+            functions: item.functions || 'Copia, Impresión, Escáner',
+            tonerYield: item.toner_yield || '15.000 páginas',
+            costPerPage: item.cost_per_page || '$10 COP',
+            compatibleIds: item.compatible_ids ? item.compatible_ids.split(',').map(s => s.trim()) : [],
           });
         });
         console.log('[SyP] ⚡ Conectado con Backend Django: ' + PRODUCTS.length + ' productos sincronizados.');

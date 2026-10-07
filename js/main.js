@@ -598,6 +598,134 @@ function initKeyboardShortcuts() {
   });
 }
 
+/* ============================================================
+   HERO SLIDER / CAROUSEL INTERACTIVO
+   ============================================================ */
+function initHeroSlider() {
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-indicator-dot');
+  const prevBtn = document.getElementById('heroPrevBtn');
+  const nextBtn = document.getElementById('heroNextBtn');
+  const sliderWrap = document.querySelector('.hero-slider-wrap');
+
+  if (!slides.length) return;
+
+  let currentIndex = 0;
+  let autoplayTimer = null;
+  const slideDuration = 6000;
+
+  function showSlide(index) {
+    if (index < 0) index = slides.length - 1;
+    if (index >= slides.length) index = 0;
+    currentIndex = index;
+
+    slides.forEach((s, idx) => {
+      s.classList.toggle('active', idx === currentIndex);
+    });
+    dots.forEach((d, idx) => {
+      d.classList.toggle('active', idx === currentIndex);
+    });
+  }
+
+  function nextSlide() {
+    showSlide(currentIndex + 1);
+  }
+
+  function prevSlide() {
+    showSlide(currentIndex - 1);
+  }
+
+  function startAutoplay() {
+    stopAutoplay();
+    autoplayTimer = setInterval(nextSlide, slideDuration);
+  }
+
+  function stopAutoplay() {
+    if (autoplayTimer) clearInterval(autoplayTimer);
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      nextSlide();
+      startAutoplay();
+    });
+  }
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      prevSlide();
+      startAutoplay();
+    });
+  }
+
+  dots.forEach((dot) => {
+    dot.addEventListener('click', () => {
+      const idx = parseInt(dot.dataset.slide, 10);
+      showSlide(idx);
+      startAutoplay();
+    });
+  });
+
+  if (sliderWrap) {
+    sliderWrap.addEventListener('mouseenter', stopAutoplay);
+    sliderWrap.addEventListener('mouseleave', startAutoplay);
+  }
+
+  startAutoplay();
+}
+
+/* ============================================================
+   PRODUCT CAROUSEL (Controles de desplazamiento horizontal)
+   ============================================================ */
+function initProductCarousel() {
+  document.querySelectorAll('.product-slider-wrapper').forEach((wrapper) => {
+    const track = wrapper.querySelector('.product-slider-track');
+    const prevBtn = wrapper.querySelector('.prev-btn');
+    const nextBtn = wrapper.querySelector('.next-btn');
+
+    if (!track) return;
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        track.scrollBy({ left: -320, behavior: 'smooth' });
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        track.scrollBy({ left: 320, behavior: 'smooth' });
+      });
+    }
+  });
+}
+
+/* ============================================================
+   FAQ ACCORDION INTERACTIVO
+   ============================================================ */
+function initFAQAccordion() {
+  document.querySelectorAll('.faq-item').forEach((item) => {
+    const question = item.querySelector('.faq-question');
+    if (!question) return;
+
+    question.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach((i) => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+}
+
+/* ============================================================
+   FLOATING ASSISTANT BUBBLE
+   ============================================================ */
+function initFloatingAssistant() {
+  const bubble = document.getElementById('floatingAssistantBubble');
+  if (bubble) {
+    bubble.addEventListener('click', () => {
+      const waUrl = 'https://wa.me/573178204193?text=Hola%2C%20quisiera%20asesor%C3%ADa%20personalizada%20con%20Fotocopiadora%20SyP';
+      window.open(waUrl, '_blank');
+    });
+  }
+}
+
 /* ---------- Init Global ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
@@ -609,7 +737,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollReveal();
   initRevealCards();
   initKeyboardShortcuts();
+  initHeroSlider();
+  initProductCarousel();
+  initFAQAccordion();
+  initFloatingAssistant();
 
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 });
+

@@ -1,27 +1,27 @@
 # Design System: SYP (Fotocopiadora SyP)
 **Project Title:** Fotocopiadora SyP — Web Platform & Equipment Management  
-**Design Philosophy:** "Precisión de planta. Servicio de barrio." (Industrial Print-Press Precision with Local Neighborhood Trust)
+**Design Philosophy:** "Precisión de planta. Servicio de barrio." (Industrial Print-Press Precision with Local Neighborhood Trust & Modern Interactive Polish)
 
 ---
 
 ## 1. Visual Theme & Atmosphere
 
-The design system for **Fotocopiadora SyP** is built around an **Editorial Industrial / Print-Shop Aesthetic** inspired by printing press registration marks (⊕), CMYK calibration targets, and technical machinery documentation.
+The design system for **Fotocopiadora SyP** fuses an **Editorial Industrial / Print-Shop Aesthetic** (registration marks ⊕, CMYK calibration accents, precise hairline dividers) with **modern dynamic engagement** (hero sliders, smooth product carousels, infinite brand marquee tickers, and interactive floating assistance).
 
-* **Tone:** Utilitarian, reliable, high-precision, honest, accessible.
-* **Density:** Balanced grid density with generous typographic breathing room, high contrast, and crisp hairline dividers.
-* **Geometry:** Sharp, squared-off corners (`border-radius: 2px`) evoking physical paper sheets, laser toner cartridges, and heavy-duty copier hardware.
-* **Elevation:** Minimalist elevation relying on 1px precision borders rather than heavy blur shadows, providing an authentic blueprint feel.
+* **Tone:** High-precision, energetic, trustworthy, transparent, accessible.
+* **Density:** Balanced grid density with generous typographic breathing room, high contrast, and tactile card feedback.
+* **Geometry:** Modern industrial corners (`border-radius: 4px` / `8px` for cards; `999px` for pills and floating widgets).
+* **Elevation:** Multi-layer depth with diffuse shadows (`box-shadow: 0 10px 30px rgba(0,0,0,0.08)`), glassmorphism (`backdrop-filter: blur(12px)`), and subtle ambient gradient lighting.
 
 ---
 
 ## 2. Color Palette & Roles
 
-| Semantic Token | Hex Code | Dark Mode Hex | Functional Role |
+| Semantic Token | Light Mode Hex | Dark Mode Hex | Functional Role |
 | :--- | :--- | :--- | :--- |
-| **`--ink` (Primary Black)** | `#0B0B0C` | `#F4F4F2` | Main headlines, high-emphasis text, dark hero sections, primary buttons. |
-| **`--paper` (Background Paper)**| `#FAFAF8` | `#121214` | Clean background canvas reminiscent of premium bond paper. |
-| **`--paper-dim` (Card Surface)**| `#F1F0EC` | `#1A1A1E` | Secondary backgrounds, category filter chips, search bars, table headers. |
+| **`--ink` (Primary Deep)** | `#0B0B0C` | `#F4F4F2` | Main headlines, high-emphasis text, dark hero slider background, primary buttons. |
+| **`--paper` (Background Surface)**| `#FAFAF8` | `#121214` | Clean canvas background reminiscent of heavy bond paper. |
+| **`--paper-dim` (Card Surface)**| `#F1F0EC` | `#1A1A1E` | Secondary container fill, category filter chips, search bars, marquee strip. |
 | **`--red` (Brand Accent)** | `#E4002B` | `#E4002B` | Brand signature color (magenta/red registration mark), primary CTA buttons, focus rings, status highlights. |
 | **`--red-dark` (Active Crimson)**| `#B4001F` | `#FF2D55` | Button hover/pressed states, discount badges. |
 | **`--steel` (Technical Neutral)**| `#6B6D70` | `#9D9EA3` | Secondary descriptions, technical specs, breadcrumbs, placeholder labels. |
@@ -29,46 +29,36 @@ The design system for **Fotocopiadora SyP** is built around an **Editorial Indus
 
 ---
 
-## 3. Typography Rules
+## 3. Dynamic & Interactive Components
+
+### 3.1 Hero Carousel / Slider (`.hero-slider-wrap`)
+* **Slides Track:** 3 feature slides with autoplay (6s interval), smooth slide transition (`cubic-bezier(0.16, 1, 0.3, 1)`), pause on hover, and manual arrow controls.
+* **Slide 1:** Fotocopiadoras & Multifuncionales Láser (Ricoh & Kyocera).
+* **Slide 2:** Servicio Técnico Especializado a Domicilio en Neiva.
+* **Slide 3:** Tóneres, Tintas y Recargas Certificadas Grado A+.
+* **Indicators:** Progress-bar animated bullets with active length expansion (`width: 56px`).
+
+### 3.2 Infinite Brand Marquee (`.marquee-container`)
+* **Continuous Loop:** Seamless marquee ticker displaying authorized brands (Ricoh, Kyocera, Canon, HP, Konica Minolta, Epson, Brother, Toshiba, Samsung).
+* **Hover State:** Pauses animation and scales hovered brand logos with high-contrast color reveal.
+
+### 3.3 Product Carousel (`.product-slider-wrapper`)
+* **Horizontal Scroll:** Smooth-scrolling snap track (`scroll-snap-type: x mandatory`) with left/right control arrows and touch swipe support.
+* **Cards:** Glassmorphism headers, discount tags (`-15%`), stock alerts (`Pocas unidades` / `Nuevo`), and one-click WhatsApp quote buttons.
+
+### 3.4 Floating WhatsApp Assistant Widget (`.floating-assistant-wrap`)
+* **Notification Pulse:** Floating green WhatsApp button with active message badge (`1`) and gentle floating animation (`@keyframes float-pulse`).
+* **Advisor Bubble:** Interactive bubble with avatar and personal greeting: *"Gladys Solano · SyP: ¿Buscas tóner o mantenimiento hoy?"*.
+
+---
+
+## 4. Typography Rules
 
 * **Display / Headings (`--font-display`):** `Archivo Black, sans-serif`
-  * *Usage:* Page titles (`h1`), section titles (`h2`), high-impact banners.
-  * *Characteristics:* Heavy grotesque weight, tight tracking (`-0.01em`), authoritative presence.
+  * *Usage:* Page titles (`h1`), section titles (`h2`), hero slide headlines.
+  * *Characteristics:* Heavy grotesque weight, tight tracking (`-0.02em`), authoritative presence.
 * **Body & Interface (`--font-body`):** `Inter, sans-serif`
   * *Usage:* Paragraphs, descriptions, navigation links, form labels.
   * *Weights:* 400 (regular), 500 (medium), 600 (semibold), 700 (bold).
 * **Technical & Data Mono (`--font-mono`):** `IBM Plex Mono, monospace`
   * *Usage:* Product prices, model codes, SKUs, timestamps, eyebrows, status badges (`.eyebrow`, `.product-price`).
-  * *Characteristics:* Monospace alignment for numbers and technical data.
-
----
-
-## 4. Component Patterns & Styling
-
-### 4.1 Buttons
-* **Primary Button (`.btn-primary`):** Background `--red` (`#E4002B`), text `#FFFFFF`, font-weight 600, border-radius 2px, subtle translateY on hover.
-* **Secondary / Outline (`.btn-outline`):** Background transparent, 1px solid `--line`, text `--ink`, hover border `--ink`.
-* **Add to Cart / Share Button (`.add-btn`):** 36x36px square icon button, hairline border, hover fill with smooth micro-interaction.
-
-### 4.2 Cards & Containers
-* **Product Cards (`.product-card`):** Flat background `--paper-dim`, 1px border `--line`, sharp 2px radius, top media box with category vector icons, bottom pricing bar.
-* **Feature / Service Cards (`.service-card`):** Border `--line`, eyebrow in mono red, bold headline, generous internal padding (32px).
-* **Compatibility Finder Box (`.compat-finder`):** Highlight container with 3px solid red left border, dual-column select grid.
-
-### 4.3 Inputs & Forms
-* **Input Fields (`input`, `select`, `textarea`):** 1px border `--line`, background `--paper`, text `--ink`, padding `12px 14px`, 2px radius. Focus state produces a 2px outline in `--red`.
-* **Filter Chips (`.chip`):** Pill-shaped toggle chips (`border-radius: 999px`), inactive border `--line`, active state fills `--ink` with `--paper` text.
-
-### 4.4 Status Badges
-* **Pendiente:** Yellow/Orange background (`#f57c00`), white mono text.
-* **Confirmada / En Proceso:** Blue/Purple background (`#0288d1` / `#7b1fa2`), white mono text.
-* **Completada:** Green background (`#2e7d32`), white mono text.
-
----
-
-## 5. Layout & Grid Principles
-
-* **Max Width:** `--max-w: 1200px` centered with `24px` horizontal gutters.
-* **Header Height:** Fixed `76px` with sticky navigation bar and registration mark logo.
-* **Product Grid:** Responsive CSS Grid (`repeat(auto-fill, minmax(270px, 1fr))` on desktop, 2 columns on tablet, 1 column on mobile).
-* **Motion & Animation:** `IntersectionObserver` scroll reveals with staggered entry delays (0.06s), cart count pulse (`@keyframes bump`), and registration crosshair snap (`@keyframes reg-snap`).

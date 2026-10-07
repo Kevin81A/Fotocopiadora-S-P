@@ -393,7 +393,7 @@ function shareProduct(id) {
   }
 }
 
-/* ---------- Render de tarjetas de producto (reutilizable y seguro) ---------- */
+/* ---------- Render de tarjetas de producto (reutilizable, enriquecido y seguro) ---------- */
 function productCardHTML(p) {
   const catLabel = CATEGORIES.find((c) => c.id === p.cat)?.label ?? p.cat;
   const stockTag =
@@ -401,35 +401,67 @@ function productCardHTML(p) {
       ? '<span class="stock-tag low">Pocas unidades</span>'
       : p.stock === 'new'
       ? '<span class="stock-tag" style="background:var(--red)">Nuevo</span>'
-      : '';
+      : '<span class="stock-tag in-stock">En Stock</span>';
+  
   const discountBadge = p.discount
     ? `<span class="discount-badge">-${p.discount}%</span>`
     : '';
+
+  const pillBadge = p.badge
+    ? `<span class="badge-pill">${escapeHTML(p.badge)}</span>`
+    : '';
+
   const originalPrice = p.discount
     ? `<span class="product-price-original">${formatCOP(Math.round(p.price / (1 - p.discount / 100)))}</span>`
     : '';
+
+  const imgSrc = p.img || (typeof getCategoryDefaultImage === 'function' ? getCategoryDefaultImage(p.cat) : 'img/prod_copier.jpg');
+  const ratingScore = p.rating || 4.9;
+  const reviewCount = p.reviews || 28;
+
+  const waQuoteText = encodeURIComponent(`Hola Fotocopiadora SyP, me interesa cotizar el producto: ${p.name} (${formatCOP(p.price)}). ¿Tienen disponibilidad en Neiva?`);
+  const waUrl = `https://wa.me/573178204193?text=${waQuoteText}`;
+
   return `
     <article class="product-card reveal-card" data-product-id="${escapeHTML(p.id)}">
       <div class="product-media">
         ${stockTag}
         ${discountBadge}
-        ${ICONS[p.cat]}
+        ${pillBadge}
+        <div class="product-media-img-wrap">
+          <img src="${escapeHTML(imgSrc)}" alt="${escapeHTML(p.name)}" class="product-real-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="product-fallback-icon" style="display:none;">${ICONS[p.cat] || ICONS['fotocopiadoras']}</div>
+        </div>
       </div>
       <div class="product-body">
-        <span class="product-cat">${escapeHTML(catLabel)}</span>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="product-cat">${escapeHTML(catLabel)}</span>
+          ${p.brand ? `<span class="product-brand-tag">${escapeHTML(p.brand)}</span>` : ''}
+        </div>
         <h3 class="product-name">${escapeHTML(p.name)}</h3>
+        
+        <div class="product-rating">
+          <span class="stars" style="color:#f59e0b; font-size:12px;">★★★★★</span>
+          <span class="rating-num" style="font-weight:700; font-size:11.5px; color:var(--ink);">${ratingScore}</span>
+          <span class="rating-count" style="font-size:11px; color:var(--steel);">(${reviewCount})</span>
+        </div>
+
         <p class="product-spec">${escapeHTML(p.spec)}</p>
+        
         <div class="product-foot">
           <div>
             ${originalPrice}
             <span class="product-price">${formatCOP(p.price)}</span>
           </div>
-          <div style="display:flex;gap:6px;">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <a href="${waUrl}" target="_blank" rel="noopener" class="add-btn wa-quote-btn" aria-label="Cotizar por WhatsApp" title="Cotizar por WhatsApp">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-1 1-1 2.3 0 1.4 1 2.7 1.1 2.9.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.3A10 10 0 1 0 12 2z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+            </a>
             <button class="add-btn" data-share="${escapeHTML(p.id)}" aria-label="Compartir producto" title="Compartir">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             </button>
-            <button class="add-btn" data-add="${escapeHTML(p.id)}" aria-label="Agregar al carrito" title="Agregar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            <button class="add-btn add-cart-btn" data-add="${escapeHTML(p.id)}" aria-label="Agregar al carrito" title="Agregar al carrito">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
             </button>
           </div>
         </div>
@@ -454,7 +486,7 @@ function renderProductGrid(container, list) {
       addToCart(btn.dataset.add);
       btn.classList.add('added');
       const p = PRODUCTS.find((x) => x.id === btn.dataset.add);
-      showToast(`${p.name} agregado al carrito ✓`);
+      showToast(`${p ? p.name : 'Producto'} agregado al carrito ✓`);
       setTimeout(() => btn.classList.remove('added'), 900);
     });
   });

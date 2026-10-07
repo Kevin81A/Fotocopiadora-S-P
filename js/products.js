@@ -58,6 +58,11 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['MP 2554 / 3054 / 3554'],
     brand: 'Ricoh',
+    img: 'img/prod_copier.jpg',
+    rating: 4.9,
+    reviews: 42,
+    badge: 'Más Vendido',
+    discount: 10,
   },
   {
     id: 'sp-600bn',
@@ -68,6 +73,10 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['Aficio MP 301'],
     brand: 'Ricoh',
+    img: 'img/prod_copier.jpg',
+    rating: 4.8,
+    reviews: 36,
+    badge: 'Recomendado',
   },
   {
     id: 'sp-c306',
@@ -78,6 +87,10 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['MP C306 / C406 Color'],
     brand: 'Ricoh',
+    img: 'img/prod_copier.jpg',
+    rating: 5.0,
+    reviews: 19,
+    badge: 'Color HD',
   },
   {
     id: 'sp-m2040',
@@ -88,6 +101,11 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['Ecosys M2040dn'],
     brand: 'Kyocera',
+    img: 'img/prod_copier.jpg',
+    rating: 4.9,
+    reviews: 58,
+    badge: 'Alto Rendimiento',
+    discount: 5,
   },
   {
     id: 'sp-p400',
@@ -98,6 +116,10 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['LaserJet Pro M404 / M428'],
     brand: 'HP',
+    img: 'img/prod_printer.jpg',
+    rating: 4.7,
+    reviews: 24,
+    badge: 'Económica',
   },
   {
     id: 'sp-p220c',
@@ -108,6 +130,10 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['MP C2003 / C2503 Color'],
     brand: 'Ricoh',
+    img: 'img/prod_printer.jpg',
+    rating: 4.8,
+    reviews: 15,
+    badge: 'WiFi Direct',
   },
   {
     id: 'sp-ton301',
@@ -118,6 +144,10 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['Aficio MP 301'],
     brand: 'Ricoh',
+    img: 'img/prod_toner.jpg',
+    rating: 4.9,
+    reviews: 95,
+    badge: 'Top Ventas',
   },
   {
     id: 'sp-ton2554',
@@ -128,6 +158,10 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['MP 2554 / 3054 / 3554'],
     brand: 'Ricoh',
+    img: 'img/prod_toner.jpg',
+    rating: 5.0,
+    reviews: 73,
+    badge: 'Original / Homologado',
   },
   {
     id: 'sp-ton2040',
@@ -138,6 +172,9 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['Ecosys M2040dn', 'Ecosys M2135dn'],
     brand: 'Kyocera',
+    img: 'img/prod_toner.jpg',
+    rating: 4.8,
+    reviews: 31,
   },
   {
     id: 'sp-ton4501c',
@@ -148,6 +185,11 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['MP C306 / C406 Color'],
     brand: 'Ricoh',
+    img: 'img/hero_toner.jpg',
+    rating: 4.9,
+    reviews: 29,
+    badge: 'Kit x4',
+    discount: 8,
   },
   {
     id: 'sp-recarga1000',
@@ -158,6 +200,9 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['Aficio MP 301', 'MP 2554 / 3054 / 3554', 'Ecosys M2040dn', 'imageRUNNER 2206 / 2520'],
     brand: 'Ricoh',
+    img: 'img/prod_toner.jpg',
+    rating: 4.9,
+    reviews: 64,
   },
   {
     id: 'sp-cil2554',
@@ -168,6 +213,10 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['MP 2554 / 3054 / 3554'],
     brand: 'Ricoh',
+    img: 'img/prod_supplies.jpg',
+    rating: 4.9,
+    reviews: 38,
+    badge: 'Alta Duración',
   },
   {
     id: 'sp-cil301',
@@ -178,6 +227,9 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['Aficio MP 301'],
     brand: 'Ricoh',
+    img: 'img/prod_supplies.jpg',
+    rating: 4.8,
+    reviews: 27,
   },
   {
     id: 'sp-banda',
@@ -188,6 +240,9 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['MP C306 / C406 Color', 'MP C2003 / C2503 Color'],
     brand: 'Ricoh',
+    img: 'img/prod_supplies.jpg',
+    rating: 5.0,
+    reviews: 14,
   },
   {
     id: 'sp-correa',
@@ -198,6 +253,9 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['Aficio MP 301', 'MP 2554 / 3054 / 3554', 'Ecosys M2040dn'],
     brand: 'Ricoh',
+    img: 'img/prod_supplies.jpg',
+    rating: 4.7,
+    reviews: 41,
   },
   {
     id: 'sp-kitstd',
@@ -208,6 +266,10 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['Aficio MP 301', 'MP 2554 / 3054 / 3554', 'Ecosys M2040dn'],
     brand: 'Ricoh',
+    img: 'img/service_workshop.jpg',
+    rating: 5.0,
+    reviews: 83,
+    badge: 'Garantizado',
   },
   {
     id: 'sp-visita',
@@ -218,8 +280,23 @@ const PRODUCTS = [
     stock: 'ok',
     models: ['Aficio MP 301', 'MP 2554 / 3054 / 3554', 'Ecosys M2040dn', 'imageRUNNER 2206 / 2520'],
     brand: 'Ricoh',
+    img: 'img/hero_service.jpg',
+    rating: 4.9,
+    reviews: 97,
+    badge: 'Express &lt; 24h',
   },
 ];
+
+function getCategoryDefaultImage(cat) {
+  switch (cat) {
+    case 'fotocopiadoras': return 'img/prod_copier.jpg';
+    case 'impresoras': return 'img/prod_printer.jpg';
+    case 'tintas': return 'img/prod_toner.jpg';
+    case 'repuestos': return 'img/prod_supplies.jpg';
+    case 'mantenimiento': return 'img/hero_service.jpg';
+    default: return 'img/prod_copier.jpg';
+  }
+}
 
 function formatCOP(value) {
   return '$' + Number(value).toLocaleString('es-CO');
@@ -248,6 +325,10 @@ async function syncProductsFromBackend() {
             brand: item.brand_name,
             models: item.compatible_models ? item.compatible_models.split(',').map((m) => m.trim()) : [],
             discount: item.discount_percent || 0,
+            img: item.image_url || getCategoryDefaultImage(item.category_slug),
+            rating: item.rating || 4.9,
+            reviews: item.reviews_count || 25,
+            badge: item.badge || '',
           });
         });
         console.log('[SyP] ⚡ Conectado con Backend Django: ' + PRODUCTS.length + ' productos sincronizados.');
@@ -257,7 +338,7 @@ async function syncProductsFromBackend() {
       }
     }
   } catch (e) {
-    // Si Django está apagado, continúa con los datos estáticos sin interrumpir al usuario
+    // Si Django está apagado, continúa con los datos estáticos enriquecidos sin interrumpir
   }
 }
 

@@ -2829,6 +2829,16 @@ table.admin-table select {
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
 /* ============================================================
    1. CALCULADORA DE RENTING & AHORRO INTELIGENTE
    ============================================================ */

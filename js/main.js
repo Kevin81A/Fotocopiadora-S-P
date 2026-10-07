@@ -2462,10 +2462,17 @@ function initAdvisorSelectorModal() {
     </div>
   `;
 
+  overlay.style.display = 'none';
+  modal.style.display = 'none';
+
   document.body.appendChild(overlay);
   document.body.appendChild(modal);
 
   function open() {
+    overlay.style.display = 'block';
+    modal.style.display = 'flex';
+    // Force reflow for transitions
+    void modal.offsetWidth;
     overlay.classList.add('open');
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -2477,6 +2484,10 @@ function initAdvisorSelectorModal() {
     overlay.classList.remove('open');
     modal.classList.remove('open');
     document.body.style.overflow = '';
+    setTimeout(() => {
+      if (!overlay.classList.contains('open')) overlay.style.display = 'none';
+      if (!modal.classList.contains('open')) modal.style.display = 'none';
+    }, 280);
   }
 
   overlay.addEventListener('click', close);
@@ -2537,19 +2548,33 @@ function initPWAInstallBanner() {
     </div>
   `;
 
+  banner.style.display = 'none';
   document.body.appendChild(banner);
+
+  function showBanner() {
+    banner.style.display = 'flex';
+    void banner.offsetWidth;
+    banner.classList.add('visible');
+  }
+
+  function hideBanner() {
+    banner.classList.remove('visible');
+    setTimeout(() => {
+      if (!banner.classList.contains('visible')) banner.style.display = 'none';
+    }, 400);
+  }
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
     setTimeout(() => {
-      banner.classList.add('visible');
+      showBanner();
     }, 2000);
   });
 
   setTimeout(() => {
     if (!localStorage.getItem('syp_pwa_dismissed') && !banner.classList.contains('visible')) {
-      banner.classList.add('visible');
+      showBanner();
     }
   }, 4000);
 
@@ -2563,10 +2588,10 @@ function initPWAInstallBanner() {
           showToast('¡Gracias por instalar Fotocopiadora SyP! 🎉');
         }
         deferredPrompt = null;
-        banner.classList.remove('visible');
+        hideBanner();
       } else {
         showToast('Para instalar: En tu navegador pulsa "Compartir" o Menú (⋮) > "Agregar a pantalla de inicio" 📱');
-        setTimeout(() => banner.classList.remove('visible'), 4000);
+        setTimeout(() => hideBanner(), 4000);
       }
     });
   }
@@ -2574,13 +2599,13 @@ function initPWAInstallBanner() {
   const dismissBtn = document.getElementById('pwaDismissBtn');
   if (dismissBtn) {
     dismissBtn.addEventListener('click', () => {
-      banner.classList.remove('visible');
+      hideBanner();
       localStorage.setItem('syp_pwa_dismissed', Date.now().toString());
     });
   }
 
   window.addEventListener('appinstalled', () => {
-    banner.classList.remove('visible');
+    hideBanner();
     showToast('App instalada con éxito 🚀');
   });
 }

@@ -1,9 +1,9 @@
 /* =========================================================
-   Fotocopiadora SyP — Service Worker v3 (PWA Offline & Cache)
+   Fotocopiadora SyP — Service Worker v4 (PWA Offline & Cache)
    Estrategia: Híbrida (Stale-While-Revalidate + Network-First)
    ========================================================= */
 
-const CACHE_NAME = 'syp-cache-v3';
+const CACHE_NAME = 'syp-cache-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

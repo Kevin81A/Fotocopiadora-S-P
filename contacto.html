@@ -417,7 +417,7 @@
       group.querySelector('.form-error').textContent = message || '';
     }
 
-    document.getElementById('contactForm').addEventListener('submit', (e) => {
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       ['cfNameGroup', 'cfEmailGroup', 'cfPhoneGroup', 'cfSubjectGroup', 'cfMsgGroup']
         .forEach(id => setContactError(id, ''));
@@ -451,6 +451,15 @@
         valid = false; 
       }
       if (!valid) return;
+
+      // Guardar mensaje en base de datos centralizada
+      await SyP.submitContactForm({
+        name,
+        email,
+        phone,
+        subject,
+        message: msg
+      });
 
       const text = encodeURIComponent(
         `Hola Fotocopiadora SyP, soy *${name}*.\n\n` +

@@ -1,0 +1,509 @@
+"""
+Fotocopiadora SyP — REST API Server (FastAPI + JWT Authentication + SQLite)
+"""
+import uuid
+import json
+from datetime import datetime, timezone
+from typing import Optional, List
+from fastapi import FastAPI, HTTPException, Depends, status, Query
+from fastapi.middleware.cors import CORSMiddleware
+from database import get_db, init_db
+from security import (
+    hash_password,
+    verify_password,
+    create_access_token,
+    get_current_user,
+    require_admin,
+)
+from models import (
+    UserRegisterRequest,
+    UserLoginRequest,
+    UserResponse,
+    AuthTokenResponse,
+    ProductResponse,
+    ProductCreate,
+    ProductBase,
+    MaintenanceRequestCreate,
+    MaintenanceRequestResponse,
+    MaintenanceStatusUpdate,
+    ContactMessageCreate,
+    QuoteCreate,
+    CounterReportCreate,
+)
+
+# Inicializar Base de Datos al arrancar
+init_db()
+
+app = FastAPI(
+    title="Fotocopiadora SyP — API REST Oficial",
+    description="Servidor API seguro para E-commerce, Catálogo Ricoh, Mantenimiento Técnico y Autenticación JWT.",
+    version="1.0.0",
+)
+
+# Habilitar CORS para peticiones desde el frontend web
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ============================================================
+# 1. HEALTH & METRICS ENDPOINTS
+# ============================================================
+@app.get("/api/v1/health")
+def health_check():
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) as cnt FROM products WHERE is_active = 1")
+        products_cnt = cursor.fetchone()["cnt"]
+        cursor.execute("SELECT COUNT(*) as cnt FROM maintenance_requests")
+        requests_cnt = cursor.fetchone()["cnt"]
+        cursor.execute("SELECT COUNT(*) as cnt FROM users")
+        users_cnt = cursor.fetchone()["cnt"]
+    
+    return {
+        "status": "online",
+        "service": "Fotocopiadora SyP Backend API",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "database": "connected (SQLite WAL)",
+        "stats": {
+            "active_products": products_cnt,
+            "maintenance_requests": requests_cnt,
+            "registered_users": users_cnt,
+        }
+    }
+
+# ============================================================
+# 2. AUTHENTICATION & USERS ENDPOINTS (JWT)
+# ============================================================
+@app.post("/api/v1/auth/register", response_model=AuthTokenResponse, status_code=status.HTTP_201_CREATED)
+def register_user(payload: UserRegisterRequest):
+    email_norm = payload.email.lower().strip()
+    
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM users WHERE email = ?", (email_norm,))
+        if cursor.fetchone():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Ya existe una cuenta registrada con este correo electrónico.",
+            )
+        
+        user_id = f"usr_{uuid.uuid4().hex[:12]}"
+        pwd_hash = hash_password(payload.password)
+        
+        cursor.execute("""
+        INSERT INTO users (id, email, password_hash, name, phone, role, is_active)
+        VALUES (?, ?, ?, ?, ?, 'cliente', 1)
+        """, (user_id, email_norm, pwd_hash, payload.name.strip(), payload.phone.strip()))
+        
+        # Generar token JWT
+        token_data = {"sub": email_norm, "id": user_id, "name": payload.name, "role": "cliente"}
+        access_token = create_access_token(token_data)
+        
+        user_res = UserResponse(
+            id=user_id,
+            name=payload.name,
+            email=email_norm,
+            phone=payload.phone,
+            role="cliente",
+            is_active=True,
+            created_at=datetime.now(timezone.utc).isoformat(),
+        )
+        
+        return AuthTokenResponse(access_token=access_token, user=user_res)
+
+@app.post("/api/v1/auth/login", response_model=AuthTokenResponse)
+def login_user(payload: UserLoginRequest):
+    email_norm = payload.email.lower().strip()
+    
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT id, email, password_hash, name, phone, role, is_active, created_at 
+        FROM users WHERE email = ?
+        """, (email_norm,))
+        user = cursor.fetchone()
+        
+        if not user or not verify_password(payload.password, user["password_hash"]):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Correo electrónico o contraseña incorrectos.",
+            )
+        
+        if not user["is_active"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Esta cuenta ha sido inhabilitada. Contacta a soporte.",
+            )
+        
+        # Actualizar last_login
+        cursor.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?", (user["id"],))
+        
+        token_data = {
+            "sub": user["email"],
+            "id": user["id"],
+            "name": user["name"],
+            "role": user["role"],
+        }
+        access_token = create_access_token(token_data)
+        
+        user_res = UserResponse(
+            id=user["id"],
+            name=user["name"],
+            email=user["email"],
+            phone=user["phone"],
+            role=user["role"],
+            is_active=bool(user["is_active"]),
+            created_at=str(user["created_at"]) if user["created_at"] else None,
+        )
+        
+        return AuthTokenResponse(access_token=access_token, user=user_res)
+
+@app.get("/api/v1/auth/me", response_model=UserResponse)
+def get_my_profile(current_user: dict = Depends(get_current_user)):
+    return UserResponse(**current_user)
+
+# ============================================================
+# 3. PRODUCTS & CATALOG ENDPOINTS (Ricoh)
+# ============================================================
+@app.get("/api/v1/products", response_model=List[ProductResponse])
+def list_products(
+    category: Optional[str] = None,
+    search: Optional[str] = None,
+    include_inactive: bool = False,
+):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        query = "SELECT * FROM products WHERE 1=1"
+        params = []
+        
+        if not include_inactive:
+            query += " AND is_active = 1"
+        
+        if category and category != "all":
+            query += " AND category_slug = ?"
+            params.append(category)
+        
+        if search:
+            query += " AND (name LIKE ? OR spec LIKE ? OR compatible_ids LIKE ?)"
+            term = f"%{search}%"
+            params.extend([term, term, term])
+        
+        query += " ORDER BY price DESC"
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+        
+        results = []
+        for r in rows:
+            results.append(ProductResponse(
+                id=r["id"],
+                name=r["name"],
+                category_slug=r["category_slug"],
+                brand=r["brand"] or "Ricoh",
+                price=float(r["price"]),
+                spec=r["spec"],
+                stock_status=r["stock_status"] or "ok",
+                is_active=bool(r["is_active"]),
+                rating=float(r["rating"] or 4.9),
+                reviews_count=int(r["reviews_count"] or 25),
+                badge=r["badge"] or "",
+                discount_percent=int(r["discount_percent"] or 0),
+                speed=r["speed"],
+                duty_cycle=r["duty_cycle"],
+                paper_size=r["paper_size"],
+                connectivity=r["connectivity"],
+                functions=r["functions"],
+                toner_yield=r["toner_yield"],
+                cost_per_page=r["cost_per_page"],
+                compatible_ids=r["compatible_ids"],
+                image_url=r["image_url"],
+                created_at=str(r["created_at"]) if r["created_at"] else None,
+            ))
+        return results
+
+@app.get("/api/v1/products/{product_id}", response_model=ProductResponse)
+def get_product(product_id: str):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM products WHERE id = ?", (product_id,))
+        r = cursor.fetchone()
+        if not r:
+            raise HTTPException(status_code=404, detail="Producto no encontrado.")
+        
+        return ProductResponse(
+            id=r["id"],
+            name=r["name"],
+            category_slug=r["category_slug"],
+            brand=r["brand"] or "Ricoh",
+            price=float(r["price"]),
+            spec=r["spec"],
+            stock_status=r["stock_status"] or "ok",
+            is_active=bool(r["is_active"]),
+            rating=float(r["rating"] or 4.9),
+            reviews_count=int(r["reviews_count"] or 25),
+            badge=r["badge"] or "",
+            discount_percent=int(r["discount_percent"] or 0),
+            speed=r["speed"],
+            duty_cycle=r["duty_cycle"],
+            paper_size=r["paper_size"],
+            connectivity=r["connectivity"],
+            functions=r["functions"],
+            toner_yield=r["toner_yield"],
+            cost_per_page=r["cost_per_page"],
+            compatible_ids=r["compatible_ids"],
+            image_url=r["image_url"],
+            created_at=str(r["created_at"]) if r["created_at"] else None,
+        )
+
+@app.post("/api/v1/products", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
+def create_product(payload: ProductCreate, admin_user: dict = Depends(require_admin)):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM products WHERE id = ?", (payload.id,))
+        if cursor.fetchone():
+            raise HTTPException(status_code=400, detail="Ya existe un producto con ese ID.")
+        
+        cursor.execute("""
+        INSERT INTO products (
+            id, name, category_slug, brand, price, spec, stock_status, is_active,
+            rating, reviews_count, badge, discount_percent, speed, duty_cycle,
+            paper_size, connectivity, functions, toner_yield, cost_per_page,
+            compatible_ids, image_url
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            payload.id, payload.name, payload.category_slug, payload.brand, payload.price,
+            payload.spec, payload.stock_status, payload.rating, payload.reviews_count,
+            payload.badge, payload.discount_percent, payload.speed, payload.duty_cycle,
+            payload.paper_size, payload.connectivity, payload.functions, payload.toner_yield,
+            payload.cost_per_page, payload.compatible_ids, payload.image_url
+        ))
+        
+        return ProductResponse(id=payload.id, is_active=True, **payload.model_dump())
+
+@app.put("/api/v1/products/{product_id}", response_model=ProductResponse)
+def update_product(product_id: str, payload: ProductBase, admin_user: dict = Depends(require_admin)):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM products WHERE id = ?", (product_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Producto no encontrado.")
+        
+        cursor.execute("""
+        UPDATE products SET
+            name = ?, category_slug = ?, brand = ?, price = ?, spec = ?,
+            stock_status = ?, rating = ?, reviews_count = ?, badge = ?,
+            discount_percent = ?, speed = ?, duty_cycle = ?, paper_size = ?,
+            connectivity = ?, functions = ?, toner_yield = ?, cost_per_page = ?,
+            compatible_ids = ?, image_url = ?
+        WHERE id = ?
+        """, (
+            payload.name, payload.category_slug, payload.brand, payload.price, payload.spec,
+            payload.stock_status, payload.rating, payload.reviews_count, payload.badge,
+            payload.discount_percent, payload.speed, payload.duty_cycle, payload.paper_size,
+            payload.connectivity, payload.functions, payload.toner_yield, payload.cost_per_page,
+            payload.compatible_ids, payload.image_url, product_id
+        ))
+        
+        return ProductResponse(id=product_id, is_active=True, **payload.model_dump())
+
+# ============================================================
+# 4. MAINTENANCE REQUESTS ENDPOINTS (Servicio Técnico)
+# ============================================================
+@app.post("/api/v1/requests", response_model=MaintenanceRequestResponse, status_code=status.HTTP_201_CREATED)
+def create_maintenance_request(
+    payload: MaintenanceRequestCreate,
+    current_user: Optional[dict] = Depends(lambda: None) # Flexible para cliente logueado o invitado
+):
+    req_id = f"req_{uuid.uuid4().hex[:8]}"
+    
+    client_name = payload.client_name or (current_user.get("name") if current_user else "Cliente Web")
+    client_email = payload.client_email or (current_user.get("email") if current_user else "contacto@cliente.com")
+    client_phone = payload.client_phone or (current_user.get("phone") if current_user else "")
+    client_id = current_user.get("id") if current_user else None
+    
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        INSERT INTO maintenance_requests (
+            id, client_id, client_name, client_email, client_phone, equipment,
+            service_type, desired_date, desired_time, description, status, admin_notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pendiente', '')
+        """, (
+            req_id, client_id, client_name, client_email, client_phone,
+            payload.equipment, payload.service_type, payload.desired_date,
+            payload.desired_time, payload.description or ""
+        ))
+        
+        return MaintenanceRequestResponse(
+            id=req_id,
+            client_id=client_id,
+            client_name=client_name,
+            client_email=client_email,
+            client_phone=client_phone,
+            equipment=payload.equipment,
+            service_type=payload.service_type,
+            desired_date=payload.desired_date,
+            desired_time=payload.desired_time,
+            description=payload.description,
+            status="Pendiente",
+            admin_notes="",
+            created_at=datetime.now(timezone.utc).isoformat(),
+            updated_at=datetime.now(timezone.utc).isoformat(),
+        )
+
+@app.get("/api/v1/requests/my", response_model=List[MaintenanceRequestResponse])
+def get_my_requests(current_user: dict = Depends(get_current_user)):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT * FROM maintenance_requests 
+        WHERE client_id = ? OR client_email = ? 
+        ORDER BY created_at DESC
+        """, (current_user["id"], current_user["email"]))
+        rows = cursor.fetchall()
+        
+        return [
+            MaintenanceRequestResponse(
+                id=r["id"],
+                client_id=r["client_id"],
+                client_name=r["client_name"],
+                client_email=r["client_email"],
+                client_phone=r["client_phone"],
+                equipment=r["equipment"],
+                service_type=r["service_type"],
+                desired_date=r["desired_date"],
+                desired_time=r["desired_time"],
+                description=r["description"],
+                status=r["status"],
+                admin_notes=r["admin_notes"],
+                created_at=str(r["created_at"]) if r["created_at"] else None,
+                updated_at=str(r["updated_at"]) if r["updated_at"] else None,
+            ) for r in rows
+        ]
+
+@app.get("/api/v1/requests", response_model=List[MaintenanceRequestResponse])
+def list_all_requests(
+    status_filter: Optional[str] = None,
+    admin_user: dict = Depends(require_admin)
+):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        query = "SELECT * FROM maintenance_requests WHERE 1=1"
+        params = []
+        if status_filter and status_filter != "all":
+            query += " AND status = ?"
+            params.append(status_filter)
+        query += " ORDER BY created_at DESC"
+        
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+        
+        return [
+            MaintenanceRequestResponse(
+                id=r["id"],
+                client_id=r["client_id"],
+                client_name=r["client_name"],
+                client_email=r["client_email"],
+                client_phone=r["client_phone"],
+                equipment=r["equipment"],
+                service_type=r["service_type"],
+                desired_date=r["desired_date"],
+                desired_time=r["desired_time"],
+                description=r["description"],
+                status=r["status"],
+                admin_notes=r["admin_notes"],
+                created_at=str(r["created_at"]) if r["created_at"] else None,
+                updated_at=str(r["updated_at"]) if r["updated_at"] else None,
+            ) for r in rows
+        ]
+
+@app.patch("/api/v1/requests/{request_id}/status")
+def update_request_status(
+    request_id: str,
+    payload: MaintenanceStatusUpdate,
+    admin_user: dict = Depends(require_admin)
+):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM maintenance_requests WHERE id = ?", (request_id,))
+        if not cursor.fetchone():
+            raise HTTPException(status_code=404, detail="Solicitud no encontrada.")
+        
+        cursor.execute("""
+        UPDATE maintenance_requests 
+        SET status = ?, admin_notes = COALESCE(?, admin_notes), updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """, (payload.status, payload.admin_notes, request_id))
+        
+        return {"ok": True, "id": request_id, "status": payload.status}
+
+# ============================================================
+# 5. QUOTES, CONTACT & COUNTER REPORTING ENDPOINTS
+# ============================================================
+@app.post("/api/v1/contact")
+def create_contact_message(payload: ContactMessageCreate):
+    msg_id = f"msg_{uuid.uuid4().hex[:8]}"
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        INSERT INTO contact_messages (id, name, email, phone, subject, message)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (msg_id, payload.name, payload.email, payload.phone, payload.subject, payload.message))
+        return {"ok": True, "id": msg_id, "message": "Mensaje recibido correctamente. Te contactaremos pronto."}
+
+@app.post("/api/v1/quotes")
+def save_quotation(payload: QuoteCreate):
+    quote_code = f"COT-2026-{uuid.uuid4().hex[:6].upper()}"
+    quote_id = f"q_{uuid.uuid4().hex[:8]}"
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        INSERT INTO quotes (id, quote_code, client_name, client_email, client_phone, items_json, subtotal, iva, total, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            quote_id, quote_code, payload.client_name or "", payload.client_email or "",
+            payload.client_phone or "", payload.items_json, payload.subtotal, payload.iva,
+            payload.total, payload.notes or ""
+        ))
+        return {"ok": True, "quote_code": quote_code, "id": quote_id}
+
+@app.get("/api/v1/quotes/{quote_code}")
+def get_quotation_by_code(quote_code: str):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM quotes WHERE quote_code = ?", (quote_code,))
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Cotización no encontrada.")
+        
+        return {
+            "quote_code": row["quote_code"],
+            "client_name": row["client_name"],
+            "items": json.loads(row["items_json"]),
+            "subtotal": row["subtotal"],
+            "iva": row["iva"],
+            "total": row["total"],
+            "created_at": str(row["created_at"]),
+        }
+
+@app.post("/api/v1/counters")
+def submit_counter_report(payload: CounterReportCreate, current_user: dict = Depends(get_current_user)):
+    rep_id = f"cnt_{uuid.uuid4().hex[:8]}"
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        INSERT INTO counter_reports (
+            id, client_id, client_name, equipment_model, mono_counter, color_counter, report_month, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            rep_id, current_user["id"], current_user["name"], payload.equipment_model,
+            payload.mono_counter, payload.color_counter, payload.report_month, payload.notes or ""
+        ))
+        return {"ok": True, "id": rep_id, "message": "Reporte de contador registrado con éxito."}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)

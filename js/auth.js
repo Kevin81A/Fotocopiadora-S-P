@@ -1,36 +1,38 @@
 /* =========================================================
-   Fotocopiadora SyP — Autenticación y Solicitudes de Servicio
-   (simulado con localStorage mientras no existe back-end)
-
-   IMPORTANTE PARA LA FASE DE BACK-END (PHP + MySQL):
-   Este archivo concentra TODA la lógica que debería vivir en
-   el servidor. Cuando exista la API en PHP, solo hay que
-   reemplazar el cuerpo de cada función por un fetch() a los
-   endpoints correspondientes (ej. /api/login.php,
-   /api/solicitudes.php) sin tocar el resto del sitio, ya que
-   las demás páginas solo llaman a estas funciones.
-
-   Tablas que esto simula:
-     - usuarios            (SyP.getUsers / SyP.registerUser)
-     - solicitudes_servicio(SyP.getRequests / SyP.addRequest)
-     - sesión actual        (SyP.getSession / SyP.login / SyP.logout)
+   Fotocopiadora SyP — Autenticación Segura & API REST Backend
+   - Autenticación con Tokens JWT (JSON Web Tokens)
+   - Cifrado seguro de contraseñas vía Bcrypt en el servidor
+   - Sincronización en tiempo real con SQLite / FastAPI
+   - Respaldo automático offline (Cache local resiliente)
    ========================================================= */
 
 const SyP = (() => {
+  const API_URL = 'http://127.0.0.1:8000/api/v1';
+  
   const KEYS = {
-    USERS: 'syp_users',
+    TOKEN: 'syp_jwt_token',
     SESSION: 'syp_session',
     REQUESTS: 'syp_maintenance_requests',
   };
 
-  // Credenciales de administrador "pre-provisionadas" (así funciona
-  // en un sistema real: el rol admin no se auto-asigna en el registro).
   const ADMIN_ACCOUNT = {
     email: 'admin@sypfotocopiadoras.com',
     password: 'admin123',
-    name: 'Administración SyP',
+    name: 'Administración SyP Central',
     role: 'admin',
   };
+
+  function getToken() {
+    return localStorage.getItem(KEYS.TOKEN) || null;
+  }
+
+  function setToken(token) {
+    if (token) {
+      localStorage.setItem(KEYS.TOKEN, token);
+    } else {
+      localStorage.removeItem(KEYS.TOKEN);
+    }
+  }
 
   function readJSON(key, fallback) {
     try {
@@ -40,134 +42,327 @@ const SyP = (() => {
       return fallback;
     }
   }
+
   function writeJSON(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
   }
 
-  /* ---------- Usuarios ---------- */
-  function getUsers() {
-    return readJSON(KEYS.USERS, []);
-  }
-  function saveUsers(users) {
-    writeJSON(KEYS.USERS, users);
-  }
-  function findUserByEmail(email) {
-    return getUsers().find((u) => u.email.toLowerCase() === email.toLowerCase());
-  }
-
-  function registerUser({ name, email, phone, password }) {
-    const emailNorm = email.trim().toLowerCase();
-    if (emailNorm === ADMIN_ACCOUNT.email || findUserByEmail(emailNorm)) {
-      return { ok: false, error: 'Ya existe una cuenta registrada con ese correo.' };
-    }
-    const user = {
-      id: 'u_' + Date.now(),
-      name: name.trim(),
-      email: emailNorm,
-      phone: phone.trim(),
-      password, // Demo: en el back-end esto se guarda con hash (password_hash de PHP), nunca en texto plano.
-      role: 'cliente',
-      createdAt: new Date().toISOString(),
-    };
-    const users = getUsers();
-    users.push(user);
-    saveUsers(users);
-    setSession(toSessionShape(user));
-    return { ok: true, user };
-  }
-
-  function login({ email, password }) {
-    const emailNorm = email.trim().toLowerCase();
-    if (emailNorm === ADMIN_ACCOUNT.email && password === ADMIN_ACCOUNT.password) {
-      const session = toSessionShape(ADMIN_ACCOUNT);
-      setSession(session);
-      return { ok: true, session };
-    }
-    const user = findUserByEmail(emailNorm);
-    if (!user || user.password !== password) {
-      return { ok: false, error: 'Correo o contraseña incorrectos.' };
-    }
-    const session = toSessionShape(user);
-    setSession(session);
-    return { ok: true, session };
-  }
-
-  function toSessionShape(user) {
-    return { name: user.name, email: user.email, role: user.role };
-  }
-
-  /* ---------- Sesión ---------- */
+  /* ---------- Sesión y Perfil ---------- */
   function getSession() {
     return readJSON(KEYS.SESSION, null);
   }
+
   function setSession(session) {
     writeJSON(KEYS.SESSION, session);
   }
+
   function logout() {
     localStorage.removeItem(KEYS.SESSION);
+    localStorage.removeItem(KEYS.TOKEN);
   }
 
-  /* ---------- Solicitudes de servicio técnico ---------- */
+  /* ---------- Headers con Autorización JWT ---------- */
+  function getAuthHeaders() {
+    const token = getToken();
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }
+
+  /* ---------- Registro de Usuario ---------- */
+  async function registerUser({ name, email, phone, password }) {
+    const emailNorm = email.trim().toLowerCase();
+    
+    // Intentar registro en API REST
+    try {
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: emailNorm,
+          phone: phone.trim(),
+          password: password,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setToken(data.access_token);
+        const session = {
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          phone: data.user.phone,
+          role: data.user.role,
+        };
+        setSession(session);
+        return { ok: true, user: data.user };
+      } else {
+        const errData = await res.json().catch(() => ({ detail: 'Error al registrar usuario.' }));
+        return { ok: false, error: errData.detail || 'Error en el servidor.' };
+      }
+    } catch (networkErr) {
+      // Fallback local si el servidor no está en línea
+      console.warn('[SyP Auth] Backend fuera de línea, usando modo local.');
+      const session = {
+        id: 'usr_' + Date.now(),
+        name: name.trim(),
+        email: emailNorm,
+        phone: phone.trim(),
+        role: 'cliente',
+      };
+      setSession(session);
+      return { ok: true, user: session };
+    }
+  }
+
+  /* ---------- Inicio de Sesión ---------- */
+  async function login({ email, password }) {
+    const emailNorm = email.trim().toLowerCase();
+
+    // Intentar login en API REST
+    try {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: emailNorm,
+          password: password,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setToken(data.access_token);
+        const session = {
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          phone: data.user.phone,
+          role: data.user.role,
+        };
+        setSession(session);
+        return { ok: true, session };
+      } else {
+        const errData = await res.json().catch(() => ({ detail: 'Correo o contraseña incorrectos.' }));
+        return { ok: false, error: errData.detail || 'Correo o contraseña incorrectos.' };
+      }
+    } catch (networkErr) {
+      // Fallback local
+      console.warn('[SyP Auth] Backend fuera de línea, usando fallback local.');
+      if (emailNorm === ADMIN_ACCOUNT.email && password === ADMIN_ACCOUNT.password) {
+        const session = { name: ADMIN_ACCOUNT.name, email: ADMIN_ACCOUNT.email, role: 'admin' };
+        setSession(session);
+        return { ok: true, session };
+      }
+      return { ok: false, error: 'No se pudo conectar al servidor de autenticación.' };
+    }
+  }
+
+  /* ---------- Verificación de Token en Servidor ---------- */
+  async function verifyCurrentSession() {
+    const token = getToken();
+    if (!token) return null;
+
+    try {
+      const res = await fetch(`${API_URL}/auth/me`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const user = await res.json();
+        const session = {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+        };
+        setSession(session);
+        return session;
+      } else {
+        logout();
+        return null;
+      }
+    } catch (e) {
+      return getSession();
+    }
+  }
+
+  /* ---------- Solicitudes de Servicio Técnico ---------- */
   function getRequests() {
     return readJSON(KEYS.REQUESTS, []);
   }
+
   function saveRequests(list) {
     writeJSON(KEYS.REQUESTS, list);
   }
-  function addRequest(data) {
+
+  async function addRequest(data) {
     const list = getRequests();
-    const request = {
+    const localReq = {
       id: 'sol_' + Date.now(),
       estado: 'Pendiente',
       createdAt: new Date().toISOString(),
       ...data,
     };
-    list.unshift(request);
+    list.unshift(localReq);
     saveRequests(list);
 
-    // Sincronizar con API Django en tiempo real
     try {
-      fetch('http://127.0.0.1:8000/api/v1/services/', {
+      const res = await fetch(`${API_URL}/requests`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
-          client_name: data.clienteNombre,
-          client_email: data.clienteEmail,
-          client_phone: data.clientePhone || '3143804967',
           equipment: data.equipo,
           service_type: data.tipo,
-          scheduled_date: data.fecha,
-          scheduled_time: data.hora,
+          desired_date: data.fecha,
+          desired_time: data.hora,
           description: data.descripcion || '',
-        })
-      }).catch(() => {});
-    } catch (e) {}
+          client_name: data.clienteNombre,
+          client_email: data.clienteEmail,
+          client_phone: data.clientePhone || '',
+        }),
+      });
+      if (res.ok) {
+        const serverReq = await res.json();
+        localReq.id = serverReq.id;
+        saveRequests(list);
+      }
+    } catch (e) {
+      console.warn('[SyP Requests] Solicitud guardada localmente (pendiente de sync).');
+    }
 
-    return request;
+    return localReq;
   }
-  function getRequestsByEmail(email) {
-    return getRequests().filter((r) => r.clienteEmail.toLowerCase() === email.toLowerCase());
+
+  async function fetchMyRequests(email) {
+    try {
+      const res = await fetch(`${API_URL}/requests/my`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.map((r) => ({
+          id: r.id,
+          clienteNombre: r.client_name,
+          clienteEmail: r.client_email,
+          equipo: r.equipment,
+          tipo: r.service_type,
+          fecha: r.desired_date,
+          hora: r.desired_time,
+          descripcion: r.description,
+          estado: r.status,
+          adminNotes: r.admin_notes,
+          createdAt: r.created_at,
+        }));
+      }
+    } catch (e) {}
+    return getRequests().filter((r) => r.clienteEmail && r.clienteEmail.toLowerCase() === email.toLowerCase());
   }
-  function updateRequestStatus(id, estado) {
+
+  async function fetchAllAdminRequests(statusFilter = 'all') {
+    try {
+      const url = statusFilter && statusFilter !== 'all' 
+        ? `${API_URL}/requests?status_filter=${encodeURIComponent(statusFilter)}`
+        : `${API_URL}/requests`;
+      
+      const res = await fetch(url, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.map((r) => ({
+          id: r.id,
+          clienteNombre: r.client_name,
+          clienteEmail: r.client_email,
+          clientePhone: r.client_phone || '+57 314 380 4967',
+          equipo: r.equipment,
+          tipo: r.service_type,
+          fecha: r.desired_date,
+          hora: r.desired_time,
+          descripcion: r.description,
+          estado: r.status,
+          adminNotes: r.admin_notes,
+          createdAt: r.created_at,
+        }));
+      }
+    } catch (e) {}
+    return getRequests();
+  }
+
+  async function updateRequestStatus(id, estado, adminNotes = '') {
     const list = getRequests();
     const item = list.find((r) => r.id === id);
     if (item) {
       item.estado = estado;
       saveRequests(list);
     }
+
+    try {
+      await fetch(`${API_URL}/requests/${id}/status`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ status: estado, admin_notes: adminNotes }),
+      });
+    } catch (e) {}
+
     return item;
   }
 
+  /* ---------- Contacto & Cotizaciones ---------- */
+  async function submitContactForm(data) {
+    try {
+      const res = await fetch(`${API_URL}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      return await res.json();
+    } catch (e) {
+      return { ok: true, fallback: true };
+    }
+  }
+
+  async function saveQuoteToServer(quoteData) {
+    try {
+      const res = await fetch(`${API_URL}/quotes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(quoteData),
+      });
+      return await res.json();
+    } catch (e) {
+      return { ok: false };
+    }
+  }
+
+  // Verificación de sesión al inicializar
+  if (typeof window !== 'undefined') {
+    verifyCurrentSession();
+  }
+
   return {
+    API_URL,
     ADMIN_ACCOUNT,
+    getToken,
+    setToken,
     registerUser,
     login,
     logout,
     getSession,
     setSession,
+    verifyCurrentSession,
     getRequests,
     addRequest,
-    getRequestsByEmail,
+    fetchMyRequests,
+    fetchAllAdminRequests,
     updateRequestStatus,
+    submitContactForm,
+    saveQuoteToServer,
+    getRequestsByEmail: (email) => getRequests().filter((r) => r.clienteEmail && r.clienteEmail.toLowerCase() === email.toLowerCase()),
   };
 })();
+

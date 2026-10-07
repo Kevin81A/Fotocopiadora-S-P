@@ -398,9 +398,9 @@
     return map[estado] || 'badge-pendiente';
   }
 
-  function renderMyRequests(email) {
+  async function renderMyRequests(email) {
     const wrap = document.getElementById('myRequests');
-    const list = SyP.getRequestsByEmail(email);
+    const list = await SyP.fetchMyRequests(email);
     if (list.length === 0) {
       wrap.innerHTML = `<p style="color:var(--steel); font-size:13.5px;">Aún no has programado ninguna visita técnica.</p>`;
       return;
@@ -410,20 +410,21 @@
         (r) => `
       <div class="request-card">
         <div>
-          <h4>${r.equipo} — ${r.tipo}</h4>
+          <h4>${escapeHTML(r.equipo)} — ${escapeHTML(r.tipo)}</h4>
           <div class="meta">
-            <strong>Fecha deseada:</strong> ${r.fecha} ${r.hora}<br>
-            <strong>Descripción:</strong> ${r.descripcion || '—'}
+            <strong>Fecha deseada:</strong> ${escapeHTML(r.fecha)} ${escapeHTML(r.hora)}<br>
+            <strong>Descripción:</strong> ${escapeHTML(r.descripcion || '—')}
+            ${r.adminNotes ? `<br><strong style="color:#10b981;">Nota técnica:</strong> ${escapeHTML(r.adminNotes)}` : ''}
           </div>
         </div>
-        <span class="badge ${statusBadgeClass(r.estado)}">${r.estado}</span>
+        <span class="badge ${statusBadgeClass(r.estado)}">${escapeHTML(r.estado)}</span>
       </div>`
       )
       .join('');
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const session = SyP.getSession();
+  document.addEventListener('DOMContentLoaded', async () => {
+    const session = await SyP.verifyCurrentSession() || SyP.getSession();
     const gateBox = document.getElementById('gateBox');
     const scheduleArea = document.getElementById('scheduleArea');
 
@@ -443,9 +444,9 @@
     scheduleArea.style.display = 'block';
     document.getElementById('scName').value = session.name;
     document.getElementById('scEmail').value = session.email;
-    renderMyRequests(session.email);
+    await renderMyRequests(session.email);
 
-    document.getElementById('scheduleForm').addEventListener('submit', (e) => {
+    document.getElementById('scheduleForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       ['scEquipoGroup', 'scTipoGroup', 'scFechaGroup', 'scHoraGroup', 'scDescGroup'].forEach((id) =>
         setError(id, '')
@@ -465,9 +466,16 @@
       if (!descripcion) { setError('scDescGroup', 'Cuéntanos brevemente qué necesitas.'); valid = false; }
       if (!valid) return;
 
-      SyP.addRequest({
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Enviando a taller...';
+      }
+
+      await SyP.addRequest({
         clienteNombre: session.name,
         clienteEmail: session.email,
+        clientePhone: session.phone || '',
         equipo,
         tipo,
         fecha,
@@ -479,7 +487,11 @@
       document.getElementById('scheduleForm').reset();
       document.getElementById('scName').value = session.name;
       document.getElementById('scEmail').value = session.email;
-      renderMyRequests(session.email);
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Enviar solicitud';
+      }
+      await renderMyRequests(session.email);
       setTimeout(() => document.getElementById('scheduleSuccess').classList.remove('show'), 3000);
     });
   });

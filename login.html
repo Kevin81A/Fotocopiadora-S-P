@@ -294,7 +294,7 @@
   });
 
   /* ---------- Submit: login ---------- */
-  document.getElementById('loginForm').addEventListener('submit', (e) => {
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     setError('loginEmailGroup', '');
     setError('loginPasswordGroup', '');
@@ -307,13 +307,23 @@
     if (!password) { setError('loginPasswordGroup', 'Ingresa tu contraseña.'); valid = false; }
     if (!valid) return;
 
-    const result = SyP.login({ email, password });
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Verificando...';
+    }
+
+    const result = await SyP.login({ email, password });
     if (!result.ok) {
       setError('loginPasswordGroup', result.error);
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Entrar';
+      }
       return;
     }
     document.getElementById('loginSuccess').classList.add('show');
-    setTimeout(() => redirectAfterAuth(result.session), 700);
+    setTimeout(() => redirectAfterAuth(result.session), 600);
   });
 
   /* ---------- Filtros de entrada en tiempo real (registro) ---------- */
@@ -375,7 +385,7 @@
   }
 
   /* ---------- Submit: registro ---------- */
-  document.getElementById('registerForm').addEventListener('submit', (e) => {
+  document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     ['regNameGroup', 'regEmailGroup', 'regPhoneGroup', 'regPasswordGroup'].forEach((id) => setError(id, ''));
 
@@ -404,13 +414,23 @@
     }
     if (!valid) return;
 
-    const result = SyP.registerUser({ name, email, phone, password });
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creando cuenta...';
+    }
+
+    const result = await SyP.registerUser({ name, email, phone, password });
     if (!result.ok) {
       setError('regEmailGroup', result.error);
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Crear cuenta';
+      }
       return;
     }
     document.getElementById('registerSuccess').classList.add('show');
-    setTimeout(() => redirectAfterAuth(SyP.getSession()), 700);
+    setTimeout(() => redirectAfterAuth(SyP.getSession()), 600);
   });
 </script>
 </body>

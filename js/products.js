@@ -574,26 +574,26 @@ function formatCOP(value) {
 }
 
 /* ============================================================
-   SINCRONIZACIÓN CON BACKEND DJANGO REST FRAMEWORK
+   SINCRONIZACIÓN CON BACKEND REST API (FastAPI / SQLite)
    ============================================================ */
 const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 async function syncProductsFromBackend() {
   try {
-    const res = await fetch(`${API_BASE_URL}/products/`);
+    const res = await fetch(`${API_BASE_URL}/products`);
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
         PRODUCTS.length = 0;
         data.forEach((item) => {
           PRODUCTS.push({
-            id: item.id_code,
+            id: item.id || item.id_code,
             name: item.name,
             cat: item.category_slug,
             price: Number(item.price),
             spec: item.spec,
-            stock: item.stock_status,
-            brand: item.brand_name,
+            stock: item.stock_status || 'ok',
+            brand: item.brand || 'Ricoh',
             models: item.compatible_models ? item.compatible_models.split(',').map((m) => m.trim()) : [],
             discount: item.discount_percent || 0,
             img: item.image_url || getCategoryDefaultImage(item.category_slug),
@@ -610,14 +610,14 @@ async function syncProductsFromBackend() {
             compatibleIds: item.compatible_ids ? item.compatible_ids.split(',').map(s => s.trim()) : [],
           });
         });
-        console.log('[SyP] ⚡ Conectado con Backend Django: ' + PRODUCTS.length + ' productos sincronizados.');
+        console.log('[SyP] ⚡ Conectado con Backend API SyP: ' + PRODUCTS.length + ' productos sincronizados.');
         if (typeof applyFilters === 'function') {
           applyFilters(false);
         }
       }
     }
   } catch (e) {
-    // Si Django está apagado, continúa con los datos estáticos enriquecidos sin interrumpir
+    // Si el backend está apagado, continúa con el catálogo local integrado
   }
 }
 
@@ -625,3 +625,4 @@ async function syncProductsFromBackend() {
 if (typeof window !== 'undefined') {
   syncProductsFromBackend();
 }
+

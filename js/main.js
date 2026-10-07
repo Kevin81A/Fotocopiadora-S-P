@@ -1340,6 +1340,61 @@ function initHeroSlider() {
 }
 
 /* ============================================================
+   BANNER SLIDER DESTACADO DE SERVICIOS & RENTING (HOME)
+   ============================================================ */
+function initServicesBannerSlider() {
+  const wrap = document.getElementById('servicesBannerSlider');
+  if (!wrap) return;
+
+  const slides = wrap.querySelectorAll('.banner-slide');
+  const dots = wrap.querySelectorAll('.banner-dot');
+  const prevBtn = document.getElementById('bannerPrevBtn');
+  const nextBtn = document.getElementById('bannerNextBtn');
+
+  if (!slides.length) return;
+
+  let currentIdx = 0;
+  let timer = null;
+  const duration = 6500;
+
+  function setSlide(i) {
+    if (i < 0) i = slides.length - 1;
+    if (i >= slides.length) i = 0;
+    currentIdx = i;
+
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === currentIdx));
+    dots.forEach((d, idx) => d.classList.toggle('active', idx === currentIdx));
+  }
+
+  function next() { setSlide(currentIdx + 1); }
+  function prev() { setSlide(currentIdx - 1); }
+
+  function start() {
+    stop();
+    timer = setInterval(next, duration);
+  }
+  function stop() {
+    if (timer) clearInterval(timer);
+  }
+
+  if (nextBtn) nextBtn.addEventListener('click', () => { next(); start(); });
+  if (prevBtn) prevBtn.addEventListener('click', () => { prev(); start(); });
+
+  dots.forEach((dot) => {
+    dot.addEventListener('click', () => {
+      const idx = parseInt(dot.dataset.bdot, 10);
+      setSlide(idx);
+      start();
+    });
+  });
+
+  wrap.addEventListener('mouseenter', stop);
+  wrap.addEventListener('mouseleave', start);
+
+  start();
+}
+
+/* ============================================================
    1. CALCULADORA DE RENTING & AHORRO INTELIGENTE
    ============================================================ */
 function initRentingCalculator() {
@@ -2633,6 +2688,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initRevealCards();
   initKeyboardShortcuts();
   initHeroSlider();
+  initServicesBannerSlider();
   initProductCarousel();
   initFAQAccordion();
   initFloatingAssistant();

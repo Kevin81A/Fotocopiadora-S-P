@@ -580,92 +580,134 @@
     </div>
   </section>
 
-  <!-- ===================== CALCULADORA DE RENTING & AHORRO ===================== -->
-  <section class="section" id="calculadora-renting" style="padding-top:20px; padding-bottom:50px;">
+  <!-- ===================== SLIDER DESTACADO DE SERVICIOS & RENTING ===================== -->
+  <section class="section" id="slider-servicios" style="padding-top:20px; padding-bottom:50px;">
     <div class="container">
-      <div class="renting-calc-container" id="rentingCalculator">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:28px;">
-          <div>
-            <span class="eyebrow" style="color:var(--red);">Simulador de Ahorro para Empresas</span>
-            <h2 style="font-size:24px; margin-top:4px;">Calculadora de Renting y Alquiler Corporativo</h2>
-            <p style="font-size:14px; color:var(--steel); margin-top:4px;">Ajusta el volumen mensual de tu oficina y descubre cuánto ahorras con nuestros planes todo incluido en Neiva.</p>
+      <div class="banner-slider-wrap" id="servicesBannerSlider">
+        <div class="banner-slider-track">
+          
+          <!-- Slide 1: Renting & Alquiler Corporativo Ricoh -->
+          <div class="banner-slide active" data-banner-slide="0">
+            <img src="img/about_store.jpg" alt="Planes de Renting y Alquiler de Fotocopiadoras Ricoh en Neiva" class="banner-slide-img" loading="lazy">
+            <div class="banner-slide-overlay">
+              <div class="banner-slide-eyebrow">
+                <span class="live-dot" style="background:var(--red);"></span>
+                Renting Corporativo · Neiva y Huila
+              </div>
+              <h2 class="banner-slide-title">Fotocopiadoras Ricoh en Alquiler Todo Incluido</h2>
+              <p class="banner-slide-desc">
+                Tóner y recargas 100% ilimitadas, repuestos originales y mantenimiento preventivo mensual en tu sede. Sin inversión de compra ni depreciación para tu empresa o colegio.
+              </p>
+              <div class="banner-perks-row">
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Tóner 100% ilimitado
+                </span>
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Soporte técnico &lt; 24h
+                </span>
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Instalación sin costo
+                </span>
+              </div>
+              <div class="banner-actions">
+                <a href="https://wa.me/573143804967?text=Hola%20Gladys%2C%20quisiera%20cotizar%20un%20plan%20de%20Renting%20Ricoh%20para%20mi%20oficina" target="_blank" rel="noopener" class="btn btn-primary">
+                  Cotizar Renting con Gladys (WhatsApp)
+                </a>
+                <a href="servicio-tecnico.html#calculadora-renting" class="btn btn-outline-light">
+                  Simular Ahorro en Servicio Técnico &rarr;
+                </a>
+              </div>
+            </div>
           </div>
-          <div class="renting-mode-selector">
-            <button class="renting-mode-btn active" id="rentingModeMono">Monocromático (B/N)</button>
-            <button class="renting-mode-btn" id="rentingModeColor">Color Full HD</button>
+
+          <!-- Slide 2: Asesoría Directa y Punto de Venta en Neiva -->
+          <div class="banner-slide" data-banner-slide="1">
+            <img src="img/contact_advisors.jpg" alt="Mesa de Atención y Asesoría Fotocopiadora SyP Neiva" class="banner-slide-img" loading="lazy">
+            <div class="banner-slide-overlay">
+              <div class="banner-slide-eyebrow">
+                <span class="live-dot" style="background:#10b981;"></span>
+                Atención Inmediata · Av. La Toma #3A-20
+              </div>
+              <h2 class="banner-slide-title">¿Necesitas insumos, tóners o asesoría para tu oficina?</h2>
+              <p class="banner-slide-desc">
+                Encuentra el suministro exacto para tu impresora o fotocopiadora Ricoh con asesoría personalizada de Gladys Solano y despacho exprés el mismo día en Neiva.
+              </p>
+              <div class="banner-perks-row">
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  +180 referencias en stock
+                </span>
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Garantía de rendimiento 100%
+                </span>
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Facturación Electrónica DIAN
+                </span>
+              </div>
+              <div class="banner-actions">
+                <a href="https://wa.me/573143804967?text=Hola%20Gladys%2C%20necesito%20cotizar%20suministros%20e%20insumos%20Ricoh" target="_blank" rel="noopener" class="btn btn-primary">
+                  Hablar con Gladys por WhatsApp
+                </a>
+                <a href="contacto.html" class="btn btn-outline-light">
+                  Ver Ubicación y Horarios &rarr;
+                </a>
+              </div>
+            </div>
           </div>
+
+          <!-- Slide 3: Servicio Técnico Especializado a Domicilio -->
+          <div class="banner-slide" data-banner-slide="2">
+            <img src="img/service_workshop.jpg" alt="Taller Especializado y Servicio Técnico Ricoh Neiva" class="banner-slide-img" loading="lazy">
+            <div class="banner-slide-overlay">
+              <div class="banner-slide-eyebrow" style="color:#60a5fa;">
+                <span class="live-dot" style="background:#3b82f6;"></span>
+                Soporte Técnico de Planta · Neiva
+              </div>
+              <h2 class="banner-slide-title">Diagnóstico y Reparación en Sitio para Equipos Ricoh</h2>
+              <p class="banner-slide-desc">
+                Eliminamos atascos continuos, códigos de error SC y manchas en tus impresiones. Nuestro técnico Juan Sebastián Portela atiende directamente en tu sede con repuestos probados.
+              </p>
+              <div class="banner-perks-row">
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Mantenimiento preventivo y correctivo
+                </span>
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Calibración de cilindro y fusor
+                </span>
+                <span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Garantía de servicio por escrito
+                </span>
+              </div>
+              <div class="banner-actions">
+                <a href="servicio-tecnico.html" class="btn btn-primary" style="background:#3b82f6; border-color:#3b82f6;">
+                  Agendar Visita Técnica
+                </a>
+                <a href="https://wa.me/573178204193?text=Hola%20Sebasti%C3%A1n%2C%20tengo%20un%20equipo%20Ricoh%20con%20falla%20y%20requiero%20asistencia%20t%C3%A9cnica" target="_blank" rel="noopener" class="btn btn-outline-light">
+                  Consultar con Sebastián (Técnico)
+                </a>
+              </div>
+            </div>
+          </div>
+
         </div>
 
-        <div class="renting-calc-grid">
-          <!-- Columna Izquierda: Slider interactivo -->
-          <div class="renting-slider-box">
-            <div>
-              <div class="renting-slider-header">
-                <span style="font-size:14px; font-weight:600; color:var(--ink);">Volumen mensual estimado:</span>
-                <span class="renting-vol-number" id="rentingVolumeVal">5.000 pág/mes</span>
-              </div>
-              <p style="font-size:12.5px; color:var(--steel); margin-top:4px;">Desliza para calcular según el número de impresiones y fotocopias de tu equipo:</p>
-            </div>
-
-            <div style="padding:10px 0;">
-              <input type="range" id="rentingVolumeRange" class="renting-range-slider" min="1000" max="50000" step="500" value="5000" aria-label="Volumen mensual de páginas">
-              <div style="display:flex; justify-content:space-between; font-size:11.5px; font-family:var(--font-mono); color:var(--steel); margin-top:8px;">
-                <span>1.000 pág</span>
-                <span>15.000 pág</span>
-                <span>30.000 pág</span>
-                <span>50.000 pág</span>
-              </div>
-            </div>
-
-            <div style="background:var(--paper-dim); border:1px solid var(--line); border-radius:8px; padding:16px;">
-              <strong style="font-size:13px; display:block; margin-bottom:8px; color:var(--ink);">¿Qué incluye todo plan de renting SyP?</strong>
-              <ul class="renting-perks-list" style="margin-bottom:0;">
-                <li>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span><strong>Tóner y recargas 100% ilimitadas</strong> sin costo por cartucho.</span>
-                </li>
-                <li>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Mantenimiento preventivo mensual y cambio de repuestos en sitio.</span>
-                </li>
-                <li>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Reemplazo inmediato del equipo en caso de falla mayor en Neiva.</span>
-                </li>
-              </ul>
-            </div>
+        <!-- Controles de Navegación del Banner Slider -->
+        <div class="banner-slider-nav">
+          <div class="banner-nav-dots" id="bannerNavDots">
+            <span class="banner-dot active" data-bdot="0" aria-label="Slide 1: Renting"></span>
+            <span class="banner-dot" data-bdot="1" aria-label="Slide 2: Asesoría"></span>
+            <span class="banner-dot" data-bdot="2" aria-label="Slide 3: Soporte"></span>
           </div>
-
-          <!-- Columna Derecha: Tarjeta de recomendación dinámica -->
-          <div class="renting-output-card">
-            <div class="renting-rec-header">
-              <img id="rentingRecImg" class="renting-rec-img" src="img/prod_copier.jpg" alt="Equipo Recomendado" loading="lazy">
-              <div>
-                <span style="font-size:11px; font-family:var(--font-mono); font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:0.06em;">Equipo Sugerido</span>
-                <div class="renting-rec-title" id="rentingRecModelName">Ricoh MP 2554 / 3054</div>
-                <span style="font-size:12px; color:var(--steel);">Multifuncional Láser Alto Rendimiento</span>
-              </div>
-            </div>
-
-            <div class="renting-savings-badge" id="rentingSavingsBadge">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-              Calculando ahorro...
-            </div>
-
-            <div class="renting-price-row">
-              <span class="renting-fee-value" id="rentingRecFee">$160.000 COP</span>
-              <span class="renting-fee-period">/ mes (Todo incluido)</span>
-            </div>
-
-            <div style="font-size:12.5px; color:var(--steel); margin-bottom:20px; line-height:1.5;">
-              • <span id="rentingIncludedPages">4.000 páginas base incluidas con insumos</span><br>
-              • <span id="rentingExtraPrice">$28 COP por página adicional</span>
-            </div>
-
-            <a href="https://wa.me/573143804967" id="rentingWhatsAppBtn" target="_blank" rel="noopener" class="btn btn-primary btn-block" style="text-align:center;">
-              Cotizar este plan de Renting con Gladys
-            </a>
-          </div>
+          <button class="banner-nav-btn" id="bannerPrevBtn" aria-label="Anterior">&larr;</button>
+          <button class="banner-nav-btn" id="bannerNextBtn" aria-label="Siguiente">&rarr;</button>
         </div>
       </div>
     </div>

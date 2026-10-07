@@ -33,13 +33,13 @@ The design system for **Fotocopiadora SyP** fuses an **Editorial Industrial / Pr
 
 ### 3.1 Hero Carousel / Slider (`.hero-slider-wrap`)
 * **Slides Track:** 3 feature slides with autoplay (6s interval), smooth slide transition (`cubic-bezier(0.16, 1, 0.3, 1)`), pause on hover, and manual arrow controls.
-* **Slide 1:** Fotocopiadoras & Multifuncionales Láser (Ricoh & Kyocera).
+* **Slide 1:** Fotocopiadoras & Multifuncionales Láser Ricoh (Línea Exclusiva MP, IM y Pro Series).
 * **Slide 2:** Servicio Técnico Especializado a Domicilio en Neiva.
-* **Slide 3:** Tóneres, Tintas y Recargas Certificadas Grado A+.
+* **Slide 3:** Tóneres, Insumos y Recargas Certificadas Grado A+ para equipos Ricoh.
 * **Indicators:** Progress-bar animated bullets with active length expansion (`width: 56px`).
 
-### 3.2 Infinite Brand Marquee (`.marquee-container`)
-* **Continuous Loop:** Seamless marquee ticker displaying authorized brands (Ricoh, Kyocera, Canon, HP, Konica Minolta, Epson, Brother, Toshiba, Samsung).
+### 3.2 Infinite Ricoh Ecosystem Marquee (`.marquee-container`)
+* **Continuous Loop:** Seamless marquee ticker displaying the full Ricoh ecosystem (RICOH, RICOH MP SERIES, RICOH IM COLOR, RICOH AFICIO, RICOH PRO INDUSTRIAL, TÓNER GRADO A+ RICOH, REPUESTOS ORIGINALES RICOH, SOPORTE TÉCNICO OFICIAL NEIVA).
 * **Hover State:** Pauses animation and scales hovered brand logos with high-contrast color reveal.
 
 ### 3.3 Product Carousel (`.product-slider-wrapper`)

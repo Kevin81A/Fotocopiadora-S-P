@@ -376,6 +376,31 @@ const SyP = (() => {
     return [];
   }
 
+  async function submitCounterReport(data) {
+    try {
+      const res = await fetch(`${API_URL}/counters`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      return await res.json();
+    } catch (e) {
+      return { ok: false, message: 'Error de conexión con el servidor.' };
+    }
+  }
+
+  async function fetchAllAdminCounters() {
+    try {
+      const res = await fetch(`${API_URL}/counters`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {}
+    return [];
+  }
+
   // Verificación de sesión al inicializar
   if (typeof window !== 'undefined') {
     verifyCurrentSession();
@@ -400,8 +425,10 @@ const SyP = (() => {
     fetchAllAdminOrders,
     updateOrderStatus,
     fetchAllAdminQuotes,
+    fetchAllAdminCounters,
     submitContactForm,
     saveQuoteToServer,
+    submitCounterReport,
     getRequestsByEmail: (email) => getRequests().filter((r) => r.clienteEmail && r.clienteEmail.toLowerCase() === email.toLowerCase()),
   };
 })();

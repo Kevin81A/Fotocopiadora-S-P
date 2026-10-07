@@ -705,6 +705,27 @@ def submit_counter_report(payload: CounterReportCreate, current_user: dict = Dep
         ))
         return {"ok": True, "id": rep_id, "message": "Reporte de contador registrado con éxito."}
 
+@app.get("/api/v1/counters")
+def list_all_counter_reports(admin_user: dict = Depends(require_admin)):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM counter_reports ORDER BY created_at DESC")
+        rows = cursor.fetchall()
+        return [
+            {
+                "id": r["id"],
+                "client_id": r["client_id"],
+                "client_name": r["client_name"],
+                "equipment_model": r["equipment_model"],
+                "mono_counter": r["mono_counter"],
+                "color_counter": r["color_counter"],
+                "report_month": r["report_month"],
+                "notes": r["notes"],
+                "created_at": str(r["created_at"])
+            }
+            for r in rows
+        ]
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)

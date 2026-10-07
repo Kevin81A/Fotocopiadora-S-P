@@ -1983,9 +1983,9 @@ function initRicohSCCodeLookup() {
               <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="margin-right:6px;"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-1 1-1 2.3 0 1.4 1 2.7 1.1 2.9.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.3A10 10 0 1 0 12 2z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
               Reportar ${escapeHTML(item.code)} a Sebastián (Técnico)
             </a>
-            <a href="#clientArea" class="btn btn-outline">
+            <button type="button" class="btn btn-outline" onclick="if(typeof prefillServiceFormFromSC === 'function') prefillServiceFormFromSC('${escapeHTML(item.code)}', '${escapeHTML(item.name)}', '${escapeHTML(item.cause)}')">
               Agendar Visita de Taller en Neiva
-            </a>
+            </button>
           </div>
         </div>
       `;
@@ -2045,6 +2045,124 @@ function initRicohSCCodeLookup() {
 
   // Render inicial
   renderCodes([RICOH_SC_CODES[0], RICOH_SC_CODES[1]]);
+}
+
+/* ============================================================
+   7B. SELECTOR INTELIGENTE DE COMPATIBILIDAD DE INSUMOS & REPUESTOS RICOH
+   ============================================================ */
+function initCompatibilityFinder() {
+  const brandSel = document.getElementById('compatBrandSelect');
+  const modelSel = document.getElementById('compatModelSelect');
+  const clearBtn = document.getElementById('compatClearBtn');
+  const resultsGrid = document.getElementById('compatResultsGrid');
+
+  if (!brandSel || !modelSel || typeof BRAND_MODELS === 'undefined') return;
+
+  // Llenar selector de Series Ricoh si no está lleno
+  if (brandSel.options.length <= 1) {
+    Object.keys(BRAND_MODELS).forEach((series) => {
+      const opt = document.createElement('option');
+      opt.value = series;
+      opt.textContent = series;
+      brandSel.appendChild(opt);
+    });
+  }
+
+  function renderCompatResults(modelName) {
+    if (!resultsGrid) return;
+    if (!modelName) {
+      resultsGrid.innerHTML = '';
+      resultsGrid.style.display = 'none';
+      return;
+    }
+
+    const matches = PRODUCTS.filter((p) => {
+      if (p.models && p.models.includes(modelName)) return true;
+      if (p.models && p.models.some((m) => modelName.includes(m) || m.includes(modelName))) return true;
+      return false;
+    });
+
+    if (matches.length === 0) {
+      resultsGrid.style.display = 'block';
+      resultsGrid.innerHTML = `
+        <div style="grid-column:1/-1; background:var(--paper); border:1px dashed var(--line); border-radius:8px; padding:24px; text-align:center;">
+          <p style="font-size:14px; color:var(--steel); margin:0 0 12px;">No hay repuestos directos en catálogo web para <strong>${escapeHTML(modelName)}</strong>, pero disponemos de stock en taller físico.</p>
+          <a href="https://wa.me/573143804967?text=${encodeURIComponent('Hola Gladys, necesito cotizar tóner y repuestos para Ricoh ' + modelName)}" target="_blank" rel="noopener" class="btn btn-primary" style="font-size:12.5px;">
+            Consultar Insumos con Gladys (Ventas)
+          </a>
+        </div>
+      `;
+      return;
+    }
+
+    resultsGrid.style.display = 'grid';
+    resultsGrid.innerHTML = matches.map((p) => {
+      const catLabel = CATEGORIES.find((c) => c.id === p.cat)?.label ?? p.cat;
+      const imgSrc = p.img || (typeof getCategoryDefaultImage === 'function' ? getCategoryDefaultImage(p.cat) : 'img/prod_toner.jpg');
+
+      return `
+        <div class="product-card" style="margin:0; box-shadow:0 2px 10px rgba(0,0,0,0.04);">
+          <div class="product-media" style="height:140px; cursor:pointer;" onclick="openQuickView('${escapeHTML(p.id)}')">
+            <span class="stock-tag in-stock">Compatible</span>
+            <div class="product-media-img-wrap">
+              <img src="${escapeHTML(imgSrc)}" alt="${escapeHTML(p.name)}" class="product-real-img" loading="lazy">
+            </div>
+          </div>
+          <div class="product-body" style="padding:14px;">
+            <span class="product-cat">${escapeHTML(catLabel)}</span>
+            <h4 class="product-name" style="font-size:13.5px; margin:4px 0 6px; cursor:pointer;" onclick="openQuickView('${escapeHTML(p.id)}')">${escapeHTML(p.name)}</h4>
+            <p class="product-spec" style="font-size:11.5px; margin-bottom:10px;">${escapeHTML(p.spec)}</p>
+            <div class="product-foot">
+              <span class="product-price" style="font-size:15px;">${formatCOP(p.price)}</span>
+              <button type="button" class="btn btn-primary" style="padding:6px 12px; font-size:12px;" onclick="addToCart('${escapeHTML(p.id)}'); showToast('${escapeHTML(p.name)} agregado al carrito ✓');">
+                + Añadir
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  brandSel.addEventListener('change', () => {
+    const selectedBrand = brandSel.value;
+    modelSel.innerHTML = '<option value="">2. Selecciona el modelo exacto</option>';
+    if (selectedBrand && BRAND_MODELS[selectedBrand]) {
+      modelSel.disabled = false;
+      BRAND_MODELS[selectedBrand].forEach((mod) => {
+        const opt = document.createElement('option');
+        opt.value = mod;
+        opt.textContent = mod;
+        modelSel.appendChild(opt);
+      });
+      if (clearBtn) clearBtn.style.display = 'inline-block';
+    } else {
+      modelSel.disabled = true;
+      if (clearBtn) clearBtn.style.display = 'none';
+      renderCompatResults(null);
+    }
+  });
+
+  modelSel.addEventListener('change', () => {
+    if (modelSel.value) {
+      if (clearBtn) clearBtn.style.display = 'inline-block';
+      renderCompatResults(modelSel.value);
+      showToast(`Insumos compatibles con ${modelSel.value} cargados ✓`);
+    } else {
+      renderCompatResults(null);
+    }
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      brandSel.value = '';
+      modelSel.innerHTML = '<option value="">2. Primero elige la Serie Ricoh</option>';
+      modelSel.disabled = true;
+      clearBtn.style.display = 'none';
+      renderCompatResults(null);
+      showToast('Filtro de compatibilidad restablecido');
+    });
+  }
 }
 
 /* ============================================================
@@ -2317,6 +2435,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initRentingCalculator();
   initSmartTroubleshooter();
   initRicohSCCodeLookup();
+  initCompatibilityFinder();
   initAdvisorSelectorModal();
   initPWAInstallBanner();
   renderTestimonials();

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Servicio Técnico | Fotocopiadora SyP</title>
 <meta name="description" content="Programa el mantenimiento preventivo o correctivo de tu fotocopiadora o impresora con Fotocopiadora SyP en Neiva.">
+<link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -82,7 +83,7 @@
 </section>
 
 <!-- ===================== ASISTENTE VISUAL DE DIAGNÓSTICO (Smart Troubleshooter) ===================== -->
-<section class="section" id="diagnostico-interactivo" style="padding-top:20px; padding-bottom:40px;">
+<section class="section" id="diagnostico-interactivo" style="padding-top:20px; padding-bottom:20px;">
   <div class="container">
     <div class="troubleshooter-wrapper" id="smartTroubleshooter">
       <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
@@ -104,6 +105,54 @@
 
       <!-- Panel de Diagnóstico Resultante -->
       <div class="diagnostic-result-panel" id="troubleResultPanel">
+        <!-- Renderizado dinámico vía JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BUSCADOR DE CÓDIGOS DE ERROR SC RICOH (Feature 1) ===================== -->
+<section class="section" id="buscador-codigos-sc" style="padding-top:10px; padding-bottom:40px;">
+  <div class="container">
+    <div class="sc-lookup-box" id="scCodeLookup">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+        <div>
+          <span class="eyebrow" style="color:var(--red);">Exclusivo Ricoh</span>
+          <h2 style="font-size:24px; margin-top:4px;">Buscador Inteligente de Códigos de Error Ricoh (SC)</h2>
+          <p style="font-size:14px; color:var(--steel); margin-top:4px;">¿Tu fotocopiadora muestra un código de servicio en pantalla (ej. SC 542, SC 320, SC 672)? Escríbelo a continuación para obtener diagnóstico oficial, causa raíz y solución técnica.</p>
+        </div>
+        <span class="live-status-pill" style="background:rgba(228,0,43,0.08); border-color:rgba(228,0,43,0.25); color:var(--red);">
+          <span class="live-dot" style="background:var(--red);"></span>
+          Base de Datos Ricoh SP
+        </span>
+      </div>
+
+      <!-- Buscador Input -->
+      <div class="sc-input-wrapper">
+        <span class="sc-search-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input type="text" id="scSearchInput" class="sc-search-input" placeholder="Escribe el código (ej. 542, 320, SC 401) o palabra clave (fusor, láser, rodillo)..." autocomplete="off" aria-label="Buscar código de error Ricoh SC">
+        <button type="button" id="scClearBtn" class="sc-clear-btn" aria-label="Limpiar búsqueda">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Chips de Acceso Rápido -->
+      <div class="sc-chips-container" id="scChipsContainer">
+        <span class="sc-chips-label">Códigos frecuentes:</span>
+        <button type="button" class="sc-chip-btn" data-sc="SC 542">SC 542 (Fusor)</button>
+        <button type="button" class="sc-chip-btn" data-sc="SC 320">SC 320 (Láser)</button>
+        <button type="button" class="sc-chip-btn" data-sc="SC 401">SC 401 (Transferencia)</button>
+        <button type="button" class="sc-chip-btn" data-sc="SC 672">SC 672 (Panel/BIOS)</button>
+        <button type="button" class="sc-chip-btn" data-sc="SC 501">SC 501 (Bandeja 1)</button>
+        <button type="button" class="sc-chip-btn" data-sc="SC 899">SC 899 (Spooler Red)</button>
+        <button type="button" class="sc-chip-btn" data-sc="SC 302">SC 302 (Carga)</button>
+        <button type="button" class="sc-chip-btn" data-sc="SC 552">SC 552 (Presión)</button>
+      </div>
+
+      <!-- Contenedor de Resultados Dinámico -->
+      <div class="sc-results-container" id="scResultsContainer">
         <!-- Renderizado dinámico vía JS -->
       </div>
     </div>

@@ -1432,6 +1432,405 @@ function generateFormalQuotationPDF() {
   window.print();
 }
 
+/* ============================================================
+   7. BUSCADOR DE CÓDIGOS DE ERROR SC RICOH (Feature 1)
+   ============================================================ */
+function initRicohSCCodeLookup() {
+  const container = document.getElementById('scCodeLookup');
+  if (!container || typeof RICOH_SC_CODES === 'undefined') return;
+
+  const input = document.getElementById('scSearchInput');
+  const clearBtn = document.getElementById('scClearBtn');
+  const chips = container.querySelectorAll('.sc-chip-btn');
+  const resultsContainer = document.getElementById('scResultsContainer');
+  if (!input || !resultsContainer) return;
+
+  function formatSeverityBadge(severity) {
+    const s = escapeHTML(severity);
+    return `<span class="severity-pill ${s}">Gravedad: ${s}</span>`;
+  }
+
+  function renderCodes(matches, queryTerm = '') {
+    if (!matches || matches.length === 0) {
+      const sanitizedQuery = escapeHTML(queryTerm);
+      const waUnknownMsg = encodeURIComponent(
+        `Hola Juan Sebastián (Técnico SyP), mi fotocopiadora Ricoh muestra el código "${queryTerm}". No lo encontré en el buscador. ¿Podrías indicarme qué significa y cómo solucionarlo?`
+      );
+      resultsContainer.innerHTML = `
+        <div class="sc-empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <h3 style="font-size:16px; margin-bottom:6px; color:var(--ink);">Código "${sanitizedQuery}" no listado en la guía rápida</h3>
+          <p style="font-size:13px; max-width:480px; margin:0 auto 18px; line-height:1.5;">Existen más de 400 sub-códigos de servicio técnico para la línea Ricoh. Nuestro jefe de taller puede decodificarlo de inmediato en el manual de servicio oficial.</p>
+          <a href="https://wa.me/573178204193?text=${waUnknownMsg}" target="_blank" rel="noopener" class="btn btn-primary" style="background:#25D366; border-color:#25D366;">
+            Consultar código "${sanitizedQuery}" con Sebastián por WhatsApp
+          </a>
+        </div>
+      `;
+      return;
+    }
+
+    resultsContainer.innerHTML = matches.map((item) => {
+      const waMsg = encodeURIComponent(
+        `Hola Sebastián (Técnico SyP), mi equipo Ricoh reporta el código ${item.code}: ${item.name}.\n` +
+        `• Categoría: ${item.category}\n` +
+        `• Causa probable: ${item.cause}\n` +
+        `¿Podrías agendar un diagnóstico en sitio o cotizarme la solución para Neiva?`
+      );
+
+      return `
+        <div class="sc-result-card" data-sc-code="${escapeHTML(item.code)}">
+          <div class="sc-card-header">
+            <div>
+              <span class="sc-code-badge">${escapeHTML(item.code)}</span>
+              <h3 class="sc-card-title">${escapeHTML(item.name)}</h3>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <span style="font-family:var(--font-mono); font-size:11.5px; color:var(--steel); background:var(--paper); padding:4px 8px; border-radius:4px; border:1px solid var(--line);">${escapeHTML(item.category)}</span>
+              ${formatSeverityBadge(item.severity)}
+            </div>
+          </div>
+
+          <div style="font-size:14px; line-height:1.6; color:var(--ink); margin-bottom:12px;">
+            <strong>¿Qué significa este código?</strong> ${escapeHTML(item.meaning)}
+          </div>
+
+          <div class="sc-detail-grid">
+            <div class="sc-detail-item">
+              <h4>Causa Raíz Probable</h4>
+              <p>${escapeHTML(item.cause)}</p>
+            </div>
+            <div class="sc-detail-item">
+              <h4>Solución y Protocolo Técnico SyP</h4>
+              <p>${escapeHTML(item.solution)}</p>
+            </div>
+          </div>
+
+          ${item.safetyNotice ? `
+            <div class="sc-safety-alert">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" style="flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span><strong>Advertencia de Seguridad:</strong> ${escapeHTML(item.safetyNotice)}</span>
+            </div>
+          ` : ''}
+
+          <div class="sc-action-row">
+            <a href="https://wa.me/573178204193?text=${waMsg}" target="_blank" rel="noopener" class="btn btn-primary" style="background:#25D366; border-color:#25D366;">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="margin-right:6px;"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-1 1-1 2.3 0 1.4 1 2.7 1.1 2.9.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.3A10 10 0 1 0 12 2z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+              Reportar ${escapeHTML(item.code)} a Sebastián (Técnico)
+            </a>
+            <a href="#clientArea" class="btn btn-outline">
+              Agendar Visita de Taller en Neiva
+            </a>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function search(query) {
+    const raw = (query || '').trim().toLowerCase();
+    if (clearBtn) {
+      clearBtn.classList.toggle('visible', raw.length > 0);
+    }
+
+    chips.forEach((c) => {
+      const code = c.dataset.sc.toLowerCase();
+      c.classList.toggle('active', raw.length > 0 && (raw.includes(code.replace('sc ', '')) || code.includes(raw)));
+    });
+
+    if (!raw) {
+      renderCodes([RICOH_SC_CODES[0], RICOH_SC_CODES[1]]);
+      return;
+    }
+
+    const matches = RICOH_SC_CODES.filter((item) => {
+      const codeClean = item.code.toLowerCase().replace(/\s+/g, '');
+      const queryClean = raw.replace(/\s+/g, '');
+      return (
+        codeClean.includes(queryClean) ||
+        item.name.toLowerCase().includes(raw) ||
+        item.category.toLowerCase().includes(raw) ||
+        item.cause.toLowerCase().includes(raw) ||
+        item.solution.toLowerCase().includes(raw)
+      );
+    });
+
+    renderCodes(matches, query);
+  }
+
+  input.addEventListener('input', (e) => {
+    search(e.target.value);
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      input.value = '';
+      search('');
+      input.focus();
+    });
+  }
+
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const sc = chip.dataset.sc;
+      input.value = sc;
+      search(sc);
+    });
+  });
+
+  // Render inicial
+  renderCodes([RICOH_SC_CODES[0], RICOH_SC_CODES[1]]);
+}
+
+/* ============================================================
+   8. MODAL SELECTOR DE ASESOR WHATSAPP (Feature 3)
+   ============================================================ */
+function initAdvisorSelectorModal() {
+  if (document.getElementById('advisorModalOverlay')) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'advisorModalOverlay';
+  overlay.className = 'advisor-modal-overlay';
+
+  const modal = document.createElement('div');
+  modal.id = 'advisorModal';
+  modal.className = 'advisor-modal';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+
+  modal.innerHTML = `
+    <div class="advisor-modal-head">
+      <div>
+        <span class="eyebrow" style="color:var(--red); font-size:11px; margin-bottom:2px; display:block;">Atención Inmediata en Neiva</span>
+        <h2>Elige tu Asesor Especializado SyP</h2>
+      </div>
+      <button class="modal-close" id="advisorModalClose" aria-label="Cerrar selector">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="advisor-modal-body">
+      <div class="advisor-cards-grid">
+        
+        <!-- ASESOR 1: GLADYS SOLANO (VENTAS & RENTING) -->
+        <div class="advisor-profile-card commercial">
+          <div>
+            <div class="advisor-avatar-box">
+              <div class="advisor-avatar gladys">
+                GS
+                <span class="advisor-online-dot" title="En línea para ventas"></span>
+              </div>
+              <div>
+                <div class="advisor-name">Gladys Solano Murcia</div>
+                <div class="advisor-role-tag">Gerencia Comercial & Renting</div>
+              </div>
+            </div>
+            <p class="advisor-desc">Asesoría comercial en venta y alquiler de fotocopiadoras Ricoh, cálculo de cuotas de renting, suministro de tóneres al por mayor y cotizaciones formales.</p>
+          </div>
+
+          <div class="advisor-quick-actions">
+            <a href="https://wa.me/573143804967?text=Hola%20Gladys%2C%20deseo%20cotizar%20un%20plan%20de%20renting%20o%20fotocopiadora%20Ricoh%20para%20mi%20empresa" target="_blank" rel="noopener" class="advisor-action-btn wa-primary">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-1 1-1 2.3 0 1.4 1 2.7 1.1 2.9.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.3A10 10 0 1 0 12 2z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+              WhatsApp: Cotizar Renting o Compra
+            </a>
+            <a href="https://wa.me/573143804967?text=Hola%20Gladys%2C%20necesito%20comprar%20t%C3%B3neres%20o%20repuestos%20Ricoh" target="_blank" rel="noopener" class="advisor-action-btn">
+              <span>📦 Comprar Tóners / Insumos</span>
+              <span style="font-size:11px; color:var(--steel);">+57 314 380 4967</span>
+            </a>
+            <a href="tel:+573143804967" class="advisor-action-btn" style="border-style:dashed;">
+              <span>📞 Llamada Telefónica Directa</span>
+              <span>Llamar</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- ASESOR 2: JUAN SEBASTIÁN PORTELA (SOPORTE TÉCNICO) -->
+        <div class="advisor-profile-card technical">
+          <div>
+            <div class="advisor-avatar-box">
+              <div class="advisor-avatar sebastian">
+                JP
+                <span class="advisor-online-dot" title="En línea en taller"></span>
+              </div>
+              <div>
+                <div class="advisor-name">Juan Sebastián Portela</div>
+                <div class="advisor-role-tag">Jefe de Soporte Técnico & Taller</div>
+              </div>
+            </div>
+            <p class="advisor-desc">Atención de fallas mecánicas, atascos de papel, códigos de error SC Ricoh, mantenimiento preventivo y servicio técnico de emergencia a domicilio en Neiva.</p>
+          </div>
+
+          <div class="advisor-quick-actions">
+            <a href="https://wa.me/573178204193?text=Hola%20Sebasti%C3%A1n%2C%20tengo%20una%20urgencia%20t%C3%A9cnica%20%2F%20c%C3%B3digo%20de%20error%20en%20mi%20fotocopiadora%20Ricoh" target="_blank" rel="noopener" class="advisor-action-btn wa-primary" style="background:#10b981; border-color:#10b981;">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-1 1-1 2.3 0 1.4 1 2.7 1.1 2.9.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.3A10 10 0 1 0 12 2z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+              WhatsApp: Urgencia / Código SC
+            </a>
+            <a href="https://wa.me/573178204193?text=Hola%20Sebasti%C3%A1n%2C%20deseo%20programar%20un%20mantenimiento%20preventivo%20en%20mi%20sede" target="_blank" rel="noopener" class="advisor-action-btn">
+              <span>🔧 Programar Mantenimiento</span>
+              <span style="font-size:11px; color:var(--steel);">+57 317 820 4193</span>
+            </a>
+            <a href="tel:+573178204193" class="advisor-action-btn" style="border-style:dashed;">
+              <span>📞 Llamada Telefónica Directa</span>
+              <span>Llamar</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="advisor-modal-foot">
+      <span>📍 Sede Central: Avenida La Toma #3A-20, Neiva</span>
+      <span>⏰ Lun–Vie: 7:30am–12:00pm y 2:00pm–5:00pm</span>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(modal);
+
+  function open() {
+    overlay.classList.add('open');
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    const closeBtn = document.getElementById('advisorModalClose');
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function close() {
+    overlay.classList.remove('open');
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  overlay.addEventListener('click', close);
+  const closeBtn = document.getElementById('advisorModalClose');
+  if (closeBtn) closeBtn.addEventListener('click', close);
+
+  // Interceptar clicks en botón flotante y botones con data-advisor-modal
+  document.querySelectorAll('.floating-wa-btn, #floatingAssistantBubble, [data-advisor-modal]').forEach((el) => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      open();
+    });
+  });
+}
+
+/* ============================================================
+   9. BANNER DE INSTALACIÓN PWA (Feature 3)
+   ============================================================ */
+let deferredPrompt = null;
+
+function initPWAInstallBanner() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch((err) => {
+        console.warn('[SyP PWA] SW registration failed:', err);
+      });
+    });
+  }
+
+  const dismissedTime = localStorage.getItem('syp_pwa_dismissed');
+  if (dismissedTime && Date.now() - parseInt(dismissedTime, 10) < 7 * 24 * 60 * 60 * 1000) {
+    return;
+  }
+
+  if (document.getElementById('pwaInstallBanner')) return;
+
+  const banner = document.createElement('aside');
+  banner.id = 'pwaInstallBanner';
+  banner.className = 'pwa-install-banner';
+  banner.setAttribute('aria-label', 'Instalar aplicación web de Fotocopiadora SyP');
+
+  banner.innerHTML = `
+    <div class="pwa-app-icon">
+      <svg viewBox="0 0 40 40" width="28" height="28">
+        <circle cx="20" cy="20" r="14" stroke="#FAFAF8" stroke-width="1.5" fill="none"/>
+        <line x1="20" y1="4" x2="20" y2="36" stroke="#FAFAF8" stroke-width="1.5"/>
+        <line x1="4" y1="20" x2="36" y2="20" stroke="#FAFAF8" stroke-width="1.5"/>
+        <circle cx="20" cy="20" r="8" stroke="#E4002B" stroke-width="2.5" fill="none"/>
+      </svg>
+    </div>
+    <div class="pwa-banner-content">
+      <div class="pwa-banner-title">Instala la App de Fotocopiadora SyP</div>
+      <p class="pwa-banner-desc">Accede al catálogo de fotocopiadoras Ricoh, buscador de errores SC y cotizaciones al instante en tu celular.</p>
+      <div class="pwa-banner-actions">
+        <button type="button" class="pwa-action-btn" id="pwaInstallActionBtn">Instalar App</button>
+        <button type="button" class="pwa-dismiss-btn" id="pwaDismissBtn">Ahora no</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(banner);
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    setTimeout(() => {
+      banner.classList.add('visible');
+    }, 2000);
+  });
+
+  setTimeout(() => {
+    if (!localStorage.getItem('syp_pwa_dismissed') && !banner.classList.contains('visible')) {
+      banner.classList.add('visible');
+    }
+  }, 4000);
+
+  const installBtn = document.getElementById('pwaInstallActionBtn');
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          showToast('¡Gracias por instalar Fotocopiadora SyP! 🎉');
+        }
+        deferredPrompt = null;
+        banner.classList.remove('visible');
+      } else {
+        showToast('Para instalar: En tu navegador pulsa "Compartir" o Menú (⋮) > "Agregar a pantalla de inicio" 📱');
+        setTimeout(() => banner.classList.remove('visible'), 4000);
+      }
+    });
+  }
+
+  const dismissBtn = document.getElementById('pwaDismissBtn');
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', () => {
+      banner.classList.remove('visible');
+      localStorage.setItem('syp_pwa_dismissed', Date.now().toString());
+    });
+  }
+
+  window.addEventListener('appinstalled', () => {
+    banner.classList.remove('visible');
+    showToast('App instalada con éxito 🚀');
+  });
+}
+
+function initFloatingAssistant() {
+  const bubble = document.getElementById('floatingAssistantBubble');
+  if (!bubble) return;
+  setTimeout(() => {
+    bubble.classList.add('show');
+  }, 2500);
+}
+
+function initFAQAccordion() {
+  const faqItems = document.querySelectorAll('.faq-item');
+  faqItems.forEach((item) => {
+    const q = item.querySelector('.faq-question');
+    if (q) {
+      q.addEventListener('click', () => {
+        const isOpen = item.classList.contains('open');
+        faqItems.forEach((i) => i.classList.remove('open'));
+        if (!isOpen) item.classList.add('open');
+      });
+    }
+  });
+}
+
+function initProductCarousel() {
+  // Inicialización suave si se requiere
+}
+
 /* ---------- Init Global ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
@@ -1451,6 +1850,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initProductComparator();
   initRentingCalculator();
   initSmartTroubleshooter();
+  initRicohSCCodeLookup();
+  initAdvisorSelectorModal();
+  initPWAInstallBanner();
   renderTestimonials();
 
   const printQuoteBtn = document.getElementById('printQuoteBtn');
@@ -1461,5 +1863,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 });
+
 
 

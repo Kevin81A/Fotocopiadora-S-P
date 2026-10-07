@@ -404,6 +404,100 @@ const TROUBLESHOOTING_DATA = [
 ];
 
 /* ============================================================
+   DICCIONARIO DE CÓDIGOS DE ERROR SC RICOH (SC Code Lookup)
+   ============================================================ */
+const RICOH_SC_CODES = [
+  {
+    code: 'SC 542',
+    name: 'Falla de Calentamiento en Fusor (Warm-up Error)',
+    category: 'Unidad de Fusión',
+    severity: 'Crítica',
+    meaning: 'El rodillo de calor no alcanza la temperatura de fusión en el tiempo programado tras el encendido.',
+    cause: 'Termistor de fusión sucio/abierto, lámpara halógena de calor quemada o termostato de seguridad disparado por variación de voltaje.',
+    solution: 'Revisión y cambio de termistores, medición de continuidad en lámparas calefactoras y reseteo en Modo de Servicio SP (SP 5-810).',
+    partSuggested: 'Termistor / Rodillo de Calor Ricoh MP 2554 / 301',
+    safetyNotice: '⚠️ No apague y encienda repetidamente la máquina. Requiere reset técnico de seguridad.',
+  },
+  {
+    code: 'SC 320',
+    name: 'Error de Motor Poligonal Láser',
+    category: 'Óptica y Láser',
+    severity: 'Alta',
+    meaning: 'El motor del espejo poligonal de la unidad óptica láser no alcanza la velocidad de rotación especificada.',
+    cause: 'Acumulación de polvo de tóner en el eje del motor poligonal, arnés de cables desconectado o tarjeta controladora de láser defectuosa.',
+    solution: 'Desarme y limpieza técnica del bloque óptico láser, lubricación de eje cerámico o sustitución del motor poligonal.',
+    partSuggested: 'Motor Poligonal Láser Ricoh Serie MP',
+    safetyNotice: 'Requiere manipulación en banco libre de estática y polvo.',
+  },
+  {
+    code: 'SC 401',
+    name: 'Fuga de Alta Tensión en Rodillo de Transferencia',
+    category: 'Transferencia e Imagen',
+    severity: 'Alta',
+    meaning: 'Se detecta fuga de corriente o corto en la polarización del rodillo de transferencia de imagen.',
+    cause: 'Rodillo de transferencia con acumulación de humedad/polvo residual, terminales oxidados o paquete de alta tensión averiado.',
+    solution: 'Limpieza y secado de contactos de alta tensión, recambio de rodillo de transferencia y calibración de polarización SP.',
+    partSuggested: 'Rodillo de Transferencia Ricoh MP 301 / 2554',
+    safetyNotice: 'Verificar humedad relativa del papel en la bandeja.',
+  },
+  {
+    code: 'SC 672',
+    name: 'Error de Comunicación Controladora - Panel Táctil',
+    category: 'Electrónica / BIOS',
+    severity: 'Crítica',
+    meaning: 'La tarjeta controladora principal (Motherboard) no recibe respuesta del panel de control tras el encendido.',
+    cause: 'Módulo de memoria RAM o disco duro trabado, cable plano del panel flojo o firmware desactualizado.',
+    solution: 'Reseteo en frío, limpieza de contactos de memoria RAM con alcohol isopropílico y verificación de voltajes de la fuente.',
+    partSuggested: 'Diagnóstico Electrónico de Planta SyP',
+    safetyNotice: 'Desconecte de la toma eléctrica antes de cualquier inspección.',
+  },
+  {
+    code: 'SC 501',
+    name: 'Falla del Motor Elevador de Bandeja 1',
+    category: 'Alimentación de Papel',
+    severity: 'Media',
+    meaning: 'El sensor de límite superior de la bandeja de papel 1 no se activa cuando el motor eleva el papel.',
+    cause: 'Mecanismo de elevación atascado por clips/grapas, sensor de altura desconectado o piñón elevador roto.',
+    solution: 'Retiro de objetos extraños en fondo de bandeja, lubricación de cremallera y calibración de sensor de elevación.',
+    partSuggested: 'Sensor de Altura / Motor Elevador Ricoh',
+    safetyNotice: 'Retire la resma de papel y verifique el fondo de la bandeja.',
+  },
+  {
+    code: 'SC 899',
+    name: 'Desbordamiento de Buffer de Spooler / Print Server',
+    category: 'Software / Red',
+    severity: 'Baja',
+    meaning: 'La controladora de impresión se bloqueó al recibir un archivo PDF o documento web corrupto por la red.',
+    cause: 'Trabajo de impresión malicioso o incompatible con el driver PCL/PostScript enviado desde un computador de la red.',
+    solution: 'Desconectar cable de red, cancelar cola de impresión en los computadores y reiniciar fotocopiadora con memoria liberada.',
+    partSuggested: 'Actualización de Driver Ricoh PCL6',
+    safetyNotice: 'Desconecte el cable de red LAN antes de reiniciar el equipo.',
+  },
+  {
+    code: 'SC 302',
+    name: 'Fuga de Corriente en Rodillo de Carga (Charge Roller)',
+    category: 'Carga y Revelado',
+    severity: 'Alta',
+    meaning: 'Fuga eléctrica en el rodillo de carga de la unidad de tambor cilindro.',
+    cause: 'Rodillo de carga con perforación superficial por suciedad o desgaste del cilindro OPC.',
+    solution: 'Sustitución de rodillo de carga y cilindro OPC con aspirado de residuos.',
+    partSuggested: 'Cilindro OPC + Rodillo de Carga Ricoh',
+    safetyNotice: 'Evite tocar la superficie del cilindro con las manos desnudas.',
+  },
+  {
+    code: 'SC 552',
+    name: 'Error de Temperatura en Rodillo de Presión',
+    category: 'Unidad de Fusión',
+    severity: 'Crítica',
+    meaning: 'La temperatura del rodillo de presión no se estabiliza durante la operación continua.',
+    cause: 'Termistor de presión desgastado o acumulación de tóner quemado en la superficie sensora.',
+    solution: 'Limpieza de residuos en sensor térmico o reemplazo de termistor secundario con reset de código.',
+    partSuggested: 'Termistor Secundario Ricoh',
+    safetyNotice: 'La unidad fusora alcanza más de 180°C. Deje enfriar antes de manipular.',
+  },
+];
+
+/* ============================================================
    PRUEBA SOCIAL Y CASOS DE ÉXITO EN EL HUILA
    ============================================================ */
 const TESTIMONIALS_DATA = [

@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotización / Pedido Oficial | Fotocopiadora SyP</title>
+<meta name="description" content="Enlace permanente de cotización y pedido en línea de Fotocopiadora SyP - Especialistas Exclusivos Ricoh en Neiva y el Huila.">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* Estilos específicos de cotización y pedido con enlace permanente */
+.doc-viewer-wrap {
+  padding: 40px 0 80px;
+  background: var(--bg-alt, #f8f9fc);
+  min-height: calc(100vh - 200px);
+}
+.doc-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 48px;
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+}
+.doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #eef1f6;
+  padding-bottom: 28px;
+  margin-bottom: 28px;
+  gap: 20px;
+}
+.doc-brand-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.doc-brand-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.doc-brand-title span {
+  color: var(--red, #cf142b);
+}
+.doc-brand-meta {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+.doc-badge-block {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.doc-type-pill {
+  display: inline-block;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+}
+.doc-type-pill.order {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+.doc-code {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  font-family: monospace;
+  letter-spacing: 0.05em;
+}
+.doc-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 28px;
+}
+.doc-info-col h4 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+.doc-info-col p {
+  margin: 3px 0;
+  font-size: 14px;
+  color: #1e293b;
+}
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 28px;
+}
+.doc-table th {
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 14px;
+  text-align: left;
+}
+.doc-table th:last-child,
+.doc-table td:last-child {
+  text-align: right;
+}
+.doc-table th:nth-child(3),
+.doc-table td:nth-child(3),
+.doc-table th:nth-child(4),
+.doc-table td:nth-child(4) {
+  text-align: center;
+}
+.doc-table td {
+  padding: 14px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 14px;
+  color: #334155;
+  vertical-align: middle;
+}
+.doc-item-title {
+  font-weight: 700;
+  color: #0f172a;
+}
+.doc-item-spec {
+  font-size: 12px;
+  color: #64748b;
+}
+.doc-calc-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 32px;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+.doc-qr-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 16px;
+}
+.doc-qr-img {
+  width: 90px;
+  height: 90px;
+  background: #ffffff;
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+.doc-qr-text {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.4;
+}
+.doc-qr-text strong {
+  color: #0f172a;
+  display: block;
+  margin-bottom: 2px;
+}
+.doc-totals-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.doc-totals-table td {
+  padding: 6px 0;
+  font-size: 14px;
+  color: #475569;
+}
+.doc-totals-table td:last-child {
+  text-align: right;
+  font-weight: 600;
+  color: #1e293b;
+}
+.doc-totals-table tr.grand-total td {
+  border-top: 2px solid #0f172a;
+  padding-top: 12px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--red, #cf142b);
+}
+.doc-notes-block {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 18px;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+}
+.doc-actions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+.doc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  border: none;
+}
+.doc-btn-primary {
+  background: var(--red, #cf142b);
+  color: #ffffff;
+}
+.doc-btn-primary:hover {
+  background: #a80f22;
+  transform: translateY(-2px);
+}
+.doc-btn-whatsapp {
+  background: #25d366;
+  color: #ffffff;
+}
+.doc-btn-whatsapp:hover {
+  background: #1eb956;
+  transform: translateY(-2px);
+}
+.doc-btn-secondary {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+.doc-btn-secondary:hover {
+  background: #e2e8f0;
+}
+.doc-btn-pay {
+  background: #0284c7;
+  color: #ffffff;
+}
+.doc-btn-pay:hover {
+  background: #0369a1;
+  transform: translateY(-2px);
+}
+
+/* Modo Impresión Limpio para Descarga de PDF */
+@media print {
+  body {
+    background: #ffffff !important;
+    font-size: 12pt;
+    color: #000000;
+  }
+  .site-header, .site-footer, .doc-actions-bar, .breadcrumb, .toast-container, .cart-drawer {
+    display: none !important;
+  }
+  .doc-viewer-wrap {
+    padding: 0 !important;
+    background: none !important;
+  }
+  .doc-card {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+  .doc-table th {
+    background: #e2e8f0 !important;
+    color: #000000 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .doc-card {
+    padding: 24px 16px;
+  }
+  .doc-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .doc-badge-block {
+    align-items: flex-start;
+    text-align: left;
+  }
+  .doc-info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .doc-calc-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .doc-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== HEADER ===================== -->
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <span class="reg-mark animate">
+        <svg viewBox="0 0 40 40">
+          <g class="layer-black"><circle cx="20" cy="20" r="12"/><line x1="20" y1="2" x2="20" y2="38"/><line x1="2" y1="20" x2="38" y2="20"/></g>
+          <g class="layer-red"><circle cx="20" cy="20" r="7"/></g>
+        </svg>
+      </span>
+      <span>
+        <span class="brand-name">Fotocopiadora <span>SyP</span></span><br>
+        <span class="brand-sub">Neiva · Huila</span>
+      </span>
+    </a>
+
+    <nav class="main-nav">
+      <a href="index.html" data-page="index.html">Inicio</a>
+      <a href="productos.html" data-page="productos.html">Productos</a>
+      <a href="nosotros.html" data-page="nosotros.html">Nosotros</a>
+      <a href="servicio-tecnico.html" data-page="servicio-tecnico.html">Servicio Técnico</a>
+      <a href="contacto.html" data-page="contacto.html">Contacto</a>
+    </nav>
+
+    <div class="header-actions">
+      <div class="account-area" id="accountArea"></div>
+      <button class="cart-btn" data-open-cart>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        Carrito <span class="cart-count">0</span>
+      </button>
+      <button class="nav-toggle" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== DOCUMENT VIEWER ===================== -->
+<main class="doc-viewer-wrap">
+  <div class="container">
+
+    <div id="docLoadingState" style="text-align:center; padding:60px 20px;">
+      <div class="spinner" style="display:inline-block; width:40px; height:40px; border:4px solid rgba(0,0,0,0.1); border-left-color:var(--red); border-radius:50%; animation:spin 1s linear infinite;"></div>
+      <p style="margin-top:16px; color:#64748b; font-weight:600;">Cargando documento comercial oficial...</p>
+    </div>
+
+    <div id="docErrorState" style="display:none; text-align:center; padding:60px 20px; background:#fff; border-radius:12px; max-width:600px; margin:0 auto;">
+      <div style="font-size:48px; margin-bottom:12px;">📄🔍</div>
+      <h2 style="color:#0f172a; margin-bottom:8px;">Documento no encontrado</h2>
+      <p id="docErrorMessage" style="color:#64748b; margin-bottom:24px;">No se encontró una cotización o pedido asociado al código especificado.</p>
+      <a href="productos.html" class="doc-btn doc-btn-primary">Ver Catálogo Ricoh</a>
+    </div>
+
+    <!-- TARJETA PRINCIPAL DEL DOCUMENTO -->
+    <div id="docContainer" class="doc-card" style="display:none;">
+      
+      <!-- ENCABEZADO -->
+      <div class="doc-header">
+        <div class="doc-brand-block">
+          <div class="doc-brand-title">
+            Fotocopiadora <span>SyP</span>
+          </div>
+          <div class="doc-brand-meta">
+            <strong>Especialistas Exclusivos Ricoh en Colombia</strong><br>
+            Calle 8 # 6-45, Centro · Neiva, Huila<br>
+            NIT: 901.482.319-1 · Régimen Simplificado<br>
+            Asesoría Comercial: +57 314 380 4967 (Gladys Solano)<br>
+            Soporte Técnico: +57 317 820 4193 (Juan Sebastián Portela)
+          </div>
+        </div>
+        
+        <div class="doc-badge-block">
+          <span id="docTypeBadge" class="doc-type-pill">Cotización Formal</span>
+          <div id="docCodeDisplay" class="doc-code">COT-2026-XXXX</div>
+          <div id="docStatusBadge" style="font-size:12px; font-weight:700; color:#047857; background:#ecfdf5; padding:4px 10px; border-radius:6px;">
+            Vigente (15 días)
+          </div>
+        </div>
+      </div>
+
+      <!-- METADATOS CLIENTE / EXPEDICIÓN -->
+      <div class="doc-info-grid">
+        <div class="doc-info-col">
+          <h4>Datos del Cliente / Empresa</h4>
+          <p><strong>Nombre / Razón Social:</strong> <span id="docClientName">Cliente General</span></p>
+          <p><strong>NIT / Cédula:</strong> <span id="docClientNit">No especificado</span></p>
+          <p><strong>Teléfono / WhatsApp:</strong> <span id="docClientPhone">No especificado</span></p>
+          <p><strong>Correo Electrónico:</strong> <span id="docClientEmail">No especificado</span></p>
+        </div>
+        <div class="doc-info-col">
+          <h4>Datos de Envío y Fecha</h4>
+          <p><strong>Fecha de Emisión:</strong> <span id="docDate">07/10/2026</span></p>
+          <p><strong>Ciudad / Destino:</strong> <span id="docCity">Neiva, Huila</span></p>
+          <p><strong>Dirección de Entrega:</strong> <span id="docAddress">Entrega local o retiro en tienda</span></p>
+          <p><strong>Método / Estado:</strong> <span id="docPaymentMethod">Cotización en línea</span></p>
+        </div>
+      </div>
+
+      <!-- TABLA DE PRODUCTOS -->
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th style="width:40px;">#</th>
+            <th>Descripción del Producto / Equipo Ricoh</th>
+            <th style="width:80px;">Cant.</th>
+            <th style="width:130px;">Precio Unit.</th>
+            <th style="width:140px;">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody id="docItemsBody">
+          <!-- Se llena dinámicamente -->
+        </tbody>
+      </table>
+
+      <!-- CÁLCULOS Y QR -->
+      <div class="doc-calc-grid">
+        <div class="doc-qr-block">
+          <img id="docQrImage" class="doc-qr-img" src="" alt="Código QR del documento">
+          <div class="doc-qr-text">
+            <strong>Documento Web Verificado</strong>
+            Escanea con cualquier celular para acceder a esta cotización en tiempo real y consultar su validez en el servidor oficial de SyP.
+          </div>
+        </div>
+
+        <div>
+          <table class="doc-totals-table">
+            <tr>
+              <td>Subtotal Neto:</td>
+              <td id="docSubtotal">$0</td>
+            </tr>
+            <tr>
+              <td>IVA (19% Discriminado):</td>
+              <td id="docIva">$0</td>
+            </tr>
+            <tr>
+              <td>Costo de Envío (Neiva):</td>
+              <td id="docShipping">GRATIS</td>
+            </tr>
+            <tr class="grand-total">
+              <td>Total COP:</td>
+              <td id="docTotal">$0</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- TÉRMINOS Y CONDICIONES RICOH -->
+      <div class="doc-notes-block">
+        <strong>Condiciones Comerciales y de Garantía:</strong>
+        <ul style="margin:6px 0 0 16px; padding:0;">
+          <li>Precios expresados en Pesos Colombianos (COP) vigentes por 15 días calendario.</li>
+          <li>Equipos Ricoh cuentan con garantía de 1 año o 50.000 copias e instalación técnica incluida en Neiva.</li>
+          <li>Insumos y tóners 100% genuinos y de alto rendimiento garantizados contra defectos de fábrica.</li>
+          <li>Pagos bancarios a través de Bancolombia, Nequi, Daviplata o PSE.</li>
+        </ul>
+      </div>
+
+      <!-- BARRA DE ACCIONES INTERACTIVAS -->
+      <div class="doc-actions-bar">
+        <button class="doc-btn doc-btn-primary" onclick="window.print()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          Imprimir / Guardar PDF
+        </button>
+
+        <a id="btnDocWhatsapp" href="#" target="_blank" class="doc-btn doc-btn-whatsapp">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.698.075-2.023-.473-1.424-.59-2.34-2.037-2.411-2.131-.071-.094-.577-.768-.577-1.464 0-.696.363-1.037.492-1.178.13-.142.284-.177.378-.177.094 0 .188.001.27.005.086.004.202-.033.316.241.118.283.404.985.44 1.056.036.071.06.154.012.249-.048.094-.072.154-.143.237-.071.083-.149.186-.213.25-.072.071-.147.148-.063.292.083.144.37 1.009 1.096 1.656.936.833 1.724 1.091 1.968 1.212.244.12.387.107.53-.059.144-.167.618-.721.784-.97.166-.248.332-.208.558-.124.226.083 1.433.676 1.679.799.245.124.409.184.469.287.06.103.06.598-.084 1.003z"/></svg>
+          Aprobar vía WhatsApp
+        </a>
+
+        <button class="doc-btn doc-btn-secondary" onclick="copyDocLink()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+          Copiar Enlace Web
+        </button>
+
+        <button id="btnDocPayNow" class="doc-btn doc-btn-pay" style="display:none;" onclick="openPaymentModalFromDoc()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          Pagar en Línea (PSE / Tarjeta)
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand">
+          <span class="reg-mark">
+            <svg viewBox="0 0 40 40">
+              <g class="layer-black"><circle cx="20" cy="20" r="12"/><line x1="20" y1="2" x2="20" y2="38"/><line x1="2" y1="20" x2="38" y2="20"/></g>
+              <g class="layer-red"><circle cx="20" cy="20" r="7"/></g>
+            </svg>
+          </span>
+          <span class="brand-name">Fotocopiadora <span>SyP</span></span>
+        </div>
+        <p>Especialistas exclusivos en la marca Ricoh en Neiva y el departamento del Huila.</p>
+      </div>
+      <div>
+        <h4>Asesores Oficiales</h4>
+        <p style="font-size:13px; color:#94a3b8; margin-bottom:6px;"><strong>Gladys Solano Murcia:</strong> +57 314 380 4967</p>
+        <p style="font-size:13px; color:#94a3b8;"><strong>Juan Sebastián Portela:</strong> +57 317 820 4193</p>
+      </div>
+      <div>
+        <h4>Ubicación</h4>
+        <p style="font-size:13px; color:#94a3b8;">Calle 8 # 6-45, Centro<br>Neiva · Huila · Colombia</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Fotocopiadora SyP. Todos los derechos reservados. Especialistas en Ricoh.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script>
+let currentDocData = null;
+let currentDocType = 'quote'; // 'quote' or 'order'
+
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const quoteCode = urlParams.get('code') || urlParams.get('cotizacion');
+  const orderCode = urlParams.get('order') || urlParams.get('pedido');
+
+  if (orderCode) {
+    currentDocType = 'order';
+    loadOrderDoc(orderCode);
+  } else if (quoteCode) {
+    currentDocType = 'quote';
+    loadQuoteDoc(quoteCode);
+  } else {
+    // Si no hay parámetros, buscar la última cotización guardada localmente
+    const lastQuote = localStorage.getItem("syp_last_quote");
+    if (lastQuote) {
+      try {
+        const parsed = JSON.parse(lastQuote);
+        if (parsed.quote_code) {
+          window.location.href = `cotizacion.html?code=${parsed.quote_code}`;
+          return;
+        }
+      } catch(e) {}
+    }
+    showDocError("No se ha indicado un código de cotización o pedido en la dirección URL.");
+  }
+});
+
+async function loadQuoteDoc(code) {
+  try {
+    const res = await fetch(`http://127.0.0.1:8000/api/v1/quotes/${encodeURIComponent(code)}`);
+    if (!res.ok) {
+      throw new Error("Cotización no encontrada en el sistema.");
+    }
+    const data = await res.json();
+    currentDocData = data;
+    renderDocument({
+      type: 'quote',
+      code: data.quote_code,
+      client_name: data.client_name || 'Cliente Empresarial SyP',
+      client_nit: 'Régimen Comercial',
+      client_email: data.client_email || 'No registrado',
+      client_phone: data.client_phone || 'No registrado',
+      address: 'Entrega local o retiro en tienda (Neiva)',
+      city: 'Neiva, Huila',
+      payment_method: 'Cotización Comercial',
+      status: 'Cotización Vigente (15 días)',
+      status_color: '#047857',
+      status_bg: '#ecfdf5',
+      items: data.items || [],
+      subtotal: data.subtotal,
+      iva: data.iva,
+      total: data.total,
+      date: data.created_at ? new Date(data.created_at).toLocaleDateString('es-CO') : new Date().toLocaleDateString('es-CO')
+    });
+  } catch (err) {
+    showDocError(err.message || "Error al cargar la cotización.");
+  }
+}
+
+async function loadOrderDoc(code) {
+  try {
+    const res = await fetch(`http://127.0.0.1:8000/api/v1/orders/${encodeURIComponent(code)}`);
+    if (!res.ok) {
+      throw new Error("Pedido no encontrado en el sistema.");
+    }
+    const data = await res.json();
+    currentDocData = data;
+    renderDocument({
+      type: 'order',
+      code: data.order_code,
+      client_name: data.client_name,
+      client_nit: data.client_nit || 'No especificado',
+      client_email: data.client_email,
+      client_phone: data.client_phone,
+      address: data.delivery_address,
+      city: data.delivery_city || 'Neiva, Huila',
+      payment_method: data.payment_method,
+      status: `Pedido: ${data.shipping_status || 'En preparación'} (${data.payment_status || 'Aprobado'})`,
+      status_color: data.payment_status === 'Aprobado' ? '#047857' : '#b45309',
+      status_bg: data.payment_status === 'Aprobado' ? '#ecfdf5' : '#fef3c7',
+      items: data.items || [],
+      subtotal: data.subtotal,
+      iva: data.iva,
+      total: data.total,
+      date: data.created_at ? new Date(data.created_at).toLocaleDateString('es-CO') : new Date().toLocaleDateString('es-CO')
+    });
+  } catch (err) {
+    showDocError(err.message || "Error al cargar el pedido.");
+  }
+}
+
+function renderDocument(doc) {
+  document.getElementById("docLoadingState").style.display = "none";
+  document.getElementById("docErrorState").style.display = "none";
+  document.getElementById("docContainer").style.display = "block";
+
+  // Badges
+  const typeBadge = document.getElementById("docTypeBadge");
+  if (doc.type === 'order') {
+    typeBadge.textContent = "Recibo Oficial de Pedido";
+    typeBadge.className = "doc-type-pill order";
+    document.title = `Pedido ${doc.code} | Fotocopiadora SyP`;
+  } else {
+    typeBadge.textContent = "Cotización Formal Ricoh";
+    typeBadge.className = "doc-type-pill";
+    document.title = `Cotización ${doc.code} | Fotocopiadora SyP`;
+  }
+
+  document.getElementById("docCodeDisplay").textContent = doc.code;
+  const statusBadge = document.getElementById("docStatusBadge");
+  statusBadge.textContent = doc.status;
+  statusBadge.style.color = doc.status_color;
+  statusBadge.style.backgroundColor = doc.status_bg;
+
+  // Cliente
+  document.getElementById("docClientName").textContent = doc.client_name;
+  document.getElementById("docClientNit").textContent = doc.client_nit;
+  document.getElementById("docClientPhone").textContent = doc.client_phone;
+  document.getElementById("docClientEmail").textContent = doc.client_email;
+
+  // Entrega y Fecha
+  document.getElementById("docDate").textContent = doc.date;
+  document.getElementById("docCity").textContent = doc.city;
+  document.getElementById("docAddress").textContent = doc.address;
+  document.getElementById("docPaymentMethod").textContent = doc.payment_method;
+
+  // Items
+  const itemsBody = document.getElementById("docItemsBody");
+  itemsBody.innerHTML = "";
+  (doc.items || []).forEach((item, index) => {
+    const tr = document.createElement("tr");
+    const itemSubtotal = (item.price || 0) * (item.quantity || 1);
+    tr.innerHTML = `
+      <td style="color:#94a3b8; font-weight:700;">${index + 1}</td>
+      <td>
+        <div class="doc-item-title">${escapeHtml(item.name || item.title || 'Producto Ricoh')}</div>
+        <div class="doc-item-spec">${escapeHtml(item.spec || 'Especialidad Ricoh')}</div>
+      </td>
+      <td style="font-weight:700;">${item.quantity || 1}</td>
+      <td>$${Number(item.price || 0).toLocaleString('es-CO')}</td>
+      <td style="font-weight:700; color:#0f172a;">$${itemSubtotal.toLocaleString('es-CO')}</td>
+    `;
+    itemsBody.appendChild(tr);
+  });
+
+  // Totales
+  document.getElementById("docSubtotal").textContent = `$${Number(doc.subtotal).toLocaleString('es-CO')}`;
+  document.getElementById("docIva").textContent = `$${Number(doc.iva).toLocaleString('es-CO')}`;
+  document.getElementById("docTotal").textContent = `$${Number(doc.total).toLocaleString('es-CO')}`;
+
+  // QR Code
+  const permalink = window.location.href;
+  const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(permalink)}`;
+  document.getElementById("docQrImage").src = qrApiUrl;
+
+  // WhatsApp Button
+  const waBtn = document.getElementById("btnDocWhatsapp");
+  const waMsg = encodeURIComponent(
+    `👋 Hola Asesores SyP, deseo validar el documento oficial Ricoh *${doc.code}* a nombre de *${doc.client_name}* por un valor total de *$${Number(doc.total).toLocaleString('es-CO')} COP*.\n\n🔗 Ver detalle en línea: ${permalink}`
+  );
+  waBtn.href = `https://wa.me/573143804967?text=${waMsg}`;
+}
+
+function showDocError(msg) {
+  document.getElementById("docLoadingState").style.display = "none";
+  document.getElementById("docContainer").style.display = "none";
+  document.getElementById("docErrorMessage").textContent = msg;
+  document.getElementById("docErrorState").style.display = "block";
+}
+
+function copyDocLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    if (typeof showToast === "function") {
+      showToast("¡Enlace permanente copiado al portapapeles! Listo para compartir.", "success");
+    } else {
+      alert("¡Enlace copiado al portapapeles!");
+    }
+  });
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>

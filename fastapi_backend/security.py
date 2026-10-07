@@ -2,6 +2,7 @@
 Fotocopiadora SyP — Security & JWT Authentication Layer
 """
 import os
+from typing import Optional
 import bcrypt
 import jwt
 from datetime import datetime, timedelta, timezone
@@ -105,3 +106,30 @@ def require_admin(current_user: dict = Security(get_current_user)) -> dict:
             detail="Acceso restringido: Se requieren privilegios de Administrador.",
         )
     return current_user
+
+def get_optional_current_user(credentials: HTTPAuthorizationCredentials = Security(security_scheme)) -> Optional[dict]:
+    if not credentials or not credentials.credentials:
+        return None
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("id")
+        if not user_id:
+            return None
+        with get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, email, name, phone, role, is_active FROM users WHERE id = ?", (user_id,))
+            row = cursor.fetchone()
+            if row and row["is_active"]:
+                return {
+                    "id": row["id"],
+                    "email": row["email"],
+                    "name": row["name"],
+                    "phone": row["phone"],
+                    "role": row["role"],
+                    "is_active": bool(row["is_active"]),
+                }
+    except Exception:
+        return None
+    return None
+

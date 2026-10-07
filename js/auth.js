@@ -339,6 +339,43 @@ const SyP = (() => {
     }
   }
 
+  async function fetchAllAdminOrders() {
+    try {
+      const res = await fetch(`${API_URL}/orders`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {}
+    return [];
+  }
+
+  async function updateOrderStatus(orderId, { payment_status, shipping_status, notes }) {
+    try {
+      const res = await fetch(`${API_URL}/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ payment_status, shipping_status, notes }),
+      });
+      return await res.json();
+    } catch (e) {
+      return { ok: false };
+    }
+  }
+
+  async function fetchAllAdminQuotes() {
+    try {
+      const res = await fetch(`${API_URL}/quotes`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {}
+    return [];
+  }
+
   // Verificación de sesión al inicializar
   if (typeof window !== 'undefined') {
     verifyCurrentSession();
@@ -360,6 +397,9 @@ const SyP = (() => {
     fetchMyRequests,
     fetchAllAdminRequests,
     updateRequestStatus,
+    fetchAllAdminOrders,
+    updateOrderStatus,
+    fetchAllAdminQuotes,
     submitContactForm,
     saveQuoteToServer,
     getRequestsByEmail: (email) => getRequests().filter((r) => r.clienteEmail && r.clienteEmail.toLowerCase() === email.toLowerCase()),

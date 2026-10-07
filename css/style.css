@@ -3710,3 +3710,312 @@ table.admin-table select {
     width: auto;
   }
 }
+
+/* ============================================================
+   BLOQUE 2: E-COMMERCE & CONVERSIÓN EN COLOMBIA (CHECKOUT 3 PASOS)
+   ============================================================ */
+.checkout-modal-container {
+  max-width: 680px;
+  width: 95%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  overflow: hidden;
+  border: 1px solid var(--line, #e2e8f0);
+}
+
+.checkout-steps-bar {
+  display: flex;
+  background: #0f172a;
+  padding: 14px 20px;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.checkout-step-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.checkout-step-item.active {
+  color: #ffffff;
+}
+
+.checkout-step-item.completed {
+  color: #38bdf8;
+}
+
+.step-number {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.checkout-step-item.active .step-number {
+  background: var(--red, #cf142b);
+  color: #ffffff;
+}
+
+.checkout-step-item.completed .step-number {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.checkout-content-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.checkout-step-pane {
+  display: none;
+  animation: fadeInStep 0.25s ease-out;
+}
+
+.checkout-step-pane.active {
+  display: block;
+}
+
+@keyframes fadeInStep {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Formulario de Facturación */
+.checkout-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.checkout-form-full {
+  grid-column: 1 / -1;
+}
+
+.checkout-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkout-input-group label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #475569;
+}
+
+.checkout-input-group input,
+.checkout-input-group select,
+.checkout-input-group textarea {
+  padding: 10px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.checkout-input-group input:focus,
+.checkout-input-group select:focus,
+.checkout-input-group textarea:focus {
+  border-color: var(--red, #cf142b);
+  box-shadow: 0 0 0 3px rgba(207,20,43,0.1);
+}
+
+/* Selector de Métodos de Pago Colombia */
+.payment-methods-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.payment-method-card {
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  position: relative;
+}
+
+.payment-method-card:hover {
+  border-color: #94a3b8;
+  transform: translateY(-2px);
+}
+
+.payment-method-card.selected {
+  border-color: var(--red, #cf142b);
+  background: #fff5f5;
+  box-shadow: 0 4px 12px rgba(207,20,43,0.08);
+}
+
+.payment-method-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.payment-method-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.payment-method-desc {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.payment-detail-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 18px;
+  margin-top: 14px;
+}
+
+.qr-payment-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.qr-code-holder {
+  width: 110px;
+  height: 110px;
+  background: #ffffff;
+  padding: 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-code-holder img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.qr-accounts-info {
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.qr-accounts-info strong {
+  color: #0f172a;
+}
+
+.checkout-totals-summary {
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-top: 18px;
+}
+
+.checkout-totals-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.checkout-totals-row.final {
+  border-top: 1px solid #cbd5e1;
+  padding-top: 8px;
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--red, #cf142b);
+}
+
+.checkout-actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Pantalla de Éxito */
+.order-success-screen {
+  text-align: center;
+  padding: 28px 12px;
+}
+
+.order-success-icon {
+  width: 64px;
+  height: 64px;
+  background: #ecfdf5;
+  color: #059669;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 32px;
+  border: 2px solid #a7f3d0;
+}
+
+.order-success-code {
+  font-family: monospace;
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  background: #f1f5f9;
+  padding: 8px 18px;
+  border-radius: 6px;
+  display: inline-block;
+  margin: 12px 0 18px;
+}
+
+@media (max-width: 640px) {
+  .checkout-steps-bar {
+    padding: 10px 12px;
+  }
+  .checkout-step-item span:not(.step-number) {
+    display: none;
+  }
+  .checkout-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .payment-methods-grid {
+    grid-template-columns: 1fr;
+  }
+  .qr-payment-container {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+

@@ -158,6 +158,33 @@ def init_db():
         )
         """)
 
+        # 8. Tabla de Pedidos y Transacciones de E-commerce
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS orders (
+            id TEXT PRIMARY KEY,
+            order_code TEXT UNIQUE NOT NULL,
+            client_id TEXT,
+            client_name TEXT NOT NULL,
+            client_email TEXT NOT NULL,
+            client_phone TEXT NOT NULL,
+            client_nit TEXT,
+            delivery_address TEXT NOT NULL,
+            delivery_city TEXT NOT NULL DEFAULT 'Neiva, Huila',
+            items_json TEXT NOT NULL,
+            subtotal REAL NOT NULL,
+            iva REAL NOT NULL,
+            total REAL NOT NULL,
+            payment_method TEXT NOT NULL,
+            payment_status TEXT NOT NULL DEFAULT 'Aprobado',
+            shipping_status TEXT NOT NULL DEFAULT 'En preparación',
+            notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (client_id) REFERENCES users(id)
+        )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_orders_code ON orders(order_code)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_orders_email ON orders(client_email)")
+
         print("[SyP DB] Database initialized successfully at:", DB_PATH)
 
 if __name__ == "__main__":

@@ -293,52 +293,21 @@ function buildWhatsAppMessage() {
   return encodeURIComponent(lines.join('\n'));
 }
 
+let checkoutStep = 1;
+let selectedPaymentMethod = 'PSE';
+
 function openCheckoutModal() {
   const overlay = document.getElementById('checkoutOverlay');
   const modal = document.getElementById('checkoutModal');
   if (!overlay || !modal) return;
+  if (state.cart.length === 0) {
+    showToast('Tu carrito está vacío. Agrega productos Ricoh primero.');
+    return;
+  }
 
-  const itemsHTML = state.cart.map((item) => {
-    const p = PRODUCTS.find((x) => x.id === item.id);
-    if (!p) return '';
-    return `
-      <div class="checkout-item">
-        <div class="checkout-item-media">${ICONS[p.cat]}</div>
-        <div class="checkout-item-info">
-          <div class="checkout-item-name">${escapeHTML(p.name)}</div>
-          <div class="checkout-item-sub">x${item.qty} — ${formatCOP(p.price)} c/u</div>
-        </div>
-        <div class="checkout-item-total">${formatCOP(p.price * item.qty)}</div>
-      </div>`;
-  }).join('');
-
-  modal.setAttribute('role', 'dialog');
-  modal.setAttribute('aria-modal', 'true');
-  modal.innerHTML = `
-    <div class="modal-head">
-      <h2>Resumen de pedido / Cotización</h2>
-      <button class="modal-close" id="modalClose" aria-label="Cerrar modal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <p class="modal-note">Revisa los productos seleccionados. Puedes imprimir esta cotización o enviarla directamente por WhatsApp para confirmar despacho.</p>
-      <div class="checkout-items">${itemsHTML}</div>
-      <div class="checkout-total-row">
-        <span>Total estimado</span>
-        <span class="checkout-total-val">${formatCOP(cartTotal())}</span>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-outline" id="printQuoteBtn" title="Imprimir o guardar en PDF">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15" style="margin-right:6px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        Imprimir
-      </button>
-      <a href="https://wa.me/573178204193?text=${buildWhatsAppMessage()}" target="_blank" rel="noopener" class="btn btn-primary" id="confirmWA">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="margin-right:6px;"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-1 1-1 2.3 0 1.4 1 2.7 1.1 2.9.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.3A10 10 0 1 0 12 2z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
-        Enviar a WhatsApp
-      </a>
-    </div>`;
+  checkoutStep = 1;
+  selectedPaymentMethod = 'PSE';
+  renderCheckoutModalContent();
 
   overlay.style.display = 'block';
   modal.style.display = 'flex';
@@ -346,36 +315,533 @@ function openCheckoutModal() {
   requestAnimationFrame(() => {
     overlay.classList.add('open');
     modal.classList.add('open');
-    document.getElementById('modalClose').focus();
+  });
+}
+
+function closeCheckoutModal() {
+  const overlay = document.getElementById('checkoutOverlay');
+  const modal = document.getElementById('checkoutModal');
+  if (!overlay || !modal) return;
+  overlay.classList.remove('open');
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    modal.style.display = 'none';
+  }, 280);
+}
+
+function renderCheckoutModalContent() {
+  const modal = document.getElementById('checkoutModal');
+  if (!modal) return;
+
+  const user = (typeof Auth !== 'undefined' && Auth.getUser) ? Auth.getUser() : null;
+  const total = cartTotal();
+  const subtotal = Math.round(total / 1.19);
+  const iva = total - subtotal;
+  const shipping = total >= 100000 ? 0 : 8000;
+  const grandTotal = total + shipping;
+
+  modal.className = 'modal checkout-modal-container';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+
+  modal.innerHTML = `
+    <!-- HEADER CON INDICADOR DE PASOS -->
+    <div class="checkout-steps-bar">
+      <div class="checkout-step-item ${checkoutStep === 1 ? 'active' : (checkoutStep > 1 ? 'completed' : '')}" onclick="goToCheckoutStep(1)">
+        <span class="step-number">1</span>
+        <span>Revisión de Carrito</span>
+      </div>
+      <div class="checkout-step-item ${checkoutStep === 2 ? 'active' : (checkoutStep > 2 ? 'completed' : '')}" onclick="goToCheckoutStep(2)">
+        <span class="step-number">2</span>
+        <span>Datos y Entrega</span>
+      </div>
+      <div class="checkout-step-item ${checkoutStep === 3 ? 'active' : (checkoutStep > 3 ? 'completed' : '')}" onclick="goToCheckoutStep(3)">
+        <span class="step-number">3</span>
+        <span>Método de Pago</span>
+      </div>
+    </div>
+
+    <!-- CUERPO SEGÚN EL PASO ACTIVO -->
+    <div class="checkout-content-body">
+      
+      <!-- PASO 1: REVISIÓN DE PRODUCTOS -->
+      <div class="checkout-step-pane ${checkoutStep === 1 ? 'active' : ''}" id="stepPane1">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h3 style="font-size:16px; font-weight:800; color:#0f172a; margin:0;">Productos Seleccionados (${cartCount()} items)</h3>
+          <button class="modal-close" onclick="closeCheckoutModal()" aria-label="Cerrar modal" style="background:none; border:none; cursor:pointer;">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="checkout-items" style="max-height:260px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:16px;">
+          ${state.cart.map(item => {
+            const p = PRODUCTS.find(x => x.id === item.id);
+            if (!p) return '';
+            return `
+              <div class="checkout-item" style="display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #f1f5f9;">
+                <div class="checkout-item-media" style="width:42px; height:42px; background:#f8fafc; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">${ICONS[p.cat] || ''}</div>
+                <div style="flex:1;">
+                  <div style="font-weight:700; font-size:13px; color:#0f172a;">${escapeHTML(p.name)}</div>
+                  <div style="font-size:11.5px; color:#64748b;">${formatCOP(p.price)} c/u</div>
+                </div>
+                <div style="font-weight:700; font-size:12px; color:#334155; background:#f1f5f9; padding:3px 8px; border-radius:4px;">x${item.qty}</div>
+                <div style="font-weight:800; font-size:13px; color:#0f172a; min-width:80px; text-align:right;">${formatCOP(p.price * item.qty)}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <div class="checkout-totals-summary">
+          <div class="checkout-totals-row">
+            <span>Subtotal Neto:</span>
+            <span style="font-weight:600;">${formatCOP(subtotal)}</span>
+          </div>
+          <div class="checkout-totals-row">
+            <span>IVA (19% Discriminado):</span>
+            <span style="font-weight:600;">${formatCOP(iva)}</span>
+          </div>
+          <div class="checkout-totals-row">
+            <span>Envío a Domicilio en Neiva:</span>
+            <span style="font-weight:600; color:${shipping === 0 ? '#059669' : '#0f172a'};">${shipping === 0 ? '¡GRATIS!' : formatCOP(shipping)}</span>
+          </div>
+          <div class="checkout-totals-row final">
+            <span>Total a Pagar (COP):</span>
+            <span>${formatCOP(grandTotal)}</span>
+          </div>
+        </div>
+
+        <div class="checkout-actions-row">
+          <button class="btn btn-outline" onclick="closeCheckoutModal()">Seguir Comprando</button>
+          <button class="btn btn-primary" onclick="goToCheckoutStep(2)">Continuar a Datos de Entrega →</button>
+        </div>
+      </div>
+
+      <!-- PASO 2: DATOS DE FACTURACIÓN Y ENVÍO -->
+      <div class="checkout-step-pane ${checkoutStep === 2 ? 'active' : ''}" id="stepPane2">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h3 style="font-size:16px; font-weight:800; color:#0f172a; margin:0;">Datos del Cliente y Dirección en Neiva</h3>
+          <button class="modal-close" onclick="closeCheckoutModal()" aria-label="Cerrar modal" style="background:none; border:none; cursor:pointer;">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+          </button>
+        </div>
+
+        <form id="checkoutDeliveryForm" onsubmit="handleDeliverySubmit(event)" class="checkout-form-grid">
+          <div class="checkout-input-group checkout-form-full">
+            <label for="chkName">Nombre Completo / Razón Social *</label>
+            <input type="text" id="chkName" required value="${user ? escapeHTML(user.name) : ''}" placeholder="Ej: Notaría 2da de Neiva / Carlos Morales">
+          </div>
+
+          <div class="checkout-input-group">
+            <label for="chkNit">Cédula o NIT para Factura *</label>
+            <input type="text" id="chkNit" required placeholder="Ej: 900.123.456-7 ó 12.345.678">
+          </div>
+
+          <div class="checkout-input-group">
+            <label for="chkPhone">Teléfono / Celular (WhatsApp) *</label>
+            <input type="tel" id="chkPhone" required value="${user ? escapeHTML(user.phone) : ''}" placeholder="Ej: 314 380 4967">
+          </div>
+
+          <div class="checkout-input-group checkout-form-full">
+            <label for="chkEmail">Correo Electrónico (Para Factura y Enlace) *</label>
+            <input type="email" id="chkEmail" required value="${user ? escapeHTML(user.email) : ''}" placeholder="correo@empresa.com">
+          </div>
+
+          <div class="checkout-input-group checkout-form-full">
+            <label for="chkAddress">Dirección Exacta de Entrega *</label>
+            <input type="text" id="chkAddress" required placeholder="Ej: Calle 8 # 6-45, Oficina 301, Centro">
+          </div>
+
+          <div class="checkout-input-group">
+            <label for="chkCity">Zona / Barrio en Neiva *</label>
+            <select id="chkCity">
+              <option value="Neiva - Centro">Neiva - Zona Centro</option>
+              <option value="Neiva - Norte / Cándido">Neiva - Norte / Cándido Leguízamo</option>
+              <option value="Neiva - Oriente / Ipanema">Neiva - Oriente / Ipanema / Buganvillas</option>
+              <option value="Neiva - Sur / Canaima">Neiva - Sur / Timanco / Canaima</option>
+              <option value="Neiva - Las Granjas">Neiva - Las Granjas</option>
+              <option value="Huila - Otro Municipio">Otro Municipio del Huila (Envío Nacional)</option>
+            </select>
+          </div>
+
+          <div class="checkout-input-group">
+            <label for="chkNotes">Observaciones de Despacho</label>
+            <input type="text" id="chkNotes" placeholder="Ej: Recibir en portería / timbre 2">
+          </div>
+
+          <div class="checkout-form-full checkout-actions-row">
+            <button type="button" class="btn btn-outline" onclick="goToCheckoutStep(1)">← Volver al Carrito</button>
+            <button type="submit" class="btn btn-primary">Continuar al Pago →</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- PASO 3: MÉTODOS DE PAGO Y CONVERSIÓN -->
+      <div class="checkout-step-pane ${checkoutStep === 3 ? 'active' : ''}" id="stepPane3">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h3 style="font-size:16px; font-weight:800; color:#0f172a; margin:0;">Selecciona tu Método de Pago</h3>
+          <button class="modal-close" onclick="closeCheckoutModal()" aria-label="Cerrar modal" style="background:none; border:none; cursor:pointer;">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="payment-methods-grid">
+          <!-- PSE -->
+          <div class="payment-method-card ${selectedPaymentMethod === 'PSE' ? 'selected' : ''}" onclick="selectPaymentMethod('PSE')">
+            <div class="payment-method-header">
+              <span class="payment-method-title">💳 PSE / Débito Bancario</span>
+              <span style="font-size:10px; font-weight:800; background:#dbeafe; color:#1e40af; padding:2px 6px; border-radius:4px;">COLOMBIA</span>
+            </div>
+            <span class="payment-method-desc">Todos los bancos: Bancolombia, Davivienda, Bogotá, Nu, etc.</span>
+          </div>
+
+          <!-- Transferencia QR Bancolombia / Nequi -->
+          <div class="payment-method-card ${selectedPaymentMethod === 'Transferencia Bancolombia / Nequi' ? 'selected' : ''}" onclick="selectPaymentMethod('Transferencia Bancolombia / Nequi')">
+            <div class="payment-method-header">
+              <span class="payment-method-title">📱 QR Bancolombia / Nequi</span>
+              <span style="font-size:10px; font-weight:800; background:#fef3c7; color:#92400e; padding:2px 6px; border-radius:4px;">INMEDIATO</span>
+            </div>
+            <span class="payment-method-desc">Escanea el código QR de SyP y transfiere al instante sin comisiones.</span>
+          </div>
+
+          <!-- Tarjeta de Crédito -->
+          <div class="payment-method-card ${selectedPaymentMethod === 'Tarjeta de Crédito / Débito' ? 'selected' : ''}" onclick="selectPaymentMethod('Tarjeta de Crédito / Débito')">
+            <div class="payment-method-header">
+              <span class="payment-method-title">💳 Tarjeta Crédito / Débito</span>
+              <span style="font-size:10px; font-weight:800; background:#f1f5f9; color:#334155; padding:2px 6px; border-radius:4px;">VISA/MC</span>
+            </div>
+            <span class="payment-method-desc">Paga hasta en 36 cuotas con Visa, Mastercard o American Express.</span>
+          </div>
+
+          <!-- Cotización Formal Web -->
+          <div class="payment-method-card ${selectedPaymentMethod === 'Cotización Formal' ? 'selected' : ''}" onclick="selectPaymentMethod('Cotización Formal')">
+            <div class="payment-method-header">
+              <span class="payment-method-title">📄 Cotización Web Permanente</span>
+              <span style="font-size:10px; font-weight:800; background:#ecfdf5; color:#065f46; padding:2px 6px; border-radius:4px;">EMPRESAS</span>
+            </div>
+            <span class="payment-method-desc">Genera un enlace web oficial con QR y PDF para aprobación contable.</span>
+          </div>
+        </div>
+
+        <!-- DETALLE DINÁMICO DEL MÉTODO -->
+        <div id="paymentDetailBox" class="payment-detail-box">
+          <!-- Se llena dinámicamente -->
+        </div>
+
+        <div class="checkout-actions-row">
+          <button class="btn btn-outline" onclick="goToCheckoutStep(2)">← Volver a Datos</button>
+          <button id="btnProcessPayment" class="btn btn-primary" onclick="processOrderSubmission()">
+            Confirmar y Pagar ${formatCOP(grandTotal)}
+          </button>
+        </div>
+      </div>
+
+      <!-- PASO 4: CONFIRMACIÓN Y ÉXITO -->
+      <div class="checkout-step-pane ${checkoutStep === 4 ? 'active' : ''}" id="stepPane4">
+        <div id="checkoutSuccessContainer" class="order-success-screen">
+          <!-- Llenado tras crear la orden -->
+        </div>
+      </div>
+
+    </div>
+  `;
+
+  renderPaymentDetailSection();
+}
+
+function goToCheckoutStep(step) {
+  if (step === 2 || step === 3) {
+    if (state.cart.length === 0) {
+      showToast('Tu carrito está vacío.');
+      return;
+    }
+  }
+  if (step === 3) {
+    const form = document.getElementById('checkoutDeliveryForm');
+    if (form && !form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+  }
+  checkoutStep = step;
+  renderCheckoutModalContent();
+}
+
+function handleDeliverySubmit(e) {
+  e.preventDefault();
+  checkoutStep = 3;
+  renderCheckoutModalContent();
+}
+
+function selectPaymentMethod(method) {
+  selectedPaymentMethod = method;
+  renderPaymentDetailSection();
+  
+  // Actualizar clases de selección
+  document.querySelectorAll('.payment-method-card').forEach(card => {
+    card.classList.toggle('selected', card.textContent.includes(method) || (method === 'PSE' && card.textContent.includes('PSE')));
   });
 
-  function closeModal() {
-    overlay.classList.remove('open');
-    modal.classList.remove('open');
-    document.body.style.overflow = '';
-    setTimeout(() => {
-      overlay.style.display = 'none';
-      modal.style.display = 'none';
-    }, 280);
+  const btn = document.getElementById('btnProcessPayment');
+  const total = cartTotal();
+  const shipping = total >= 100000 ? 0 : 8000;
+  const grandTotal = total + shipping;
+
+  if (btn) {
+    if (method === 'Cotización Formal') {
+      btn.textContent = '📄 Generar Cotización Oficial Web';
+    } else {
+      btn.textContent = `Confirmar y Procesar ${formatCOP(grandTotal)}`;
+    }
+  }
+}
+
+function renderPaymentDetailSection() {
+  const box = document.getElementById('paymentDetailBox');
+  if (!box) return;
+
+  if (selectedPaymentMethod === 'PSE') {
+    box.innerHTML = `
+      <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:8px;">Transferencia Segura PSE en Colombia</div>
+      <div class="checkout-form-grid">
+        <div class="checkout-input-group checkout-form-full">
+          <label>Selecciona tu Entidad Bancaria</label>
+          <select id="pseBankSelect">
+            <option value="Bancolombia">Bancolombia</option>
+            <option value="Nequi">Nequi</option>
+            <option value="Davivienda / Daviplata">Davivienda / Daviplata</option>
+            <option value="Banco de Bogotá">Banco de Bogotá</option>
+            <option value="BBVA Colombia">BBVA Colombia</option>
+            <option value="Scotiabank Colpatria">Scotiabank Colpatria</option>
+            <option value="Banco Agrario de Colombia">Banco Agrario de Colombia</option>
+            <option value="Nu Colombia">Nu Colombia (Cuenta Nu)</option>
+            <option value="Lulo Bank">Lulo Bank</option>
+          </select>
+        </div>
+        <div class="checkout-input-group">
+          <label>Tipo de Persona</label>
+          <select id="psePersonType">
+            <option value="Natural">Persona Natural</option>
+            <option value="Juridica">Persona Jurídica (Empresa)</option>
+          </select>
+        </div>
+        <div class="checkout-input-group">
+          <label>Cédula / NIT del Titular</label>
+          <input type="text" id="pseDocNumber" placeholder="Número de documento">
+        </div>
+      </div>
+      <p style="font-size:11px; color:#64748b; margin-top:10px;">🔒 Transacción protegida y cifrada en el sistema de pagos seguros de Colombia.</p>
+    `;
+  } else if (selectedPaymentMethod === 'Transferencia Bancolombia / Nequi') {
+    box.innerHTML = `
+      <div class="qr-payment-container">
+        <div class="qr-code-holder">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Bancolombia-SyP-Neiva-3143804967" alt="QR Bancolombia SyP">
+        </div>
+        <div class="qr-accounts-info">
+          <div style="font-weight:800; color:#0f172a; margin-bottom:4px; font-size:14px;">Cuentas Oficiales de Fotocopiadora SyP:</div>
+          <div><strong>• Bancolombia Ahorros:</strong> 078-456982-12</div>
+          <div><strong>• Nequi / Daviplata:</strong> 314 380 4967 (Gladys Solano)</div>
+          <div><strong>• Llave Transfiya:</strong> 317 820 4193 (Juan Sebastián)</div>
+          <p style="font-size:11px; color:#64748b; margin-top:6px;">Al confirmar, se reservará tu pedido y podrás enviar el comprobante directamente a nuestros asesores por WhatsApp.</p>
+        </div>
+      </div>
+    `;
+  } else if (selectedPaymentMethod === 'Tarjeta de Crédito / Débito') {
+    box.innerHTML = `
+      <div style="font-size:13px; font-weight:700; color:#0f172a; margin-bottom:8px;">Pago con Tarjeta de Crédito o Débito</div>
+      <div class="checkout-form-grid">
+        <div class="checkout-input-group checkout-form-full">
+          <label>Número de Tarjeta</label>
+          <input type="text" id="ccNumber" placeholder="4500 1234 5678 9010" maxlength="19">
+        </div>
+        <div class="checkout-input-group">
+          <label>Fecha Vencimiento (MM/AA)</label>
+          <input type="text" id="ccExpiry" placeholder="12/28" maxlength="5">
+        </div>
+        <div class="checkout-input-group">
+          <label>Código de Seguridad (CVV)</label>
+          <input type="password" id="ccCvv" placeholder="123" maxlength="4">
+        </div>
+      </div>
+    `;
+  } else if (selectedPaymentMethod === 'Cotización Formal') {
+    box.innerHTML = `
+      <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:6px; padding:12px; font-size:13px; color:#065f46;">
+        <strong>📄 Generación de Enlace Web de Cotización</strong><br>
+        Se generará un documento formal con código permanente (ej: <code>COT-2026-XXXX</code>) que podrás enviar por correo, compartir en comités de compras o imprimir en PDF con validez de 15 días.
+      </div>
+    `;
+  }
+}
+
+async function processOrderSubmission() {
+  const btn = document.getElementById('btnProcessPayment');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Procesando en el servidor...';
   }
 
-  document.getElementById('modalClose').addEventListener('click', closeModal);
-  document.getElementById('printQuoteBtn').addEventListener('click', () => {
-    window.print();
+  // Extraer datos del formulario
+  const name = document.getElementById('chkName')?.value || 'Cliente General';
+  const nit = document.getElementById('chkNit')?.value || '';
+  const phone = document.getElementById('chkPhone')?.value || '';
+  const email = document.getElementById('chkEmail')?.value || 'ventas@fotocopiadorasyp.com';
+  const address = document.getElementById('chkAddress')?.value || 'Entrega local Neiva';
+  const city = document.getElementById('chkCity')?.value || 'Neiva, Huila';
+  const notes = document.getElementById('chkNotes')?.value || '';
+
+  const total = cartTotal();
+  const subtotal = Math.round(total / 1.19);
+  const iva = total - subtotal;
+  const shipping = total >= 100000 ? 0 : 8000;
+  const grandTotal = total + shipping;
+
+  const items = state.cart.map(i => {
+    const p = PRODUCTS.find(x => x.id === i.id);
+    return {
+      id: i.id,
+      name: p ? p.name : 'Producto Ricoh',
+      spec: p ? p.spec : '',
+      price: p ? p.price : 0,
+      quantity: i.qty
+    };
   });
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-  
-  document.getElementById('confirmWA').addEventListener('click', () => {
-    setTimeout(() => {
+
+  try {
+    if (selectedPaymentMethod === 'Cotización Formal') {
+      // Guardar cotización en la API
+      const res = await fetch('http://127.0.0.1:8000/api/v1/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_name: name,
+          client_email: email,
+          client_phone: phone,
+          items_json: JSON.stringify(items),
+          subtotal: subtotal,
+          iva: iva,
+          total: grandTotal,
+          notes: notes
+        })
+      });
+
+      if (!res.ok) throw new Error('Error al registrar la cotización en el servidor.');
+      const data = await res.json();
+      
+      localStorage.setItem("syp_last_quote", JSON.stringify(data));
       state.cart = [];
       saveCartToStorage(state.cart);
       renderCart();
       updateCartCount();
-      closeModal();
-      showToast('¡Pedido enviado a WhatsApp! 🎉');
-    }, 400);
-  });
+
+      renderOrderSuccess({
+        isQuote: true,
+        code: data.quote_code,
+        name: name,
+        total: grandTotal,
+        url: `/cotizacion.html?code=${data.quote_code}`,
+        phone: phone
+      });
+
+    } else {
+      // Guardar pedido en la API
+      const res = await fetch('http://127.0.0.1:8000/api/v1/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(typeof Auth !== 'undefined' && Auth.getToken() ? { 'Authorization': `Bearer ${Auth.getToken()}` } : {})
+        },
+        body: JSON.stringify({
+          client_name: name,
+          client_email: email,
+          client_phone: phone,
+          client_nit: nit,
+          delivery_address: address,
+          delivery_city: city,
+          items_json: JSON.stringify(items),
+          subtotal: subtotal,
+          iva: iva,
+          total: grandTotal,
+          payment_method: selectedPaymentMethod,
+          payment_status: selectedPaymentMethod === 'Transferencia Bancolombia / Nequi' ? 'En Verificación' : 'Aprobado',
+          notes: notes
+        })
+      });
+
+      if (!res.ok) throw new Error('Error al procesar el pedido en el servidor.');
+      const data = await res.json();
+
+      state.cart = [];
+      saveCartToStorage(state.cart);
+      renderCart();
+      updateCartCount();
+
+      renderOrderSuccess({
+        isQuote: false,
+        code: data.order_code,
+        name: name,
+        total: grandTotal,
+        url: `/cotizacion.html?order=${data.order_code}`,
+        phone: phone,
+        method: selectedPaymentMethod
+      });
+    }
+
+  } catch (err) {
+    showToast(err.message || 'Error en la conexión. Intenta nuevamente.', 'error');
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Reintentar';
+    }
+  }
 }
+
+function renderOrderSuccess(info) {
+  checkoutStep = 4;
+  const pane = document.getElementById('stepPane4');
+  const container = document.getElementById('checkoutSuccessContainer');
+  if (!pane || !container) return;
+
+  document.querySelectorAll('.checkout-step-pane').forEach(p => p.classList.remove('active'));
+  pane.classList.add('active');
+
+  const permalink = window.location.origin + info.url;
+  const waMessage = encodeURIComponent(
+    `👋 Hola Asesores SyP, acabo de registrar ${info.isQuote ? 'la cotización' : 'el pedido'} *${info.code}* a nombre de *${info.name}* por *$${Number(info.total).toLocaleString('es-CO')} COP*.\n\n🔗 Enlace oficial: ${permalink}`
+  );
+
+  container.innerHTML = `
+    <div class="order-success-icon">✓</div>
+    <h2 style="font-size:22px; font-weight:800; color:#0f172a; margin:0 0 6px;">
+      ${info.isQuote ? '¡Cotización Oficial Generada!' : '¡Pedido Registrado con Éxito!'}
+    </h2>
+    <p style="font-size:14px; color:#64748b; margin:0 0 12px;">
+      ${info.isQuote 
+        ? 'Se ha creado el documento comercial con enlace permanente y código QR.'
+        : 'Tu compra ha sido registrada en el sistema de Fotocopiadora SyP y está lista para despacho en Neiva.'}
+    </p>
+
+    <div class="order-success-code">${info.code}</div>
+
+    <div style="display:flex; flex-direction:column; gap:10px; max-width:400px; margin:16px auto 0;">
+      <a href="${info.url}" class="btn btn-primary" style="text-align:center; padding:12px 18px; font-weight:700;">
+        📄 Ver Documento / Factura en Línea y Descargar PDF
+      </a>
+      <a href="https://wa.me/573143804967?text=${waMessage}" target="_blank" class="btn btn-outline" style="background:#25d366; color:#fff; border-color:#25d366; text-align:center; padding:12px 18px; font-weight:700;">
+        💬 Notificar a Asesores por WhatsApp
+      </a>
+      <button class="btn btn-outline" onclick="navigator.clipboard.writeText('${permalink}'); showToast('¡Enlace copiado al portapapeles!');" style="text-align:center; padding:10px;">
+        📋 Copiar Enlace Permanente
+      </button>
+      <button class="btn btn-outline" onclick="closeCheckoutModal()" style="text-align:center; padding:10px; border:none; color:#64748b;">
+        Cerrar y Continuar Navegando
+      </button>
+    </div>
+  `;
+}
+
 
 /* ---------- Compartir producto (Web Share API) ---------- */
 function shareProduct(id) {

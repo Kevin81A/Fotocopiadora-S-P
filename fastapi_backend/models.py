@@ -109,9 +109,64 @@ class QuoteCreate(BaseModel):
     total: float
     notes: Optional[str] = None
 
+class QuoteResponse(BaseModel):
+    id: str
+    quote_code: str
+    client_name: Optional[str] = None
+    client_email: Optional[str] = None
+    client_phone: Optional[str] = None
+    items_json: str
+    subtotal: float
+    iva: float
+    total: float
+    notes: Optional[str] = None
+    created_at: Optional[str] = None
+
+# --- Orders & E-Commerce Schemas ---
+class OrderCreate(BaseModel):
+    client_name: str = Field(..., min_length=2, max_length=150)
+    client_email: EmailStr
+    client_phone: str = Field(..., min_length=7, max_length=25)
+    client_nit: Optional[str] = None
+    delivery_address: str = Field(..., min_length=5, max_length=250)
+    delivery_city: str = "Neiva, Huila"
+    items_json: str
+    subtotal: float = Field(..., gt=0)
+    iva: float = Field(..., ge=0)
+    total: float = Field(..., gt=0)
+    payment_method: str = Field(..., pattern="^(PSE|Tarjeta de Crédito / Débito|Transferencia Bancolombia / Nequi|Crédito Empresarial 30 Días|WhatsApp Directo)$")
+    payment_status: Optional[str] = "Aprobado"
+    notes: Optional[str] = None
+
+class OrderStatusUpdate(BaseModel):
+    payment_status: Optional[str] = Field(None, pattern="^(Aprobado|Pendiente|Rechazado|En Verificación)$")
+    shipping_status: Optional[str] = Field(None, pattern="^(En preparación|Despachado|En camino|Entregado|Cancelado)$")
+    notes: Optional[str] = None
+
+class OrderResponse(BaseModel):
+    id: str
+    order_code: str
+    client_id: Optional[str] = None
+    client_name: str
+    client_email: str
+    client_phone: str
+    client_nit: Optional[str] = None
+    delivery_address: str
+    delivery_city: str
+    items_json: str
+    subtotal: float
+    iva: float
+    total: float
+    payment_method: str
+    payment_status: str
+    shipping_status: str
+    notes: Optional[str] = None
+    created_at: Optional[str] = None
+
 class CounterReportCreate(BaseModel):
     equipment_model: str
     mono_counter: int = Field(..., ge=0)
     color_counter: int = Field(0, ge=0)
     report_month: str
     notes: Optional[str] = None
+

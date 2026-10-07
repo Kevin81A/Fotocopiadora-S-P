@@ -13,6 +13,7 @@ from security import (
     verify_password,
     create_access_token,
     get_current_user,
+    get_optional_current_user,
     require_admin,
 )
 from models import (
@@ -28,6 +29,10 @@ from models import (
     MaintenanceStatusUpdate,
     ContactMessageCreate,
     QuoteCreate,
+    QuoteResponse,
+    OrderCreate,
+    OrderStatusUpdate,
+    OrderResponse,
     CounterReportCreate,
 )
 
@@ -62,6 +67,10 @@ def health_check():
         requests_cnt = cursor.fetchone()["cnt"]
         cursor.execute("SELECT COUNT(*) as cnt FROM users")
         users_cnt = cursor.fetchone()["cnt"]
+        cursor.execute("SELECT COUNT(*) as cnt FROM orders")
+        orders_cnt = cursor.fetchone()["cnt"]
+        cursor.execute("SELECT COUNT(*) as cnt FROM quotes")
+        quotes_cnt = cursor.fetchone()["cnt"]
     
     return {
         "status": "online",
@@ -72,6 +81,8 @@ def health_check():
             "active_products": products_cnt,
             "maintenance_requests": requests_cnt,
             "registered_users": users_cnt,
+            "orders": orders_cnt,
+            "quotes": quotes_cnt,
         }
     }
 
@@ -468,7 +479,12 @@ def save_quotation(payload: QuoteCreate):
             payload.client_phone or "", payload.items_json, payload.subtotal, payload.iva,
             payload.total, payload.notes or ""
         ))
-        return {"ok": True, "quote_code": quote_code, "id": quote_id}
+        return {
+            "ok": True,
+            "quote_code": quote_code,
+            "id": quote_id,
+            "permalink_url": f"/cotizacion.html?code={quote_code}"
+        }
 
 @app.get("/api/v1/quotes/{quote_code}")
 def get_quotation_by_code(quote_code: str):
@@ -482,12 +498,197 @@ def get_quotation_by_code(quote_code: str):
         return {
             "quote_code": row["quote_code"],
             "client_name": row["client_name"],
+            "client_email": row["client_email"],
+            "client_phone": row["client_phone"],
             "items": json.loads(row["items_json"]),
             "subtotal": row["subtotal"],
             "iva": row["iva"],
             "total": row["total"],
+            "notes": row["notes"],
             "created_at": str(row["created_at"]),
         }
+
+@app.get("/api/v1/quotes", response_model=List[QuoteResponse])
+def list_all_quotes(admin_user: dict = Depends(require_admin)):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM quotes ORDER BY created_at DESC")
+        rows = cursor.fetchall()
+        return [
+            QuoteResponse(
+                id=r["id"],
+                quote_code=r["quote_code"],
+                client_name=r["client_name"],
+                client_email=r["client_email"],
+                client_phone=r["client_phone"],
+                items_json=r["items_json"],
+                subtotal=r["subtotal"],
+                iva=r["iva"],
+                total=r["total"],
+                notes=r["notes"],
+                created_at=str(r["created_at"])
+            ) for r in rows
+        ]
+
+# ============================================================
+# 8. ORDERS & E-COMMERCE ENDPOINTS
+# ============================================================
+@app.post("/api/v1/orders", status_code=status.HTTP_201_CREATED)
+def create_order(
+    payload: OrderCreate,
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
+    order_code = f"ORD-2026-{uuid.uuid4().hex[:6].upper()}"
+    order_id = f"ord_{uuid.uuid4().hex[:10]}"
+    client_id = current_user["id"] if current_user else None
+    
+    # Validar formato items_json
+    try:
+        items = json.loads(payload.items_json)
+        if not isinstance(items, list) or len(items) == 0:
+            raise ValueError("Items must be a non-empty list.")
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Formato inválido de productos en el pedido: {str(e)}"
+        )
+
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        INSERT INTO orders (
+            id, order_code, client_id, client_name, client_email, client_phone, client_nit,
+            delivery_address, delivery_city, items_json, subtotal, iva, total,
+            payment_method, payment_status, shipping_status, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'En preparación', ?)
+        """, (
+            order_id, order_code, client_id, payload.client_name.strip(), payload.client_email.lower().strip(),
+            payload.client_phone.strip(), payload.client_nit.strip() if payload.client_nit else None,
+            payload.delivery_address.strip(), payload.delivery_city.strip(), payload.items_json,
+            payload.subtotal, payload.iva, payload.total, payload.payment_method,
+            payload.payment_status or "Aprobado", payload.notes.strip() if payload.notes else None
+        ))
+        
+        return {
+            "ok": True,
+            "order_code": order_code,
+            "id": order_id,
+            "payment_status": payload.payment_status or "Aprobado",
+            "shipping_status": "En preparación",
+            "receipt_url": f"/cotizacion.html?order={order_code}",
+            "message": "¡Pedido registrado exitosamente en el sistema de Fotocopiadora SyP!"
+        }
+
+@app.get("/api/v1/orders/{order_code}")
+def get_order_by_code(order_code: str):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM orders WHERE order_code = ? OR id = ?", (order_code, order_code))
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Pedido no encontrado.")
+        
+        return {
+            "id": row["id"],
+            "order_code": row["order_code"],
+            "client_name": row["client_name"],
+            "client_email": row["client_email"],
+            "client_phone": row["client_phone"],
+            "client_nit": row["client_nit"],
+            "delivery_address": row["delivery_address"],
+            "delivery_city": row["delivery_city"],
+            "items": json.loads(row["items_json"]),
+            "subtotal": row["subtotal"],
+            "iva": row["iva"],
+            "total": row["total"],
+            "payment_method": row["payment_method"],
+            "payment_status": row["payment_status"],
+            "shipping_status": row["shipping_status"],
+            "notes": row["notes"],
+            "created_at": str(row["created_at"]),
+        }
+
+@app.get("/api/v1/orders/user/my")
+def get_my_orders(current_user: dict = Depends(get_current_user)):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT * FROM orders 
+        WHERE client_id = ? OR client_email = ?
+        ORDER BY created_at DESC
+        """, (current_user["id"], current_user["email"]))
+        rows = cursor.fetchall()
+        
+        result = []
+        for r in rows:
+            result.append({
+                "id": r["id"],
+                "order_code": r["order_code"],
+                "client_name": r["client_name"],
+                "total": r["total"],
+                "payment_method": r["payment_method"],
+                "payment_status": r["payment_status"],
+                "shipping_status": r["shipping_status"],
+                "created_at": str(r["created_at"]),
+                "items_count": len(json.loads(r["items_json"]))
+            })
+        return result
+
+@app.get("/api/v1/orders", response_model=List[OrderResponse])
+def list_all_orders(admin_user: dict = Depends(require_admin)):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM orders ORDER BY created_at DESC")
+        rows = cursor.fetchall()
+        return [
+            OrderResponse(
+                id=r["id"],
+                order_code=r["order_code"],
+                client_id=r["client_id"],
+                client_name=r["client_name"],
+                client_email=r["client_email"],
+                client_phone=r["client_phone"],
+                client_nit=r["client_nit"],
+                delivery_address=r["delivery_address"],
+                delivery_city=r["delivery_city"],
+                items_json=r["items_json"],
+                subtotal=r["subtotal"],
+                iva=r["iva"],
+                total=r["total"],
+                payment_method=r["payment_method"],
+                payment_status=r["payment_status"],
+                shipping_status=r["shipping_status"],
+                notes=r["notes"],
+                created_at=str(r["created_at"])
+            ) for r in rows
+        ]
+
+@app.patch("/api/v1/orders/{order_id}/status")
+def update_order_status(
+    order_id: str,
+    payload: OrderStatusUpdate,
+    admin_user: dict = Depends(require_admin)
+):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM orders WHERE id = ? OR order_code = ?", (order_id, order_id))
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Pedido no encontrado.")
+        
+        target_id = row["id"]
+        
+        if payload.payment_status and payload.shipping_status:
+            cursor.execute("UPDATE orders SET payment_status = ?, shipping_status = ? WHERE id = ?", (payload.payment_status, payload.shipping_status, target_id))
+        elif payload.payment_status:
+            cursor.execute("UPDATE orders SET payment_status = ? WHERE id = ?", (payload.payment_status, target_id))
+        elif payload.shipping_status:
+            cursor.execute("UPDATE orders SET shipping_status = ? WHERE id = ?", (payload.shipping_status, target_id))
+            
+        if payload.notes:
+            cursor.execute("UPDATE orders SET notes = ? WHERE id = ?", (payload.notes, target_id))
+            
+        return {"ok": True, "message": "Estado del pedido actualizado con éxito."}
 
 @app.post("/api/v1/counters")
 def submit_counter_report(payload: CounterReportCreate, current_user: dict = Depends(get_current_user)):
@@ -507,3 +708,4 @@ def submit_counter_report(payload: CounterReportCreate, current_user: dict = Dep
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
+

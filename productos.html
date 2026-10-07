@@ -32,6 +32,109 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+<!-- Schema.org Datos Estructurados para Google (Catálogo Ricoh Neiva) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Catálogo Oficial Ricoh — Fotocopiadora SyP Neiva",
+  "description": "Fotocopiadoras multifuncionales, impresoras láser, tóners originales y repuestos Ricoh con servicio técnico y garantía en Neiva, Huila.",
+  "url": "https://fotocopiadorasyp.com/productos.html",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "item": {
+        "@type": "Product",
+        "name": "Multifuncional Láser Ricoh MP 2554",
+        "image": "https://fotocopiadorasyp.com/img/prod_copier.jpg",
+        "description": "Fotocopiadora multifuncional 35 ppm, dúplex automático, escáner a color y conectividad de red Gigabit para empresas en Neiva.",
+        "brand": { "@type": "Brand", "name": "Ricoh" },
+        "offers": {
+          "@type": "Offer",
+          "price": "3400000",
+          "priceCurrency": "COP",
+          "availability": "https://schema.org/InStock",
+          "seller": { "@type": "LocalBusiness", "name": "Fotocopiadora SyP" }
+        }
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "item": {
+        "@type": "Product",
+        "name": "Multifuncional Láser B/N Ricoh MP 301 SPF",
+        "image": "https://fotocopiadorasyp.com/img/prod_copier.jpg",
+        "description": "Equipo compacto de alta velocidad 31 ppm, copia, impresión y escáner dúplex ideal para oficinas y despachos.",
+        "brand": { "@type": "Brand", "name": "Ricoh" },
+        "offers": {
+          "@type": "Offer",
+          "price": "1850000",
+          "priceCurrency": "COP",
+          "availability": "https://schema.org/InStock",
+          "seller": { "@type": "LocalBusiness", "name": "Fotocopiadora SyP" }
+        }
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "item": {
+        "@type": "Product",
+        "name": "Multifuncional Color Ricoh MP C306 HD",
+        "image": "https://fotocopiadorasyp.com/img/prod_copier.jpg",
+        "description": "Impresión y copiado láser a color de alta definición 30 ppm con pantalla táctil inteligente de 10.1 pulgadas.",
+        "brand": { "@type": "Brand", "name": "Ricoh" },
+        "offers": {
+          "@type": "Offer",
+          "price": "2600000",
+          "priceCurrency": "COP",
+          "availability": "https://schema.org/InStock",
+          "seller": { "@type": "LocalBusiness", "name": "Fotocopiadora SyP" }
+        }
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "item": {
+        "@type": "Product",
+        "name": "Multifuncional Láser Ricoh MP 5054 Industrial",
+        "image": "https://fotocopiadorasyp.com/img/prod_copier.jpg",
+        "description": "Multifuncional de alto volumen 50 ppm, disco duro 320GB y ciclo de hasta 50.000 páginas mensuales.",
+        "brand": { "@type": "Brand", "name": "Ricoh" },
+        "offers": {
+          "@type": "Offer",
+          "price": "4900000",
+          "priceCurrency": "COP",
+          "availability": "https://schema.org/InStock",
+          "seller": { "@type": "LocalBusiness", "name": "Fotocopiadora SyP" }
+        }
+      }
+    },
+    {
+      "@type": "ListItem",
+      "position": 5,
+      "item": {
+        "@type": "Product",
+        "name": "Tóner Negro Ricoh MP 2554 / 3054 / 3554",
+        "image": "https://fotocopiadorasyp.com/img/prod_toner.jpg",
+        "description": "Cartucho de tóner Ricoh original y homologado con rendimiento de 24.000 páginas para serie MP.",
+        "brand": { "@type": "Brand", "name": "Ricoh" },
+        "offers": {
+          "@type": "Offer",
+          "price": "78000",
+          "priceCurrency": "COP",
+          "availability": "https://schema.org/InStock",
+          "seller": { "@type": "LocalBusiness", "name": "Fotocopiadora SyP" }
+        }
+      }
+    }
+  ]
+}
+</script>
+
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -383,6 +486,11 @@
 
     initCompatFinder();
     applyFilters(false);
+
+    // Deep-linking directo si la URL viene con ?id=sp-2554c o similar
+    if (typeof checkAutoOpenProductFromURL === 'function') {
+      checkAutoOpenProductFromURL();
+    }
   });
 </script>
 </body>

@@ -1,16 +1,19 @@
 # =========================================================
 # Robots.txt — Fotocopiadora SyP (Neiva, Huila)
+# Sitio oficial de venta, renting y servicio técnico Ricoh
 # =========================================================
 
 User-agent: *
 Allow: /
 Allow: /index.html
 Allow: /productos.html
+Allow: /productos.html?id=*
 Allow: /servicio-tecnico.html
 Allow: /nosotros.html
 Allow: /contacto.html
 Allow: /login.html
 Allow: /cotizacion.html
+Allow: /manifest.json
 Allow: /css/
 Allow: /js/
 Allow: /img/
@@ -19,5 +22,23 @@ Allow: /img/
 Disallow: /admin.html
 Disallow: /fastapi_backend/
 Disallow: /api/
+Disallow: /backend/
 
+# Rastreadores Sociales para Previsualización (WhatsApp, Meta, Twitter, LinkedIn)
+User-agent: WhatsApp
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+# Declaración del Mapa del Sitio
 Sitemap: https://fotocopiadorasyp.com/sitemap.xml

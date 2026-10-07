@@ -1547,6 +1547,20 @@ function openQuickView(productId) {
   const waQuoteText = encodeURIComponent(`Hola Fotocopiadora SyP, me interesa cotizar la ficha técnica de: ${p.name} (${formatCOP(p.price)}). ¿Tienen unidades en Neiva?`);
   const waUrl = `https://wa.me/573178204193?text=${waQuoteText}`;
 
+  const currentUrl = new URL(window.location.href);
+  currentUrl.searchParams.set('id', p.id);
+  const shareHref = currentUrl.toString();
+
+  // Guardar título original y sincronizar URL en el navegador
+  if (!window._defaultPageTitle) window._defaultPageTitle = document.title;
+  document.title = `${p.name} | Fotocopiadora SyP Neiva`;
+  if (window.history && window.history.replaceState) {
+    window.history.replaceState({ productId: p.id }, '', shareHref);
+  }
+
+  const shareTextWa = encodeURIComponent(`Hola, te comparto la ficha técnica de esta fotocopiadora/insumo Ricoh en SyP Neiva:\n📌 ${p.name} (${formatCOP(p.price)})\n👉 ${shareHref}`);
+  const waShareLink = `https://api.whatsapp.com/send?text=${shareTextWa}`;
+
   modal.innerHTML = `
     <div class="quickview-head">
       <div>
@@ -1600,6 +1614,22 @@ function openQuickView(productId) {
             Cotizar por WhatsApp
           </a>
         </div>
+
+        <!-- BARRA DE COMPARTIR Y DEEP LINKING (Feature 4 - SEO & Social) -->
+        <div class="quickview-share-bar">
+          <span class="quickview-share-label">Compartir equipo:</span>
+          <div class="quickview-share-actions">
+            <a href="${waShareLink}" target="_blank" rel="noopener" class="btn-share-wa" title="Enviar ficha técnica por WhatsApp">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-1 1-1 2.3 0 1.4 1 2.7 1.1 2.9.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.3A10 10 0 1 0 12 2z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+              WhatsApp
+            </a>
+            <button type="button" class="btn-share-copy" id="quickViewCopyShareBtn" title="Copiar enlace directo indexable">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copiar Enlace
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   `;
@@ -1619,10 +1649,50 @@ function openQuickView(productId) {
       overlay.classList.remove('open');
       modal.classList.remove('open');
       document.body.style.overflow = '';
+
+      // Restaurar URL limpia sin el ID y título original
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('id');
+      cleanUrl.searchParams.delete('p');
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, '', cleanUrl.pathname + (cleanUrl.search ? cleanUrl.search : ''));
+      }
+      if (window._defaultPageTitle) {
+        document.title = window._defaultPageTitle;
+      }
+
       setTimeout(() => {
         overlay.style.display = 'none';
         modal.style.display = 'none';
       }, 280);
+    });
+  }
+
+  // Copiar link al portapapeles
+  const copyShareBtn = document.getElementById('quickViewCopyShareBtn');
+  if (copyShareBtn) {
+    copyShareBtn.addEventListener('click', async () => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(shareHref);
+        } else {
+          const tempInput = document.createElement('input');
+          tempInput.value = shareHref;
+          document.body.appendChild(tempInput);
+          tempInput.select();
+          document.execCommand('copy');
+          document.body.removeChild(tempInput);
+        }
+        showToast('¡Enlace del producto copiado al portapapeles! 📋');
+        copyShareBtn.innerHTML = `✓ Copiado`;
+        setTimeout(() => {
+          if (copyShareBtn) {
+            copyShareBtn.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar Enlace`;
+          }
+        }, 2200);
+      } catch (err) {
+        showToast('Enlace listo: ' + shareHref);
+      }
     });
   }
 
@@ -1642,6 +1712,31 @@ function openQuickView(productId) {
       showToast(`${bObj ? bObj.name : 'Insumo'} añadido ✓`);
     });
   });
+}
+
+/* ============================================================
+   DEEP-LINKING AUTOMÁTICO: ABRIR PRODUCTO DESDE LA URL
+   ============================================================ */
+function checkAutoOpenProductFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const targetId = params.get('id') || params.get('p') || params.get('producto');
+  if (!targetId || typeof PRODUCTS === 'undefined') return;
+
+  const found = PRODUCTS.find((p) => p.id === targetId);
+  if (!found) return;
+
+  // Esperar a que el DOM pinte el catálogo
+  setTimeout(() => {
+    openQuickView(targetId);
+
+    // Scroll y realce visual en la tarjeta
+    const card = document.querySelector(`[data-quickview="${targetId}"]`)?.closest('.product-card');
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('product-card-highlight');
+      setTimeout(() => card.classList.remove('product-card-highlight'), 3000);
+    }
+  }, 180);
 }
 
 /* ============================================================
@@ -2728,6 +2823,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNetworkStatusListener();
   initBackToTopButton();
   renderTestimonials();
+  checkAutoOpenProductFromURL();
 
   const printQuoteBtn = document.getElementById('printQuoteBtn');
   if (printQuoteBtn) {

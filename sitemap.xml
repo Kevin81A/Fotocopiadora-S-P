@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- ================= PÁGINAS PRINCIPALES ================= -->
   <url>
     <loc>https://fotocopiadorasyp.com/</loc>
     <lastmod>2026-10-07</lastmod>
@@ -12,6 +14,7 @@
       <image:caption>Equipos multifuncionales e impresoras Ricoh en Neiva, Huila</image:caption>
     </image:image>
   </url>
+
   <url>
     <loc>https://fotocopiadorasyp.com/productos.html</loc>
     <lastmod>2026-10-07</lastmod>
@@ -19,9 +22,11 @@
     <priority>0.9</priority>
     <image:image>
       <image:loc>https://fotocopiadorasyp.com/img/prod_copier.jpg</image:loc>
-      <image:title>Catálogo de Fotocopiadoras, Impresoras y Tóners Ricoh</image:title>
+      <image:title>Catálogo Oficial Ricoh: Fotocopiadoras, Impresoras y Tóners en Neiva</image:title>
+      <image:caption>Venta y alquiler de fotocopiadoras Ricoh en Neiva y Huila</image:caption>
     </image:image>
   </url>
+
   <url>
     <loc>https://fotocopiadorasyp.com/servicio-tecnico.html</loc>
     <lastmod>2026-10-07</lastmod>
@@ -30,8 +35,10 @@
     <image:image>
       <image:loc>https://fotocopiadorasyp.com/img/hero_service.jpg</image:loc>
       <image:title>Servicio Técnico Ricoh, Buscador de Códigos SC y Taller en Neiva</image:title>
+      <image:caption>Reparación, diagnóstico express y mantenimiento preventivo Ricoh en Huila</image:caption>
     </image:image>
   </url>
+
   <url>
     <loc>https://fotocopiadorasyp.com/nosotros.html</loc>
     <lastmod>2026-10-07</lastmod>
@@ -42,6 +49,7 @@
       <image:title>Sobre Fotocopiadora SyP — Trayectoria en Neiva, Huila</image:title>
     </image:image>
   </url>
+
   <url>
     <loc>https://fotocopiadorasyp.com/contacto.html</loc>
     <lastmod>2026-10-07</lastmod>
@@ -49,19 +57,212 @@
     <priority>0.8</priority>
     <image:image>
       <image:loc>https://fotocopiadorasyp.com/img/contact_advisors.jpg</image:loc>
-      <image:title>Contacto Directo — Gladys Solano y Juan Sebastián Portela</image:title>
+      <image:title>Contacto Directo SyP Neiva — Gladys Solano y Juan Sebastián Portela</image:title>
     </image:image>
   </url>
+
   <url>
     <loc>https://fotocopiadorasyp.com/cotizacion.html</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>
+
   <url>
     <loc>https://fotocopiadorasyp.com/login.html</loc>
     <lastmod>2026-10-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
+
+  <!-- ================= FOTOCOPIADORAS E IMPRESORAS RICOH ================= -->
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-2554c</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_copier.jpg</image:loc>
+      <image:title>Multifuncional Láser Ricoh MP 2554 — Venta y Renting en Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-600bn</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_copier.jpg</image:loc>
+      <image:title>Multifuncional Láser B/N Ricoh MP 301 SPF en Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-c306</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_copier.jpg</image:loc>
+      <image:title>Multifuncional Color Ricoh MP C306 HD en Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-5054</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_copier.jpg</image:loc>
+      <image:title>Multifuncional Láser Ricoh MP 5054 Industrial Alto Volumen Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-p501</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_printer.jpg</image:loc>
+      <image:title>Impresora Láser Monocromática Ricoh P 501 en Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-p220c</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_printer.jpg</image:loc>
+      <image:title>Impresora Color Ricoh SP C250SF WiFi en Neiva</image:title>
+    </image:image>
+  </url>
+
+  <!-- ================= TÓNERS Y CONSUMIBLES RICOH ================= -->
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-ton301</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_toner.jpg</image:loc>
+      <image:title>Tóner Ricoh MP 301 Tipo 1270D Original y Homologado en Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-ton2554</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_toner.jpg</image:loc>
+      <image:title>Tóner Negro Ricoh MP 2554 / 3054 / 3554 en Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-ton5054</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_toner.jpg</image:loc>
+      <image:title>Tóner Negro Ricoh MP 5054 / 6054 Alto Rendimiento en Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-ton4501c</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/hero_toner.jpg</image:loc>
+      <image:title>Kit Tóner Color Ricoh MP C306 / C406 CMYK en Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-recarga1000</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_toner.jpg</image:loc>
+      <image:title>Polvo de Tóner Ricoh Micro-filtrado 1000gr en Neiva</image:title>
+    </image:image>
+  </url>
+
+  <!-- ================= REPUESTOS Y MANTENIMIENTO ================= -->
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-cil2554</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_supplies.jpg</image:loc>
+      <image:title>Cilindro Tambor OPC Ricoh MP 2554 / 3554 / 5054 Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-cil301</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_supplies.jpg</image:loc>
+      <image:title>Cilindro OPC y Cuchilla Ricoh MP 301 en Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-banda</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_supplies.jpg</image:loc>
+      <image:title>Banda de Transferencia Ricoh MP C2503 / C306 Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-correa</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_supplies.jpg</image:loc>
+      <image:title>Gomas de Alimentación de Papel Ricoh Pick Up Rollers Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-kitstd</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/service_workshop.jpg</image:loc>
+      <image:title>Mantenimiento Preventivo Completo Ricoh en Taller Neiva</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html?id=sp-visita</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/hero_service.jpg</image:loc>
+      <image:title>Visita Técnica de Emergencia y Diagnóstico Ricoh en Neiva</image:title>
+    </image:image>
+  </url>
+
 </urlset>

@@ -390,15 +390,27 @@ const SyP = (() => {
   }
 
   async function fetchAllAdminCounters() {
+    let apiData = [];
     try {
       const res = await fetch(`${API_URL}/counters`, {
         headers: getAuthHeaders(),
       });
       if (res.ok) {
-        return await res.json();
+        apiData = await res.json();
       }
     } catch (e) {}
-    return [];
+
+    try {
+      const localData = JSON.parse(localStorage.getItem('syp_counter_reports') || '[]');
+      const ids = new Set(apiData.map((x) => x.id));
+      localData.forEach((item) => {
+        if (!ids.has(item.id)) {
+          apiData.push(item);
+        }
+      });
+    } catch (err) {}
+
+    return apiData;
   }
 
   /* ---------- Notificaciones en Tiempo Real ---------- */

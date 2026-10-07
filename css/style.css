@@ -4523,4 +4523,237 @@ table.admin-table select {
   }
 }
 
+/* ============================================================
+   13. COBERTURA HUILA & REPORTE CONTADORES (Feature 5)
+   ============================================================ */
+.huila-coverage-wrap {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 32px 28px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+.huila-zones-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+@media (max-width: 860px) {
+  .huila-zones-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.huila-zone-card {
+  background: var(--paper-dim);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.huila-zone-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--ink);
+}
+.huila-zone-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 8px;
+  border-radius: 4px;
+  width: fit-content;
+  margin-bottom: 10px;
+}
+.huila-zone-badge.metro {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.huila-zone-badge.centro {
+  background: #fef3c7;
+  color: #92400e;
+}
+.huila-zone-badge.sur {
+  background: #dcfce7;
+  color: #166534;
+}
+.huila-zone-card h4 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--ink);
+  margin: 0 0 4px;
+}
+.huila-zone-time {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.huila-zone-card p {
+  font-size: 13px;
+  color: var(--steel);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Selector Interactivo de Municipio */
+.huila-selector-box {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+.huila-town-result {
+  background: var(--paper-dim);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+}
+.town-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.town-zone-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.town-zone-badge.metro { background: #fee2e2; color: #991b1b; }
+.town-zone-badge.centro { background: #fef3c7; color: #92400e; }
+.town-zone-badge.sur { background: #dcfce7; color: #166534; }
+
+.town-time-badge {
+  font-size: 13px;
+  color: var(--ink);
+}
+.town-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  font-size: 12.5px;
+  background: var(--paper);
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+.town-meta-label {
+  display: block;
+  font-size: 11px;
+  color: var(--steel);
+  margin-bottom: 2px;
+}
+.town-card-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+@media (max-width: 640px) {
+  .town-card-footer .btn { width: 100%; text-align: center; }
+}
+
+/* Módulo de Reporte de Contadores */
+.counter-report-box {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 36px 32px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+}
+.counter-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.counter-month-pill {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  padding: 6px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.counter-helper-card {
+  background: var(--paper-dim);
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+}
+.counter-helper-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+.counter-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 768px) {
+  .counter-steps-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.cstep {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.cnum {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.cstep p {
+  font-size: 12px;
+  color: var(--steel);
+  margin: 3px 0 0;
+  line-height: 1.4;
+}
+.counter-actions-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+@media (max-width: 640px) {
+  .counter-actions-row .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 

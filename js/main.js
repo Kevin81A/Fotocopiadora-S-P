@@ -2764,6 +2764,387 @@ function initNetworkStatusListener() {
   if (!navigator.onLine) updateOnlineStatus();
 }
 
+/* ============================================================
+   13. COBERTURA DEPARTAMENTAL EN EL HUILA (Feature 5)
+   ============================================================ */
+const HUILA_COVERAGE_DATA = [
+  {
+    id: 'neiva',
+    name: 'Neiva (Sede Central)',
+    zone: 'Zona 1 · Metropolitana',
+    zoneClass: 'metro',
+    responseTime: '< 2 a 4 Horas (Inmediata)',
+    frequency: 'Atención continua (Lunes a Sábado)',
+    shippingCost: 'Gratis en perímetro urbano',
+    advisor: 'Juan Sebastián Portela & Gladys Solano',
+    phone: '573178204193',
+    details: 'Cobertura inmediata en todas las comunas (1 a 10), zona industrial y centros médicos. Diagnóstico en sitio y cambio de repuestos en el mismo día.'
+  },
+  {
+    id: 'rivera',
+    name: 'Rivera',
+    zone: 'Zona 1 · Metropolitana',
+    zoneClass: 'metro',
+    responseTime: '< 3 a 5 Horas',
+    frequency: 'Diario (Lunes a Viernes)',
+    shippingCost: 'Tarifa preferencial metropolitana',
+    advisor: 'Juan Sebastián Portela',
+    phone: '573178204193',
+    details: 'Atención presencial a hoteles, colegios, alcaldía y fincas campestres. Despacho diario de tóners e insumos.'
+  },
+  {
+    id: 'palermo',
+    name: 'Palermo & El Juncal',
+    zone: 'Zona 1 · Metropolitana',
+    zoneClass: 'metro',
+    responseTime: '< 3 a 5 Horas',
+    frequency: 'Diario (Lunes a Viernes)',
+    shippingCost: 'Tarifa metropolitana',
+    advisor: 'Juan Sebastián Portela',
+    phone: '573178204193',
+    details: 'Soporte prioritario a sector minero, agroindustrial, piscícola y entidades oficiales.'
+  },
+  {
+    id: 'campoalegre',
+    name: 'Campoalegre',
+    zone: 'Zona 2 · Norte / Centro',
+    zoneClass: 'centro',
+    responseTime: '< 24 Horas',
+    frequency: 'Martes, Jueves y Sábados',
+    shippingCost: 'Envío express intermunicipal',
+    advisor: 'Soporte Técnico Especializado SyP',
+    phone: '573178204193',
+    details: 'Atención a molinos de arroz, instituciones educativas, notarías y cooperativas agropecuarias.'
+  },
+  {
+    id: 'aipe',
+    name: 'Aipe',
+    zone: 'Zona 2 · Norte / Centro',
+    zoneClass: 'centro',
+    responseTime: '< 24 Horas',
+    frequency: 'Lunes, Miércoles y Viernes',
+    shippingCost: 'Envío express corredor norte',
+    advisor: 'Soporte Técnico Especializado SyP',
+    phone: '573178204193',
+    details: 'Soporte a empresas del sector de hidrocarburos, contratistas, juzgados y alcaldía municipal.'
+  },
+  {
+    id: 'yaguara',
+    name: 'Yaguará & Betania',
+    zone: 'Zona 2 · Norte / Centro',
+    zoneClass: 'centro',
+    responseTime: '< 24 Horas',
+    frequency: 'Miércoles y Sábados',
+    shippingCost: 'Envío directo por transporte de ruta',
+    advisor: 'Soporte Técnico Especializado SyP',
+    phone: '573178204193',
+    details: 'Atención técnica en sitio a empresas turísticas, sector piscícola y comercio del embalse.'
+  },
+  {
+    id: 'hobo',
+    name: 'Hobo',
+    zone: 'Zona 2 · Norte / Centro',
+    zoneClass: 'centro',
+    responseTime: '< 24 Horas',
+    frequency: 'Martes y Viernes',
+    shippingCost: 'Envío intermunicipal directo',
+    advisor: 'Soporte Técnico Especializado SyP',
+    phone: '573178204193',
+    details: 'Mantenimiento preventivo mensual de fotocopiadoras Ricoh en arriendo y venta de insumos.'
+  },
+  {
+    id: 'tello-baraya',
+    name: 'Tello & Baraya',
+    zone: 'Zona 2 · Norte / Centro',
+    zoneClass: 'centro',
+    responseTime: '< 24 a 36 Horas',
+    frequency: 'Ruta quincenal o urgencia técnica',
+    shippingCost: 'Envío por encomienda Cootranshuila',
+    advisor: 'Soporte Técnico Especializado SyP',
+    phone: '573178204193',
+    details: 'Soporte técnico a notarías, juzgados e instituciones educativas municipales.'
+  },
+  {
+    id: 'garzon',
+    name: 'Garzón (Capital Diocesana)',
+    zone: 'Zona 3 · Sur / Occidente',
+    zoneClass: 'sur',
+    responseTime: '24 a 48 Horas (Ruta Semanal)',
+    frequency: 'Miércoles y Jueves fijos',
+    shippingCost: 'Despacho diario vía Coomotor / Cootranshuila',
+    advisor: 'Juan Sebastián Portela & Ruta Sur',
+    phone: '573178204193',
+    details: 'Ruta fija semanal para clínicas, bancos, notarías, juzgados y colegios de Garzón. Entrega de tóners el mismo día de despacho.'
+  },
+  {
+    id: 'gigante',
+    name: 'Gigante',
+    zone: 'Zona 3 · Sur / Occidente',
+    zoneClass: 'sur',
+    responseTime: '24 a 48 Horas',
+    frequency: 'Miércoles y Jueves fijos',
+    shippingCost: 'Despacho intermunicipal diario',
+    advisor: 'Soporte Técnico Especializado SyP',
+    phone: '573178204193',
+    details: 'Atención a cooperativas cafeteras, agroindustria y entidades públicas.'
+  },
+  {
+    id: 'pitalito',
+    name: 'Pitalito (Valle de Laboyos)',
+    zone: 'Zona 3 · Sur / Occidente',
+    zoneClass: 'sur',
+    responseTime: '48 Horas / Ruta Programada',
+    frequency: 'Viernes y Sábados',
+    shippingCost: 'Envío terminal a terminal con entrega express',
+    advisor: 'Juan Sebastián Portela & Ruta Sur',
+    phone: '573178204193',
+    details: 'Atención a grandes empresas, sector cafetero, universidades y entidades públicas del sur del Huila.'
+  },
+  {
+    id: 'la-plata',
+    name: 'La Plata (Occidente del Huila)',
+    zone: 'Zona 3 · Sur / Occidente',
+    zoneClass: 'sur',
+    responseTime: '48 Horas / Ruta Programada',
+    frequency: 'Lunes y Jueves',
+    shippingCost: 'Envío intermunicipal por flota directa',
+    advisor: 'Soporte Técnico Especializado SyP',
+    phone: '573178204193',
+    details: 'Suministro de tóners al por mayor y visitas de mantenimiento preventivo y correctivo programado.'
+  }
+];
+
+function initHuilaCoverage() {
+  const select = document.getElementById('huilaTownSelect');
+  const resultCard = document.getElementById('huilaTownResultCard');
+  if (!select || !resultCard) return;
+
+  // Llenar select
+  select.innerHTML = '<option value="">-- Elige tu municipio del Huila --</option>' +
+    HUILA_COVERAGE_DATA.map((t) => `<option value="${t.id}">${t.name}</option>`).join('');
+
+  function renderTown(townId) {
+    const town = HUILA_COVERAGE_DATA.find((t) => t.id === townId) || HUILA_COVERAGE_DATA[0];
+    const waText = encodeURIComponent(`Hola Sebastián, consulto desde ${town.name} por servicio técnico / tóners para mi fotocopiadora Ricoh.`);
+    const waUrl = `https://wa.me/${town.phone}?text=${waText}`;
+
+    resultCard.innerHTML = `
+      <div class="town-card-header">
+        <div>
+          <span class="town-zone-badge ${town.zoneClass}">${town.zone}</span>
+          <h3 style="font-size:18px; margin:4px 0 2px;">${town.name}</h3>
+        </div>
+        <div class="town-time-badge">
+          ⏱️ Tiempo de llegada: <strong>${town.responseTime}</strong>
+        </div>
+      </div>
+      <div class="town-card-body">
+        <p style="font-size:13.5px; color:var(--steel); margin-bottom:12px; line-height:1.5;">${town.details}</p>
+        <div class="town-meta-grid">
+          <div>
+            <span class="town-meta-label">Frecuencia de Ruta:</span>
+            <strong>${town.frequency}</strong>
+          </div>
+          <div>
+            <span class="town-meta-label">Despacho de Tóners:</span>
+            <strong>${town.shippingCost}</strong>
+          </div>
+          <div>
+            <span class="town-meta-label">Técnico Asignado:</span>
+            <strong>${town.advisor}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="town-card-footer">
+        <a href="${waUrl}" target="_blank" rel="noopener" class="btn btn-primary" style="background:#10b981; border-color:#10b981;">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.6-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-1.5-.7-2.5-1.3-3.5-3-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.2.3-1 1-1 2.3 0 1.4 1 2.7 1.1 2.9.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.6-.7 1.9-1.3.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.3A10 10 0 1 0 12 2z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+          Solicitar Visita Técnica o Tóner en ${town.name}
+        </a>
+      </div>
+    `;
+  }
+
+  // Cargar Neiva por defecto
+  renderTown('neiva');
+
+  select.addEventListener('change', () => {
+    if (select.value) {
+      renderTown(select.value);
+    }
+  });
+}
+
+/* ============================================================
+   14. REPORTE MENSUAL DE CONTADORES (Feature 5)
+   ============================================================ */
+function initCounterReporter() {
+  const toggleBtn = document.getElementById('counterHelperToggle');
+  const helperContent = document.getElementById('counterHelperContent');
+  const helperArrow = document.getElementById('counterHelperArrow');
+
+  if (toggleBtn && helperContent) {
+    toggleBtn.addEventListener('click', () => {
+      const isHidden = helperContent.style.display === 'none';
+      helperContent.style.display = isHidden ? 'block' : 'none';
+      if (helperArrow) helperArrow.textContent = isHidden ? 'Ocultar guía ▲' : 'Ver guía ▼';
+    });
+  }
+
+  // Autocompletar con sesión si está logueado
+  if (typeof SyP !== 'undefined' && SyP.getSession) {
+    const session = SyP.getSession();
+    if (session) {
+      const compInput = document.getElementById('pCntCompany');
+      const phoneInput = document.getElementById('pCntPhone');
+      if (compInput && !compInput.value) compInput.value = session.name || '';
+      if (phoneInput && !phoneInput.value) phoneInput.value = session.phone || '';
+    }
+  }
+}
+
+async function handlePublicCounterSubmit(e) {
+  e.preventDefault();
+
+  const company = document.getElementById('pCntCompany')?.value.trim();
+  const nit = document.getElementById('pCntNit')?.value.trim() || 'No especificado';
+  const phone = document.getElementById('pCntPhone')?.value.trim();
+  const model = document.getElementById('pCntModel')?.value;
+  const serial = document.getElementById('pCntSerial')?.value.trim() || 'N/A';
+  const month = document.getElementById('pCntMonth')?.value;
+  const mono = Number(document.getElementById('pCntMono')?.value || 0);
+  const color = Number(document.getElementById('pCntColor')?.value || 0);
+  const notes = document.getElementById('pCntNotes')?.value.trim() || 'Sin observaciones adicionales';
+
+  if (!company || !phone || !model || !month) {
+    showToast('Por favor completa los campos obligatorios del reporte (*)', 'error');
+    return;
+  }
+
+  const payload = {
+    client_name: company,
+    equipment_model: model,
+    mono_counter: mono,
+    color_counter: color,
+    report_month: month,
+    notes: `NIT: ${nit} | Tel: ${phone} | Serial: ${serial} | Notas: ${notes}`
+  };
+
+  // Guardar en backend si está disponible o en local
+  try {
+    if (typeof SyP !== 'undefined' && SyP.submitCounterReport) {
+      await SyP.submitCounterReport(payload);
+    }
+  } catch (err) {}
+
+  // Guardar en LocalStorage como resguardo
+  try {
+    const existing = JSON.parse(localStorage.getItem('syp_counter_reports') || '[]');
+    existing.unshift({
+      id: 'cnt_' + Date.now().toString(36),
+      created_at: new Date().toISOString(),
+      ...payload
+    });
+    localStorage.setItem('syp_counter_reports', JSON.stringify(existing));
+  } catch (err) {}
+
+  // Generar mensaje estructurado de WhatsApp a Gladys (Facturación)
+  const waMsgText = encodeURIComponent(
+    `📋 *REPORTE MENSUAL DE CONTADOR — FOTOCOPIADORA SyP*\n` +
+    `---------------------------------------\n` +
+    `🏢 *Empresa / Titular:* ${company}\n` +
+    `🆔 *NIT / C.C.:* ${nit}\n` +
+    `📞 *Teléfono:* ${phone}\n` +
+    `🖨️ *Modelo Ricoh:* ${model}\n` +
+    `🔢 *Serial / Plaqueta:* ${serial}\n` +
+    `📅 *Mes Reportado:* ${month}\n` +
+    `---------------------------------------\n` +
+    `📊 *Contador Blanco y Negro:* ${mono.toLocaleString('es-CO')} páginas\n` +
+    (color > 0 ? `🎨 *Contador Color:* ${color.toLocaleString('es-CO')} páginas\n` : '') +
+    `📝 *Observaciones / Insumos:* ${notes}\n` +
+    `---------------------------------------\n` +
+    `*Fecha de Envío:* ${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO')}\n` +
+    `_Enviado desde el portal web oficial Fotocopiadora SyP Neiva._`
+  );
+
+  const waGladysUrl = `https://wa.me/573143804967?text=${waMsgText}`;
+
+  // Mostrar mensaje de éxito
+  const successBox = document.getElementById('publicCounterSuccess');
+  if (successBox) successBox.classList.add('show');
+  showToast('¡Reporte generado! Abriendo WhatsApp con Facturación SyP... 🎉', 'success');
+
+  // Abrir WhatsApp en nueva pestaña
+  setTimeout(() => {
+    window.open(waGladysUrl, '_blank');
+  }, 400);
+
+  // Limpiar campos después de enviar
+  setTimeout(() => {
+    document.getElementById('publicCounterReportForm')?.reset();
+    if (successBox) successBox.classList.remove('show');
+  }, 6000);
+}
+
+async function saveCounterReportOnly() {
+  const company = document.getElementById('pCntCompany')?.value.trim();
+  const nit = document.getElementById('pCntNit')?.value.trim() || 'No especificado';
+  const phone = document.getElementById('pCntPhone')?.value.trim();
+  const model = document.getElementById('pCntModel')?.value;
+  const serial = document.getElementById('pCntSerial')?.value.trim() || 'N/A';
+  const month = document.getElementById('pCntMonth')?.value;
+  const mono = Number(document.getElementById('pCntMono')?.value || 0);
+  const color = Number(document.getElementById('pCntColor')?.value || 0);
+  const notes = document.getElementById('pCntNotes')?.value.trim() || 'Sin observaciones';
+
+  if (!company || !phone || !model || !month) {
+    showToast('Completa los campos obligatorios (*) antes de registrar.', 'error');
+    return;
+  }
+
+  const payload = {
+    client_name: company,
+    equipment_model: model,
+    mono_counter: mono,
+    color_counter: color,
+    report_month: month,
+    notes: `NIT: ${nit} | Tel: ${phone} | Serial: ${serial} | Notas: ${notes}`
+  };
+
+  const btn = document.getElementById('btnSaveCounterDBOnly');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Guardando en plataforma...';
+  }
+
+  try {
+    if (typeof SyP !== 'undefined' && SyP.submitCounterReport) {
+      await SyP.submitCounterReport(payload);
+    }
+    const existing = JSON.parse(localStorage.getItem('syp_counter_reports') || '[]');
+    existing.unshift({
+      id: 'cnt_' + Date.now().toString(36),
+      created_at: new Date().toISOString(),
+      ...payload
+    });
+    localStorage.setItem('syp_counter_reports', JSON.stringify(existing));
+
+    const successBox = document.getElementById('publicCounterSuccess');
+    if (successBox) successBox.classList.add('show');
+    showToast('¡Reporte guardado en plataforma SyP con éxito! 📊', 'success');
+    document.getElementById('publicCounterReportForm')?.reset();
+    setTimeout(() => {
+      if (successBox) successBox.classList.remove('show');
+    }, 5000);
+  } catch (err) {
+    showToast('Reporte respaldado en almacenamiento seguro local.', 'success');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '📊 Registrar Directo en Plataforma SyP';
+    }
+  }
+}
+
 function initBackToTopButton() {
   if (document.getElementById('backToTopBtn')) return;
 
@@ -2820,6 +3201,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initCompatibilityFinder();
   initAdvisorSelectorModal();
   initPWAInstallBanner();
+  initHuilaCoverage();
+  initCounterReporter();
   initNetworkStatusListener();
   initBackToTopButton();
   renderTestimonials();

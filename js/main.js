@@ -1017,7 +1017,30 @@ function triggerRegMarks() {
   });
 }
 
-/* ---------- Área de cuenta en el header ---------- */
+/* ---------- Notificaciones y Área de cuenta en el header ---------- */
+function formatRelativeTime(isoStr) {
+  if (!isoStr) return '';
+  const date = new Date(isoStr.includes('Z') ? isoStr : isoStr + 'Z');
+  const now = new Date();
+  const diffSec = Math.max(0, Math.floor((now - date) / 1000));
+  if (diffSec < 45) return 'Hace un momento';
+  if (diffSec < 3600) return `Hace ${Math.floor(diffSec / 60)} min`;
+  if (diffSec < 86400) return `Hace ${Math.floor(diffSec / 3600)} h`;
+  if (diffSec < 172800) return 'Ayer';
+  return date.toLocaleDateString('es-CO', { day: '2-digit', month: 'short' });
+}
+
+const NOTIF_ICONS = {
+  order: '🛒',
+  maintenance: '🔧',
+  renting: '📄',
+  system: '🔔',
+  promo: '🏷️',
+  info: 'ℹ️',
+};
+
+let notifPollInterval = null;
+
 function initAccountArea() {
   const area = document.getElementById('accountArea');
   if (!area || typeof SyP === 'undefined') return;
@@ -1025,6 +1048,7 @@ function initAccountArea() {
   const session = SyP.getSession();
 
   if (!session) {
+    if (notifPollInterval) clearInterval(notifPollInterval);
     area.innerHTML = `
       <a href="login.html" class="account-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
@@ -1034,39 +1058,156 @@ function initAccountArea() {
   }
 
   area.innerHTML = `
-    <button class="account-btn" id="accountToggle" aria-haspopup="true" aria-expanded="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
-      <span class="label">${escapeHTML(session.name.split(' ')[0])}</span>
-    </button>
-    <div class="account-dropdown" id="accountDropdown">
-      <div class="who">
-        <div class="name">${escapeHTML(session.name)}</div>
-        <div class="role">${session.role === 'admin' ? 'Administrador' : 'Cliente'}</div>
+    <!-- Campanita de Notificaciones -->
+    <div class="notif-bell-wrap" id="notifBellWrap">
+      <button class="notif-btn" id="notifToggle" aria-label="Notificaciones" aria-haspopup="true" aria-expanded="false" title="Centro de Notificaciones">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+      </button>
+      <div class="notif-dropdown" id="notifDropdown" role="region" aria-label="Notificaciones del usuario">
+        <div class="notif-head">
+          <h4>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Notificaciones
+          </h4>
+          <button class="notif-clear-btn" id="notifMarkAllBtn" type="button">Marcar leídas</button>
+        </div>
+        <div class="notif-list" id="notifList">
+          <div class="notif-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Cargando notificaciones...
+          </div>
+        </div>
       </div>
-      ${
-        session.role === 'admin'
-          ? '<a href="admin.html">Panel administrativo</a>'
-          : '<a href="servicio-tecnico.html">Mis solicitudes</a>'
-      }
-      <button id="logoutBtn">Cerrar sesión</button>
+    </div>
+
+    <!-- Menú de Usuario -->
+    <div style="position:relative">
+      <button class="account-btn" id="accountToggle" aria-haspopup="true" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+        <span class="label">${escapeHTML(session.name.split(' ')[0])}</span>
+      </button>
+      <div class="account-dropdown" id="accountDropdown">
+        <div class="who">
+          <div class="name">${escapeHTML(session.name)}</div>
+          <div class="role">${session.role === 'admin' ? 'Administrador' : 'Cliente'}</div>
+        </div>
+        ${
+          session.role === 'admin'
+            ? '<a href="admin.html">Panel administrativo</a>'
+            : '<a href="servicio-tecnico.html">Mis solicitudes</a>'
+        }
+        <button id="logoutBtn" type="button">Cerrar sesión</button>
+      </div>
     </div>`;
 
-  const toggle = document.getElementById('accountToggle');
-  const dropdown = document.getElementById('accountDropdown');
-  toggle.addEventListener('click', (e) => {
+  const accToggle = document.getElementById('accountToggle');
+  const accDropdown = document.getElementById('accountDropdown');
+  const notifToggle = document.getElementById('notifToggle');
+  const notifDropdown = document.getElementById('notifDropdown');
+  const notifBadge = document.getElementById('notifBadge');
+  const notifList = document.getElementById('notifList');
+  const notifMarkAllBtn = document.getElementById('notifMarkAllBtn');
+
+  // Toggle Menú de Usuario
+  accToggle.addEventListener('click', (e) => {
     e.stopPropagation();
-    const isOpen = dropdown.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', String(isOpen));
-  });
-  document.addEventListener('click', () => {
-    dropdown.classList.remove('open');
-    toggle.setAttribute('aria-expanded', 'false');
+    notifDropdown.classList.remove('open');
+    notifToggle.setAttribute('aria-expanded', 'false');
+    const isOpen = accDropdown.classList.toggle('open');
+    accToggle.setAttribute('aria-expanded', String(isOpen));
   });
 
+  // Toggle Campanita de Notificaciones
+  notifToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    accDropdown.classList.remove('open');
+    accToggle.setAttribute('aria-expanded', 'false');
+    const isOpen = notifDropdown.classList.toggle('open');
+    notifToggle.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  // Cerrar dropdowns al hacer clic fuera
+  document.addEventListener('click', () => {
+    accDropdown.classList.remove('open');
+    accToggle.setAttribute('aria-expanded', 'false');
+    notifDropdown.classList.remove('open');
+    notifToggle.setAttribute('aria-expanded', 'false');
+  });
+
+  // Marcar todas como leídas
+  notifMarkAllBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    await SyP.markAllNotificationsRead();
+    refreshNotifications();
+  });
+
+  // Cerrar sesión
   document.getElementById('logoutBtn').addEventListener('click', () => {
+    if (notifPollInterval) clearInterval(notifPollInterval);
     SyP.logout();
     window.location.href = 'index.html';
   });
+
+  // Función de actualización en tiempo real de notificaciones
+  async function refreshNotifications() {
+    if (!SyP.getToken()) return;
+    const res = await SyP.fetchMyNotifications(15);
+    const unread = res.unread_count || 0;
+    if (unread > 0) {
+      notifBadge.textContent = unread > 9 ? '9+' : unread;
+      notifBadge.style.display = 'block';
+    } else {
+      notifBadge.style.display = 'none';
+    }
+
+    if (!res.items || res.items.length === 0) {
+      notifList.innerHTML = `
+        <div class="notif-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          No tienes notificaciones por el momento.
+        </div>`;
+      return;
+    }
+
+    notifList.innerHTML = res.items.map((n) => {
+      const icon = NOTIF_ICONS[n.type] || '🔔';
+      const unreadCls = !n.is_read ? ' unread' : '';
+      const timeStr = formatRelativeTime(n.created_at);
+      return `
+        <div class="notif-item${unreadCls}" data-id="${escapeHTML(n.id)}" data-link="${escapeHTML(n.link_url || '')}">
+          <div class="notif-item-icon">${icon}</div>
+          <div class="notif-item-body">
+            <div class="notif-item-title">${escapeHTML(n.title)}</div>
+            <div class="notif-item-msg">${escapeHTML(n.message)}</div>
+            <div class="notif-item-time">${timeStr}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    // Listener de clic para cada item (marca como leído y navega)
+    notifList.querySelectorAll('.notif-item').forEach((itemEl) => {
+      itemEl.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const nid = itemEl.dataset.id;
+        const link = itemEl.dataset.link;
+        await SyP.markNotificationRead(nid);
+        itemEl.classList.remove('unread');
+        refreshNotifications();
+        if (link) {
+          window.location.href = link;
+        }
+      });
+    });
+  }
+
+  // Carga inicial y sondeo periódico cada 20 segundos
+  refreshNotifications();
+  if (notifPollInterval) clearInterval(notifPollInterval);
+  notifPollInterval = setInterval(refreshNotifications, 20000);
 }
 
 /* ---------- Animaciones de secciones con scroll ---------- */

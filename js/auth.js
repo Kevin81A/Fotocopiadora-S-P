@@ -401,6 +401,69 @@ const SyP = (() => {
     return [];
   }
 
+  /* ---------- Notificaciones en Tiempo Real ---------- */
+  async function fetchMyNotifications(limit = 20) {
+    if (!getToken()) return { unread_count: 0, items: [] };
+    try {
+      const res = await fetch(`${API_URL}/notifications/my?limit=${limit}`, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn('[SyP] Error consultando notificaciones:', e);
+    }
+    return { unread_count: 0, items: [] };
+  }
+
+  async function markNotificationRead(notifId) {
+    if (!getToken()) return { ok: false };
+    try {
+      const res = await fetch(`${API_URL}/notifications/${notifId}/read`, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+      });
+      return await res.json();
+    } catch (e) {
+      return { ok: false };
+    }
+  }
+
+  async function markAllNotificationsRead() {
+    if (!getToken()) return { ok: false };
+    try {
+      const res = await fetch(`${API_URL}/notifications/mark-all-read`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+      });
+      return await res.json();
+    } catch (e) {
+      return { ok: false };
+    }
+  }
+
+  /* ---------- Métricas & Analytics ---------- */
+  async function fetchAdminAnalytics(month = null) {
+    if (!getToken()) return null;
+    try {
+      const url = month ? `${API_URL}/admin/analytics?month=${encodeURIComponent(month)}` : `${API_URL}/admin/analytics`;
+      const res = await fetch(url, {
+        headers: getAuthHeaders(),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn('[SyP] Error consultando métricas:', e);
+    }
+    return null;
+  }
+
+  function getExportCsvUrl(dataset) {
+    return `${API_URL}/admin/export/${dataset}`;
+  }
+
   // Verificación de sesión al inicializar
   if (typeof window !== 'undefined') {
     verifyCurrentSession();
@@ -429,6 +492,11 @@ const SyP = (() => {
     submitContactForm,
     saveQuoteToServer,
     submitCounterReport,
+    fetchMyNotifications,
+    markNotificationRead,
+    markAllNotificationsRead,
+    fetchAdminAnalytics,
+    getExportCsvUrl,
     getRequestsByEmail: (email) => getRequests().filter((r) => r.clienteEmail && r.clienteEmail.toLowerCase() === email.toLowerCase()),
   };
 })();

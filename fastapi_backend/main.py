@@ -3,9 +3,11 @@ Fotocopiadora SyP — REST API Server (FastAPI + JWT Authentication + SQLite)
 """
 import uuid
 import json
+import csv
+import io
 from datetime import datetime, timezone
 from typing import Optional, List
-from fastapi import FastAPI, HTTPException, Depends, status, Query
+from fastapi import FastAPI, HTTPException, Depends, status, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from database import get_db, init_db
 from security import (
@@ -34,6 +36,9 @@ from models import (
     OrderStatusUpdate,
     OrderResponse,
     CounterReportCreate,
+    NotificationCreate,
+    NotificationResponse,
+    AnalyticsOverviewResponse,
 )
 
 # Inicializar Base de Datos al arrancar
@@ -53,6 +58,48 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ============================================================
+# 0. NOTIFICATION HELPERS (Disparadores automáticos)
+# ============================================================
+SHIPPING_EMOJI = {
+    "En preparación": "📦", "Despachado": "🚚", "En camino": "🛵",
+    "Entregado": "✅", "Cancelado": "❌",
+}
+MAINT_EMOJI = {
+    "Pendiente": "⏳", "Confirmada": "📅", "En proceso": "🔧",
+    "Completada": "✅", "Cancelada": "❌",
+}
+
+def ricoh_label(equipment: str) -> str:
+    """Evita duplicar la marca ('Ricoh Ricoh MP 2554')."""
+    eq = (equipment or "").strip()
+    return eq if eq.lower().startswith("ricoh") else f"Ricoh {eq}"
+
+def create_notification(cursor, user_email: str, title: str, message: str,
+                        notif_type: str = "info", link_url: Optional[str] = None,
+                        user_id: Optional[str] = None) -> Optional[str]:
+    """Inserta una notificación usando el cursor de la transacción en curso."""
+    if not user_email:
+        return None
+    email_norm = user_email.lower().strip()
+    if not user_id:
+        cursor.execute("SELECT id FROM users WHERE email = ?", (email_norm,))
+        u = cursor.fetchone()
+        user_id = u["id"] if u else None
+    notif_id = f"ntf_{uuid.uuid4().hex[:12]}"
+    cursor.execute("""
+    INSERT INTO notifications (id, user_id, user_email, title, message, type, link_url, is_read)
+    VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+    """, (notif_id, user_id, email_norm, title[:150], message, notif_type, link_url))
+    return notif_id
+
+def notify_admins(cursor, title: str, message: str, notif_type: str = "system",
+                  link_url: Optional[str] = None) -> None:
+    """Envía la misma notificación a todos los usuarios con rol administrativo."""
+    cursor.execute("SELECT id, email FROM users WHERE role IN ('admin', 'tecnico', 'ventas') AND is_active = 1")
+    for a in cursor.fetchall():
+        create_notification(cursor, a["email"], title, message, notif_type, link_url, a["id"])
 
 # ============================================================
 # 1. HEALTH & METRICS ENDPOINTS
@@ -326,7 +373,7 @@ def update_product(product_id: str, payload: ProductBase, admin_user: dict = Dep
 @app.post("/api/v1/requests", response_model=MaintenanceRequestResponse, status_code=status.HTTP_201_CREATED)
 def create_maintenance_request(
     payload: MaintenanceRequestCreate,
-    current_user: Optional[dict] = Depends(lambda: None) # Flexible para cliente logueado o invitado
+    current_user: Optional[dict] = Depends(get_optional_current_user) # Flexible para cliente logueado o invitado
 ):
     req_id = f"req_{uuid.uuid4().hex[:8]}"
     
@@ -347,6 +394,20 @@ def create_maintenance_request(
             payload.equipment, payload.service_type, payload.desired_date,
             payload.desired_time, payload.description or ""
         ))
+
+        # Disparadores automáticos
+        create_notification(
+            cursor, client_email,
+            f"🔧 Solicitud {req_id} recibida",
+            f"Agendamos tu {payload.service_type} para el {ricoh_label(payload.equipment)} el "
+            f"{payload.desired_date} ({payload.desired_time}). Un técnico confirmará pronto.",
+            "maintenance", "/cuenta.html#solicitudes", client_id
+        )
+        notify_admins(
+            cursor, f"🛠️ Nueva solicitud técnica {req_id}",
+            f"{client_name} · {ricoh_label(payload.equipment)} · {payload.service_type} · {payload.desired_date}",
+            "maintenance", "/admin.html#requests"
+        )
         
         return MaintenanceRequestResponse(
             id=req_id,
@@ -439,8 +500,9 @@ def update_request_status(
 ):
     with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id FROM maintenance_requests WHERE id = ?", (request_id,))
-        if not cursor.fetchone():
+        cursor.execute("SELECT id, client_id, client_email, equipment FROM maintenance_requests WHERE id = ?", (request_id,))
+        req_row = cursor.fetchone()
+        if not req_row:
             raise HTTPException(status_code=404, detail="Solicitud no encontrada.")
         
         cursor.execute("""
@@ -448,6 +510,16 @@ def update_request_status(
         SET status = ?, admin_notes = COALESCE(?, admin_notes), updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
         """, (payload.status, payload.admin_notes, request_id))
+
+        # Disparador automático: avisar al cliente del avance del servicio técnico
+        msg = f"Tu servicio para el equipo {ricoh_label(req_row['equipment'])} ahora está: {MAINT_EMOJI.get(payload.status, '🔧')} {payload.status}."
+        if payload.admin_notes:
+            msg += f" Nota del técnico: {payload.admin_notes}"
+        create_notification(
+            cursor, req_row["client_email"],
+            f"Servicio técnico {request_id}: {payload.status}",
+            msg, "maintenance", "/cuenta.html#solicitudes", req_row["client_id"]
+        )
         
         return {"ok": True, "id": request_id, "status": payload.status}
 
@@ -568,6 +640,20 @@ def create_order(
             payload.subtotal, payload.iva, payload.total, payload.payment_method,
             payload.payment_status or "Aprobado", payload.notes.strip() if payload.notes else None
         ))
+
+        # Disparadores automáticos: cliente + equipo administrativo
+        create_notification(
+            cursor, payload.client_email.lower().strip(),
+            f"✅ Pedido {order_code} recibido",
+            f"Registramos tu pedido por ${payload.total:,.0f} COP ({payload.payment_method}). "
+            "Te avisaremos cuando sea despachado en Neiva.".replace(",", "."),
+            "order", f"/cotizacion.html?order={order_code}", client_id
+        )
+        notify_admins(
+            cursor, f"🛒 Nuevo pedido {order_code}",
+            f"{payload.client_name.strip()} · ${payload.total:,.0f} COP · {payload.payment_method}".replace(",", "."),
+            "order", "/admin.html#orders"
+        )
         
         return {
             "ok": True,
@@ -671,7 +757,7 @@ def update_order_status(
 ):
     with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id FROM orders WHERE id = ? OR order_code = ?", (order_id, order_id))
+        cursor.execute("SELECT id, order_code, client_id, client_email FROM orders WHERE id = ? OR order_code = ?", (order_id, order_id))
         row = cursor.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Pedido no encontrado.")
@@ -687,6 +773,22 @@ def update_order_status(
             
         if payload.notes:
             cursor.execute("UPDATE orders SET notes = ? WHERE id = ?", (payload.notes, target_id))
+
+        # Disparador automático: notificar al cliente del cambio
+        if payload.payment_status or payload.shipping_status:
+            parts = []
+            if payload.shipping_status:
+                parts.append(f"Envío: {SHIPPING_EMOJI.get(payload.shipping_status, '📦')} {payload.shipping_status}")
+            if payload.payment_status:
+                parts.append(f"Pago: {payload.payment_status}")
+            msg = " · ".join(parts)
+            if payload.notes:
+                msg += f" — {payload.notes}"
+            create_notification(
+                cursor, row["client_email"],
+                f"Actualización de tu pedido {row['order_code']}",
+                msg, "order", f"/cotizacion.html?order={row['order_code']}", row["client_id"]
+            )
             
         return {"ok": True, "message": "Estado del pedido actualizado con éxito."}
 
@@ -725,6 +827,196 @@ def list_all_counter_reports(admin_user: dict = Depends(require_admin)):
             }
             for r in rows
         ]
+
+# ============================================================
+# 9. NOTIFICATIONS ENDPOINTS (Centro de Notificaciones)
+# ============================================================
+def _row_to_notification(r) -> NotificationResponse:
+    return NotificationResponse(
+        id=r["id"],
+        user_id=r["user_id"],
+        user_email=r["user_email"],
+        title=r["title"],
+        message=r["message"],
+        type=r["type"],
+        link_url=r["link_url"],
+        is_read=bool(r["is_read"]),
+        created_at=str(r["created_at"]) if r["created_at"] else None,
+    )
+
+@app.get("/api/v1/notifications/my")
+def get_my_notifications(
+    limit: int = Query(20, ge=1, le=100),
+    current_user: dict = Depends(get_current_user)
+):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT * FROM notifications
+        WHERE user_id = ? OR user_email = ?
+        ORDER BY created_at DESC, rowid DESC
+        LIMIT ?
+        """, (current_user["id"], current_user["email"], limit))
+        rows = cursor.fetchall()
+        cursor.execute("""
+        SELECT COUNT(*) AS cnt FROM notifications
+        WHERE (user_id = ? OR user_email = ?) AND is_read = 0
+        """, (current_user["id"], current_user["email"]))
+        unread = cursor.fetchone()["cnt"]
+        return {
+            "unread_count": unread,
+            "items": [_row_to_notification(r).model_dump() for r in rows],
+        }
+
+@app.patch("/api/v1/notifications/{notif_id}/read")
+def mark_notification_read(notif_id: str, current_user: dict = Depends(get_current_user)):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        UPDATE notifications SET is_read = 1
+        WHERE id = ? AND (user_id = ? OR user_email = ?)
+        """, (notif_id, current_user["id"], current_user["email"]))
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Notificación no encontrada.")
+        return {"ok": True, "id": notif_id}
+
+@app.post("/api/v1/notifications/mark-all-read")
+def mark_all_notifications_read(current_user: dict = Depends(get_current_user)):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        UPDATE notifications SET is_read = 1
+        WHERE (user_id = ? OR user_email = ?) AND is_read = 0
+        """, (current_user["id"], current_user["email"]))
+        return {"ok": True, "updated": cursor.rowcount}
+
+@app.post("/api/v1/notifications", status_code=status.HTTP_201_CREATED)
+def admin_send_notification(payload: NotificationCreate, admin_user: dict = Depends(require_admin)):
+    """Permite al administrador enviar una notificación manual (promo, recordatorio de contadores, etc.)."""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        notif_id = create_notification(
+            cursor, payload.user_email, payload.title, payload.message,
+            payload.type, payload.link_url, payload.user_id
+        )
+        return {"ok": True, "id": notif_id}
+
+# ============================================================
+# 10. ADMIN ANALYTICS & CSV EXPORTS
+# ============================================================
+@app.get("/api/v1/admin/analytics", response_model=AnalyticsOverviewResponse)
+def get_admin_analytics(
+    month: Optional[str] = Query(None, pattern=r"^\d{4}-\d{2}$", description="Filtrar ventas por mes YYYY-MM"),
+    admin_user: dict = Depends(require_admin)
+):
+    with get_db() as conn:
+        cursor = conn.cursor()
+
+        # --- Ventas (excluye pedidos rechazados / cancelados) ---
+        sales_query = """
+        SELECT payment_method, shipping_status, payment_status, total FROM orders
+        WHERE payment_status != 'Rechazado' AND shipping_status != 'Cancelado'
+        """
+        params: list = []
+        if month:
+            sales_query += " AND strftime('%Y-%m', created_at) = ?"
+            params.append(month)
+        cursor.execute(sales_query, params)
+        order_rows = cursor.fetchall()
+
+        total_sales = 0.0
+        payment_breakdown: dict = {}
+        for r in order_rows:
+            total_sales += float(r["total"] or 0)
+            pm = r["payment_method"]
+            entry = payment_breakdown.setdefault(pm, {"count": 0, "total": 0.0})
+            entry["count"] += 1
+            entry["total"] += float(r["total"] or 0)
+
+        cursor.execute("SELECT shipping_status, COUNT(*) AS cnt FROM orders GROUP BY shipping_status")
+        shipping_breakdown = {r["shipping_status"]: r["cnt"] for r in cursor.fetchall()}
+
+        # --- Mantenimiento ---
+        cursor.execute("SELECT status, COUNT(*) AS cnt FROM maintenance_requests GROUP BY status")
+        maint_by_status = {r["status"]: r["cnt"] for r in cursor.fetchall()}
+        maint_total = sum(maint_by_status.values())
+
+        cursor.execute("""
+        SELECT equipment, COUNT(*) AS cnt FROM maintenance_requests
+        GROUP BY equipment ORDER BY cnt DESC LIMIT 8
+        """)
+        models_serviced = {r["equipment"]: r["cnt"] for r in cursor.fetchall()}
+
+        # --- Renting: páginas impresas (suma de contadores reportados) ---
+        cursor.execute("SELECT COALESCE(SUM(mono_counter + color_counter), 0) AS pages FROM counter_reports")
+        renting_pages = int(cursor.fetchone()["pages"] or 0)
+
+        cursor.execute("SELECT COUNT(*) AS cnt FROM quotes")
+        quotes_cnt = cursor.fetchone()["cnt"]
+
+        # --- Actividad reciente combinada ---
+        cursor.execute("""
+        SELECT 'order' AS kind, order_code AS ref, client_name, total AS amount, shipping_status AS status, created_at FROM orders
+        UNION ALL
+        SELECT 'maintenance', id, client_name, NULL, status, created_at FROM maintenance_requests
+        UNION ALL
+        SELECT 'counter', id, client_name, (mono_counter + color_counter), report_month, created_at FROM counter_reports
+        ORDER BY created_at DESC LIMIT 10
+        """)
+        recent = [
+            {
+                "kind": r["kind"], "ref": r["ref"], "client_name": r["client_name"],
+                "amount": r["amount"], "status": r["status"], "created_at": str(r["created_at"]),
+            }
+            for r in cursor.fetchall()
+        ]
+
+        return AnalyticsOverviewResponse(
+            total_sales_cop=round(total_sales, 2),
+            orders_count=len(order_rows),
+            payment_methods_breakdown=payment_breakdown,
+            shipping_status_breakdown=shipping_breakdown,
+            maintenance_count=maint_total,
+            maintenance_by_status=maint_by_status,
+            ricoh_models_serviced=models_serviced,
+            renting_pages_printed=renting_pages,
+            quotes_count=quotes_cnt,
+            recent_activity=recent,
+        )
+
+_EXPORT_TABLES = {
+    "orders": ("orders", ["order_code", "client_name", "client_email", "client_phone", "client_nit",
+                          "delivery_address", "delivery_city", "subtotal", "iva", "total",
+                          "payment_method", "payment_status", "shipping_status", "notes", "created_at"]),
+    "requests": ("maintenance_requests", ["id", "client_name", "client_email", "client_phone", "equipment",
+                                          "service_type", "desired_date", "desired_time", "description",
+                                          "status", "admin_notes", "created_at", "updated_at"]),
+    "counters": ("counter_reports", ["id", "client_name", "equipment_model", "mono_counter",
+                                     "color_counter", "report_month", "notes", "created_at"]),
+    "quotes": ("quotes", ["quote_code", "client_name", "client_email", "client_phone",
+                          "subtotal", "iva", "total", "notes", "created_at"]),
+}
+
+@app.get("/api/v1/admin/export/{dataset}")
+def export_dataset_csv(dataset: str, admin_user: dict = Depends(require_admin)):
+    if dataset not in _EXPORT_TABLES:
+        raise HTTPException(status_code=404, detail="Dataset no válido. Usa: orders, requests, counters, quotes.")
+    table, columns = _EXPORT_TABLES[dataset]
+    buf = io.StringIO()
+    buf.write("\ufeff")  # BOM para que Excel abra tildes correctamente
+    writer = csv.writer(buf, delimiter=";")
+    writer.writerow(columns)
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute(f"SELECT {', '.join(columns)} FROM {table} ORDER BY created_at DESC")
+        for r in cursor.fetchall():
+            writer.writerow(["" if r[c] is None else r[c] for c in columns])
+    filename = f"syp_{dataset}_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
+    return Response(
+        content=buf.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 if __name__ == "__main__":
     import uvicorn

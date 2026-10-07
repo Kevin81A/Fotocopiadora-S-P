@@ -185,6 +185,23 @@ def init_db():
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_orders_code ON orders(order_code)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_orders_email ON orders(client_email)")
 
+        # 9. Tabla de Notificaciones en Tiempo Real
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS notifications (
+            id TEXT PRIMARY KEY,
+            user_id TEXT,
+            user_email TEXT NOT NULL,
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            type TEXT NOT NULL DEFAULT 'info',
+            link_url TEXT,
+            is_read INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_email, is_read)")
+
         print("[SyP DB] Database initialized successfully at:", DB_PATH)
 
 if __name__ == "__main__":

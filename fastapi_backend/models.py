@@ -170,3 +170,37 @@ class CounterReportCreate(BaseModel):
     report_month: str
     notes: Optional[str] = None
 
+# --- Notifications Schemas ---
+class NotificationCreate(BaseModel):
+    user_id: Optional[str] = None
+    user_email: EmailStr
+    title: str = Field(..., min_length=2, max_length=150)
+    message: str = Field(..., min_length=2)
+    type: str = "info" # 'order', 'maintenance', 'system', 'promo', 'renting'
+    link_url: Optional[str] = None
+
+class NotificationResponse(BaseModel):
+    id: str
+    user_id: Optional[str] = None
+    user_email: str
+    title: str
+    message: str
+    type: str
+    link_url: Optional[str] = None
+    is_read: bool = False
+    created_at: Optional[str] = None
+
+# --- Analytics Overview Schemas ---
+class AnalyticsOverviewResponse(BaseModel):
+    total_sales_cop: float
+    orders_count: int
+    payment_methods_breakdown: dict
+    shipping_status_breakdown: dict
+    maintenance_count: int
+    maintenance_by_status: dict
+    ricoh_models_serviced: dict
+    renting_pages_printed: int
+    quotes_count: int
+    recent_activity: List[dict]
+
+

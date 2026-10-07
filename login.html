@@ -55,65 +55,133 @@
   </div>
 </section>
 
-<!-- ===================== AUTH ===================== -->
-<section class="section">
-  <div class="container">
-    <div class="auth-wrap">
-      <div class="auth-tabs">
-        <button class="auth-tab active" data-tab="login">Iniciar sesión</button>
-        <button class="auth-tab" data-tab="registro">Crear cuenta</button>
+<!-- ===================== AUTH SPLIT ===================== -->
+<section class="section" style="padding-top:40px; padding-bottom:80px;">
+  <div class="container" style="max-width:1060px;">
+    <div class="auth-split-wrapper">
+      
+      <!-- LADO IZQUIERDO: SHOWCASE / BENEFICIOS -->
+      <div class="auth-showcase">
+        <div>
+          <div class="live-status-pill" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.2); color:#FFF;">
+            <span class="live-dot" style="background:#E4002B;"></span>
+            <span>Portal de Clientes SyP</span>
+          </div>
+          <h2>Control total de tus impresoras y servicios técnicos.</h2>
+          <p style="color:rgba(250,250,248,0.75); font-size:14px; line-height:1.6;">
+            Accede al historial de visitas de tus equipos, programa mantenimientos prioritarios y recibe cotizaciones directas a tu WhatsApp.
+          </p>
+
+          <div class="auth-benefits-list">
+            <div class="auth-benefit-item">
+              <div class="auth-benefit-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <div class="auth-benefit-text">
+                <h4>Garantía Directa en Neiva</h4>
+                <p>Historial técnico de tus máquinas registrado con fecha y diagnósticos.</p>
+              </div>
+            </div>
+
+            <div class="auth-benefit-item">
+              <div class="auth-benefit-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <div class="auth-benefit-text">
+                <h4>Atención en Tiempo Récord</h4>
+                <p>Solicitudes atendidas por técnicos especialistas de planta en menos de 24h.</p>
+              </div>
+            </div>
+
+            <div class="auth-benefit-item">
+              <div class="auth-benefit-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
+              <div class="auth-benefit-text">
+                <h4>Tarifas Preferenciales en Tóner</h4>
+                <p>Precios especiales en recargas e insumos para clientes frecuentes.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size:12px; color:rgba(250,250,248,0.5); font-family:var(--font-mono);">
+          Fotocopiadora SyP · Avenida la Toma #3A-20 · Neiva, Huila
+        </div>
       </div>
 
-      <!-- LOGIN -->
-      <form class="auth-panel active" id="loginForm" data-panel="login" novalidate>
-        <div class="auth-hint">
-          Cuenta de administrador de prueba: <code>admin@sypfotocopiadoras.com</code> / <code>admin123</code>
+      <!-- LADO DERECHO: FORMULARIOS TABS -->
+      <div class="auth-form-side">
+        <div class="auth-tabs" style="margin-bottom:28px;">
+          <button class="auth-tab active" data-tab="login">Iniciar sesión</button>
+          <button class="auth-tab" data-tab="registro">Crear cuenta</button>
         </div>
-        <div class="form-group" id="loginEmailGroup">
-          <label for="loginEmail">Correo electrónico</label>
-          <input type="email" id="loginEmail" placeholder="tucorreo@ejemplo.com">
-          <span class="form-error"></span>
-        </div>
-        <div class="form-group" id="loginPasswordGroup">
-          <label for="loginPassword">Contraseña</label>
-          <input type="password" id="loginPassword" placeholder="••••••••">
-          <span class="form-error"></span>
-        </div>
-        <div class="form-success" id="loginSuccess">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-          <span>Sesión iniciada. Redirigiendo...</span>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
-      </form>
 
-      <!-- REGISTRO -->
-      <form class="auth-panel" id="registerForm" data-panel="registro" novalidate>
-        <div class="form-group" id="regNameGroup">
-          <label for="regName">Nombre completo</label>
-          <input type="text" id="regName" placeholder="" autocomplete="name">
-          <span class="form-error"></span>
-        </div>
-        <div class="form-group" id="regEmailGroup">
-          <label for="regEmail">Correo electrónico</label>
-          <input type="email" id="regEmail" placeholder="" autocomplete="email">
-          <span class="form-error"></span>
-        </div>
-        <div class="form-group" id="regPhoneGroup">
-          <label for="regPhone">Teléfono / WhatsApp</label>
-          <input type="tel" id="regPhone" placeholder="" autocomplete="tel" inputmode="numeric">
-          <span class="form-error"></span>
-        </div>
-        <div class="form-group" id="regPasswordGroup">
-          <label for="regPassword">Contraseña</label>
-          <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres">
-          <span class="form-error"></span>
-        </div>
-        <div class="form-success" id="registerSuccess">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-          <span>Cuenta creada. Redirigiendo...</span>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">Crear cuenta</button>
-      </form>
+        <!-- LOGIN -->
+        <form class="auth-panel active" id="loginForm" data-panel="login" novalidate>
+          <div class="auth-hint">
+            Administración: <code>admin@fotocopiadorasyp.com</code> / <code>admin123</code>
+          </div>
+          <div class="form-group" id="loginEmailGroup">
+            <label for="loginEmail">Correo electrónico</label>
+            <input type="email" id="loginEmail" placeholder="tucorreo@ejemplo.com" autocomplete="email">
+            <span class="form-error"></span>
+          </div>
+          <div class="form-group" id="loginPasswordGroup">
+            <label for="loginPassword">Contraseña</label>
+            <div class="input-password-wrap">
+              <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+              <button type="button" class="password-toggle-btn" data-target="loginPassword" aria-label="Mostrar u ocultar contraseña">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <span class="form-error"></span>
+          </div>
+          <div class="form-success" id="loginSuccess">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <span>Sesión iniciada. Redirigiendo...</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px;">Ingresar al sistema</button>
+        </form>
+
+        <!-- REGISTRO -->
+        <form class="auth-panel" id="registerForm" data-panel="registro" novalidate>
+          <div class="form-group" id="regNameGroup">
+            <label for="regName">Nombre completo o Empresa</label>
+            <input type="text" id="regName" placeholder="" autocomplete="name">
+            <span class="form-error"></span>
+          </div>
+          <div class="form-group" id="regEmailGroup">
+            <label for="regEmail">Correo electrónico</label>
+            <input type="email" id="regEmail" placeholder="" autocomplete="email">
+            <span class="form-error"></span>
+          </div>
+          <div class="form-group" id="regPhoneGroup">
+            <label for="regPhone">Teléfono / WhatsApp</label>
+            <input type="tel" id="regPhone" placeholder="" autocomplete="tel" inputmode="numeric">
+            <span class="form-error"></span>
+          </div>
+          <div class="form-group" id="regPasswordGroup">
+            <label for="regPassword">Contraseña</label>
+            <div class="input-password-wrap">
+              <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+              <button type="button" class="password-toggle-btn" data-target="regPassword" aria-label="Mostrar u ocultar contraseña">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="password-meter" id="passMeter">
+              <div class="password-meter-bar" id="passMeterBar"></div>
+            </div>
+            <span class="form-error"></span>
+          </div>
+          <div class="form-success" id="registerSuccess">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <span>Cuenta creada con éxito. Redirigiendo...</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px;">Crear cuenta gratuita</button>
+        </form>
+      </div>
+
     </div>
   </div>
 </section>
@@ -258,6 +326,52 @@
   regPhoneInput.addEventListener('input', (e) => {
     e.target.value = e.target.value.replace(/[^0-9+\s-]/g, '');
   });
+
+  /* ---------- Password Visibility Toggle ---------- */
+  document.querySelectorAll('.password-toggle-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const input = document.getElementById(targetId);
+      if (!input) return;
+      const isPass = input.type === 'password';
+      input.type = isPass ? 'text' : 'password';
+      btn.innerHTML = isPass
+        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    });
+  });
+
+  /* ---------- Password Strength Meter ---------- */
+  const regPassInput = document.getElementById('regPassword');
+  const passMeter = document.getElementById('passMeter');
+  const passMeterBar = document.getElementById('passMeterBar');
+
+  if (regPassInput && passMeter && passMeterBar) {
+    regPassInput.addEventListener('input', (e) => {
+      const val = e.target.value;
+      if (!val) {
+        passMeter.classList.remove('show');
+        return;
+      }
+      passMeter.classList.add('show');
+      let score = 0;
+      if (val.length >= 6) score += 25;
+      if (val.length >= 10) score += 25;
+      if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score += 25;
+      if (/[0-9]/.test(val) || /[^A-Za-z0-9]/.test(val)) score += 25;
+
+      passMeterBar.style.width = score + '%';
+      if (score <= 25) {
+        passMeterBar.style.backgroundColor = '#ef4444';
+      } else if (score <= 50) {
+        passMeterBar.style.backgroundColor = '#f59e0b';
+      } else if (score <= 75) {
+        passMeterBar.style.backgroundColor = '#3b82f6';
+      } else {
+        passMeterBar.style.backgroundColor = '#10b981';
+      }
+    });
+  }
 
   /* ---------- Submit: registro ---------- */
   document.getElementById('registerForm').addEventListener('submit', (e) => {

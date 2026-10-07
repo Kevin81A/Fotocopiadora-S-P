@@ -224,3 +224,44 @@ const PRODUCTS = [
 function formatCOP(value) {
   return '$' + Number(value).toLocaleString('es-CO');
 }
+
+/* ============================================================
+   SINCRONIZACIÓN CON BACKEND DJANGO REST FRAMEWORK
+   ============================================================ */
+const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+
+async function syncProductsFromBackend() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/products/`);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        PRODUCTS.length = 0;
+        data.forEach((item) => {
+          PRODUCTS.push({
+            id: item.id_code,
+            name: item.name,
+            cat: item.category_slug,
+            price: Number(item.price),
+            spec: item.spec,
+            stock: item.stock_status,
+            brand: item.brand_name,
+            models: item.compatible_models ? item.compatible_models.split(',').map((m) => m.trim()) : [],
+            discount: item.discount_percent || 0,
+          });
+        });
+        console.log('[SyP] ⚡ Conectado con Backend Django: ' + PRODUCTS.length + ' productos sincronizados.');
+        if (typeof applyFilters === 'function') {
+          applyFilters(false);
+        }
+      }
+    }
+  } catch (e) {
+    // Si Django está apagado, continúa con los datos estáticos sin interrumpir al usuario
+  }
+}
+
+// Intentar sincronización al cargar
+if (typeof window !== 'undefined') {
+  syncProductsFromBackend();
+}

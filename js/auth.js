@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
    Fotocopiadora SyP — Autenticación y Solicitudes de Servicio
    (simulado con localStorage mientras no existe back-end)
 
@@ -124,6 +124,25 @@ const SyP = (() => {
     };
     list.unshift(request);
     saveRequests(list);
+
+    // Sincronizar con API Django en tiempo real
+    try {
+      fetch('http://127.0.0.1:8000/api/v1/services/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_name: data.clienteNombre,
+          client_email: data.clienteEmail,
+          client_phone: data.clientePhone || '3143804967',
+          equipment: data.equipo,
+          service_type: data.tipo,
+          scheduled_date: data.fecha,
+          scheduled_time: data.hora,
+          description: data.descripcion || '',
+        })
+      }).catch(() => {});
+    } catch (e) {}
+
     return request;
   }
   function getRequestsByEmail(email) {

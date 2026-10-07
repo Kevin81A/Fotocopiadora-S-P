@@ -1,6 +1,15 @@
 # Old duplicate subfolder (ignore)
 syp-web/
 
+# Python & Django
+backend/venv/
+venv/
+*.pyc
+__pycache__/
+backend/db.sqlite3
+backend/media/
+*.sqlite3
+
 # Node / npm
 node_modules/
 npm-debug.log*

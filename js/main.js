@@ -2415,6 +2415,71 @@ function initProductCarousel() {
   // Inicialización suave si se requiere
 }
 
+/* ============================================================
+   10. CONTROL DE RED (ONLINE / OFFLINE) & BOTÓN VOLVER ARRIBA
+   ============================================================ */
+function initNetworkStatusListener() {
+  function updateOnlineStatus() {
+    let pill = document.getElementById('offlineBannerPill');
+    if (!pill) {
+      pill = document.createElement('div');
+      pill.id = 'offlineBannerPill';
+      pill.className = 'offline-banner-pill';
+      pill.innerHTML = `
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+        <span>Modo sin conexión: El catálogo local y códigos SC siguen disponibles</span>
+      `;
+      document.body.appendChild(pill);
+    }
+
+    if (!navigator.onLine) {
+      pill.classList.add('show');
+      showToast('⚠️ Modo sin conexión activado', 'error');
+    } else {
+      if (pill.classList.contains('show')) {
+        pill.classList.remove('show');
+        showToast('📡 Conexión a internet restablecida ✓', 'success');
+      }
+    }
+  }
+
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  if (!navigator.onLine) updateOnlineStatus();
+}
+
+function initBackToTopButton() {
+  if (document.getElementById('backToTopBtn')) return;
+
+  const btn = document.createElement('button');
+  btn.id = 'backToTopBtn';
+  btn.className = 'back-to-top-btn';
+  btn.setAttribute('aria-label', 'Volver arriba de la página');
+  btn.setAttribute('title', 'Volver arriba');
+  btn.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"/>
+    </svg>
+  `;
+
+  document.body.appendChild(btn);
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 380) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  }, { passive: true });
+
+  btn.addEventListener('click', () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+}
+
 /* ---------- Init Global ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
@@ -2438,6 +2503,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initCompatibilityFinder();
   initAdvisorSelectorModal();
   initPWAInstallBanner();
+  initNetworkStatusListener();
+  initBackToTopButton();
   renderTestimonials();
 
   const printQuoteBtn = document.getElementById('printQuoteBtn');

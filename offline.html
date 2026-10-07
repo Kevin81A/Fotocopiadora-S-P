@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modo Offline | Fotocopiadora SyP Neiva</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/style.css">
+<style>
+.offline-screen {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+}
+.offline-icon-box {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(228, 0, 43, 0.1);
+  color: var(--red, #e4002b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.offline-title {
+  font-family: var(--font-display, 'Archivo Black', sans-serif);
+  font-size: 26px;
+  margin-bottom: 12px;
+  color: var(--ink, #0b0b0c);
+}
+.offline-desc {
+  font-size: 15px;
+  color: var(--steel, #6b6d70);
+  max-width: 520px;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+.offline-card {
+  background: var(--paper-dim, #f1f0ec);
+  border: 1px solid var(--line, #e3e2df);
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 580px;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 28px;
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="brand">
+      <span class="reg-mark animate">
+        <svg viewBox="0 0 40 40">
+          <g class="layer-black"><circle cx="20" cy="20" r="12"/><line x1="20" y1="2" x2="20" y2="38"/><line x1="2" y1="20" x2="38" y2="20"/></g>
+          <g class="layer-red"><circle cx="20" cy="20" r="7"/></g>
+        </svg>
+      </span>
+      <span>
+        <span class="brand-name">Fotocopiadora <span>SyP</span></span><br>
+        <span class="brand-sub">Neiva · Modo Sin Conexión</span>
+      </span>
+    </a>
+  </div>
+</header>
+
+<main class="container">
+  <div class="offline-screen">
+    <div class="offline-icon-box">
+      <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="1" y1="1" x2="23" y2="23"/>
+        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+        <path d="M10.71 5.05A16 16 0 0 1 22.58 9"/>
+        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+        <line x1="12" y1="20" x2="12.01" y2="20"/>
+      </svg>
+    </div>
+
+    <h1 class="offline-title">Estás en Modo Sin Conexión</h1>
+    <p class="offline-desc">No tienes acceso a internet en este momento, pero puedes consultar la información técnica de emergencia y los teléfonos de soporte de planta en Neiva.</p>
+
+    <div class="offline-card">
+      <h3 style="font-size:16px; margin-bottom:12px; color:var(--ink);">📞 Líneas de Atención Directa Telefónica</h3>
+      <div style="font-size:13.5px; line-height:1.8; color:var(--steel);">
+        <div>• <strong>Gladys Solano Murcia (Ventas & Renting):</strong> <a href="tel:+573143804967" style="color:var(--red); font-weight:700;">+57 314 380 4967</a></div>
+        <div>• <strong>Juan Sebastián Portela (Soporte Técnico & Taller):</strong> <a href="tel:+573178204193" style="color:var(--red); font-weight:700;">+57 317 820 4193</a></div>
+        <div>• <strong>Sede Central:</strong> Avenida La Toma #3A-20, Neiva, Huila</div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+      <button onclick="window.location.reload()" class="btn btn-primary">
+        🔄 Reintentar Conexión
+      </button>
+      <a href="servicio-tecnico.html" class="btn btn-outline">
+        🛠️ Ver Códigos de Error Ricoh Guardados
+      </a>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer" style="padding:24px 0;">
+  <div class="container" style="text-align:center; font-size:12px; color:var(--steel);">
+    <span>Fotocopiadora SyP · Sede Central Neiva · Modo Offline PWA</span>
+  </div>
+</footer>
+
+</body>
+</html>

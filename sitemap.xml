@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://fotocopiadorasyp.com/</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/hero_ricoh.jpg</image:loc>
+      <image:title>Fotocopiadora SyP Neiva — Venta, Renting y Mantenimiento Ricoh</image:title>
+      <image:caption>Equipos multifuncionales e impresoras Ricoh en Neiva, Huila</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://fotocopiadorasyp.com/productos.html</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/prod_copier.jpg</image:loc>
+      <image:title>Catálogo de Fotocopiadoras, Impresoras y Tóners Ricoh</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://fotocopiadorasyp.com/servicio-tecnico.html</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/hero_service.jpg</image:loc>
+      <image:title>Servicio Técnico Ricoh, Buscador de Códigos SC y Taller en Neiva</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://fotocopiadorasyp.com/nosotros.html</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/about_store.jpg</image:loc>
+      <image:title>Sobre Fotocopiadora SyP — Trayectoria en Neiva, Huila</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://fotocopiadorasyp.com/contacto.html</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://fotocopiadorasyp.com/img/contact_advisors.jpg</image:loc>
+      <image:title>Contacto Directo — Gladys Solano y Juan Sebastián Portela</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://fotocopiadorasyp.com/cotizacion.html</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://fotocopiadorasyp.com/login.html</loc>
+    <lastmod>2026-10-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>

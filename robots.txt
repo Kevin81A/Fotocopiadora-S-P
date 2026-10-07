@@ -1,0 +1,23 @@
+# =========================================================
+# Robots.txt — Fotocopiadora SyP (Neiva, Huila)
+# =========================================================
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /productos.html
+Allow: /servicio-tecnico.html
+Allow: /nosotros.html
+Allow: /contacto.html
+Allow: /login.html
+Allow: /cotizacion.html
+Allow: /css/
+Allow: /js/
+Allow: /img/
+
+# Excluir rutas privadas y de backend
+Disallow: /admin.html
+Disallow: /fastapi_backend/
+Disallow: /api/
+
+Sitemap: https://fotocopiadorasyp.com/sitemap.xml

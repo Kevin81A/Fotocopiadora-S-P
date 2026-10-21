@@ -9,9 +9,23 @@ from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, Security, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from database import get_db
+import secrets
 
-# En producción esto se extrae de variables de entorno (os.environ.get)
-SECRET_KEY = os.environ.get("SYP_JWT_SECRET", "syp_super_secret_jwt_key_neiva_huila_2026_ricoh_specialist")
+# Clave secreta robusta: de entorno o persistida en archivo protegido
+_SECRET_FILE = os.path.join(os.path.dirname(__file__), ".jwt_secret")
+if os.environ.get("SYP_JWT_SECRET"):
+    SECRET_KEY = os.environ["SYP_JWT_SECRET"]
+elif os.path.exists(_SECRET_FILE):
+    with open(_SECRET_FILE, "r", encoding="utf-8") as _f:
+        SECRET_KEY = _f.read().strip()
+else:
+    SECRET_KEY = secrets.token_urlsafe(64)
+    try:
+        with open(_SECRET_FILE, "w", encoding="utf-8") as _f:
+            _f.write(SECRET_KEY)
+    except Exception:
+        pass
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_DAYS = 7
 

@@ -15,13 +15,6 @@ const SyP = (() => {
     REQUESTS: 'syp_maintenance_requests',
   };
 
-  const ADMIN_ACCOUNT = {
-    email: 'admin@sypfotocopiadoras.com',
-    password: 'admin123',
-    name: 'Administración SyP Central',
-    role: 'admin',
-  };
-
   function getToken() {
     return localStorage.getItem(KEYS.TOKEN) || null;
   }
@@ -151,14 +144,8 @@ const SyP = (() => {
         return { ok: false, error: errData.detail || 'Correo o contraseña incorrectos.' };
       }
     } catch (networkErr) {
-      // Fallback local
-      console.warn('[SyP Auth] Backend fuera de línea, usando fallback local.');
-      if (emailNorm === ADMIN_ACCOUNT.email && password === ADMIN_ACCOUNT.password) {
-        const session = { name: ADMIN_ACCOUNT.name, email: ADMIN_ACCOUNT.email, role: 'admin' };
-        setSession(session);
-        return { ok: true, session };
-      }
-      return { ok: false, error: 'No se pudo conectar al servidor de autenticación.' };
+      console.warn('[SyP Auth] No se pudo comunicar con el servidor:', networkErr);
+      return { ok: false, error: 'No se pudo conectar al servidor de autenticación. Verifica que el backend esté en ejecución.' };
     }
   }
 
@@ -383,7 +370,11 @@ const SyP = (() => {
         headers: getAuthHeaders(),
         body: JSON.stringify(data),
       });
-      return await res.json();
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return { ok: false, message: resData.detail || 'Error al registrar contador en el servidor.' };
+      }
+      return { ok: true, ...resData };
     } catch (e) {
       return { ok: false, message: 'Error de conexión con el servidor.' };
     }
@@ -483,7 +474,6 @@ const SyP = (() => {
 
   return {
     API_URL,
-    ADMIN_ACCOUNT,
     getToken,
     setToken,
     registerUser,

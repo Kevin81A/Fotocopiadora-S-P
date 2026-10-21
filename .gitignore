@@ -53,6 +53,13 @@ desktop.ini
 *.swo
 *~
 
+# SQLite databases & JWT secrets
+*.db
+*.sqlite
+*.sqlite3
+.jwt_secret
+syp.db
+
 # Temporary
 *.tmp
 *.bak

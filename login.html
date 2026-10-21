@@ -128,7 +128,7 @@
         <!-- LOGIN -->
         <form class="auth-panel active" id="loginForm" data-panel="login" novalidate>
           <div class="auth-hint">
-            Administración: <code>admin@fotocopiadorasyp.com</code> / <code>admin123</code>
+            Administración: <code>admin@sypfotocopiadoras.com</code> / <code>admin123</code>
           </div>
           <div class="form-group" id="loginEmailGroup">
             <label for="loginEmail">Correo electrónico</label>
@@ -338,7 +338,7 @@
   const regPhoneInput = document.getElementById('regPhone');
 
   regNameInput.addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '');
+    e.target.value = e.target.value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,&'-]/g, '');
   });
 
   regPhoneInput.addEventListener('input', (e) => {

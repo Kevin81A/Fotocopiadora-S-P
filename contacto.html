@@ -426,9 +426,9 @@
     const nameInput = document.getElementById('cfName');
     const phoneInput = document.getElementById('cfPhone');
 
-    // Bloquear números y símbolos no alfabéticos en el nombre (solo letras, acentos, espacios)
+    // Permitir letras, números, acentos, espacios y signos comunes en razones sociales
     nameInput.addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '');
+      e.target.value = e.target.value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,&'-]/g, '');
     });
 
     // Bloquear letras y caracteres inválidos en teléfono (solo números, espacios, +)

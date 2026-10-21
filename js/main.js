@@ -335,7 +335,7 @@ function renderCheckoutModalContent() {
   const modal = document.getElementById('checkoutModal');
   if (!modal) return;
 
-  const user = (typeof Auth !== 'undefined' && Auth.getUser) ? Auth.getUser() : null;
+  const user = (typeof SyP !== 'undefined' && SyP.getSession) ? SyP.getSession() : null;
   const total = cartTotal();
   const subtotal = Math.round(total / 1.19);
   const iva = total - subtotal;
@@ -751,7 +751,7 @@ async function processOrderSubmission() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(typeof Auth !== 'undefined' && Auth.getToken() ? { 'Authorization': `Bearer ${Auth.getToken()}` } : {})
+          ...(typeof SyP !== 'undefined' && SyP.getToken && SyP.getToken() ? { 'Authorization': `Bearer ${SyP.getToken()}` } : {})
         },
         body: JSON.stringify({
           client_name: name,
@@ -765,7 +765,7 @@ async function processOrderSubmission() {
           iva: iva,
           total: grandTotal,
           payment_method: selectedPaymentMethod,
-          payment_status: selectedPaymentMethod === 'Transferencia Bancolombia / Nequi' ? 'En Verificación' : 'Aprobado',
+          payment_status: selectedPaymentMethod === 'Transferencia Bancolombia / Nequi' ? 'En Verificación' : 'Pendiente',
           notes: notes
         })
       });
@@ -2875,26 +2875,35 @@ async function saveCounterReportOnly() {
   }
 
   try {
+    let apiSuccess = false;
     if (typeof SyP !== 'undefined' && SyP.submitCounterReport) {
-      await SyP.submitCounterReport(payload);
+      const apiRes = await SyP.submitCounterReport(payload);
+      if (apiRes && apiRes.ok) {
+        apiSuccess = true;
+      }
     }
     const existing = JSON.parse(localStorage.getItem('syp_counter_reports') || '[]');
     existing.unshift({
       id: 'cnt_' + Date.now().toString(36),
       created_at: new Date().toISOString(),
+      synced: apiSuccess,
       ...payload
     });
     localStorage.setItem('syp_counter_reports', JSON.stringify(existing));
 
     const successBox = document.getElementById('publicCounterSuccess');
     if (successBox) successBox.classList.add('show');
-    showToast('¡Reporte guardado en plataforma SyP con éxito! 📊', 'success');
+    if (apiSuccess) {
+      showToast('¡Reporte guardado en la plataforma SyP con éxito! 📊', 'success');
+    } else {
+      showToast('Reporte guardado localmente (se sincronizará al conectar con el servidor).', 'info');
+    }
     document.getElementById('publicCounterReportForm')?.reset();
     setTimeout(() => {
       if (successBox) successBox.classList.remove('show');
     }, 5000);
   } catch (err) {
-    showToast('Reporte respaldado en almacenamiento seguro local.', 'success');
+    showToast('Reporte respaldado en almacenamiento seguro local.', 'info');
   } finally {
     if (btn) {
       btn.disabled = false;

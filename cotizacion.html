@@ -373,11 +373,20 @@
       <p style="margin-top:16px; color:#64748b; font-weight:600;">Cargando documento comercial oficial...</p>
     </div>
 
-    <div id="docErrorState" style="display:none; text-align:center; padding:60px 20px; background:#fff; border-radius:12px; max-width:600px; margin:0 auto;">
+    <div id="docErrorState" style="display:none; text-align:center; padding:48px 24px; background:#fff; border-radius:12px; max-width:620px; margin:0 auto; box-shadow:0 4px 20px rgba(0,0,0,0.06);">
       <div style="font-size:48px; margin-bottom:12px;">📄🔍</div>
-      <h2 style="color:#0f172a; margin-bottom:8px;">Documento no encontrado</h2>
-      <p id="docErrorMessage" style="color:#64748b; margin-bottom:24px;">No se encontró una cotización o pedido asociado al código especificado.</p>
-      <a href="productos.html" class="doc-btn doc-btn-primary">Ver Catálogo Ricoh</a>
+      <h2 style="color:#0f172a; margin-bottom:8px;">Consultar Documento Comercial</h2>
+      <p id="docErrorMessage" style="color:#64748b; margin-bottom:24px;">No se especificó un código o no se encontró el documento solicitado.</p>
+      
+      <div style="margin-bottom:24px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+        <input type="text" id="manualDocCode" placeholder="Ej: ORD-2026-AB12 o COT-2026-CD34" style="padding:10px 14px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; width:260px; max-width:100%;">
+        <button type="button" class="doc-btn doc-btn-primary" onclick="lookupManualDoc()">Buscar</button>
+      </div>
+
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <a href="productos.html" class="doc-btn" style="background:#0f172a; color:#fff;">Ver Catálogo Ricoh</a>
+        <a href="index.html" class="doc-btn" style="background:#f1f5f9; color:#334155;">Ir al Inicio</a>
+      </div>
     </div>
 
     <!-- TARJETA PRINCIPAL DEL DOCUMENTO -->
@@ -719,6 +728,19 @@ function showDocError(msg) {
   document.getElementById("docContainer").style.display = "none";
   document.getElementById("docErrorMessage").textContent = msg;
   document.getElementById("docErrorState").style.display = "block";
+}
+
+function lookupManualDoc() {
+  const code = document.getElementById("manualDocCode")?.value.trim();
+  if (!code) {
+    if (typeof showToast === "function") showToast("Ingresa un código válido", "error");
+    return;
+  }
+  if (code.toUpperCase().startsWith("ORD-")) {
+    window.location.href = `cotizacion.html?order=${encodeURIComponent(code)}`;
+  } else {
+    window.location.href = `cotizacion.html?code=${encodeURIComponent(code)}`;
+  }
 }
 
 function copyDocLink() {

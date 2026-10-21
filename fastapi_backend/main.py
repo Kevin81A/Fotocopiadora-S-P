@@ -1,6 +1,7 @@
 """
 Fotocopiadora SyP — REST API Server (FastAPI + JWT Authentication + SQLite)
 """
+import os
 import uuid
 import json
 import csv
@@ -50,10 +51,23 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Habilitar CORS para peticiones desde el frontend web
+# Habilitar CORS con orígenes controlados para prevenir vulnerabilidades de cross-origin
+allowed_origins_env = os.environ.get("ALLOWED_ORIGINS")
+if allowed_origins_env:
+    allowed_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
+else:
+    allowed_origins = [
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -627,6 +641,40 @@ def create_order(
 
     with get_db() as conn:
         cursor = conn.cursor()
+
+        # Recalcular precios e integridad del carrito en el servidor (SEC-04)
+        verified_items = []
+        catalog_total = 0.0
+        for item in items:
+            prod_id = str(item.get("id", "")).strip()
+            qty = max(1, int(item.get("qty", 1)))
+            cursor.execute("SELECT id, name, price FROM products WHERE id = ?", (prod_id,))
+            p_row = cursor.fetchone()
+            if p_row:
+                unit_price = float(p_row["price"])
+                p_name = p_row["name"]
+            else:
+                unit_price = float(item.get("price", 0))
+                p_name = item.get("name", "Producto Ricoh")
+            
+            line_total = unit_price * qty
+            catalog_total += line_total
+            verified_items.append({
+                "id": prod_id,
+                "name": p_name,
+                "price": unit_price,
+                "qty": qty,
+                "line_total": line_total
+            })
+
+        server_subtotal = round(catalog_total / 1.19)
+        server_iva = round(catalog_total - server_subtotal)
+        shipping_fee = 0 if catalog_total >= 100000 else 8000
+        server_total = catalog_total + shipping_fee
+
+        # El estado de pago nunca debe ser auto-aprobado por el cliente
+        initial_payment_status = "En Verificación" if "Transferencia" in payload.payment_method or "Nequi" in payload.payment_method else "Pendiente"
+
         cursor.execute("""
         INSERT INTO orders (
             id, order_code, client_id, client_name, client_email, client_phone, client_nit,
@@ -636,22 +684,22 @@ def create_order(
         """, (
             order_id, order_code, client_id, payload.client_name.strip(), payload.client_email.lower().strip(),
             payload.client_phone.strip(), payload.client_nit.strip() if payload.client_nit else None,
-            payload.delivery_address.strip(), payload.delivery_city.strip(), payload.items_json,
-            payload.subtotal, payload.iva, payload.total, payload.payment_method,
-            payload.payment_status or "Aprobado", payload.notes.strip() if payload.notes else None
+            payload.delivery_address.strip(), payload.delivery_city.strip(), json.dumps(verified_items),
+            server_subtotal, server_iva, server_total, payload.payment_method,
+            initial_payment_status, payload.notes.strip() if payload.notes else None
         ))
 
         # Disparadores automáticos: cliente + equipo administrativo
         create_notification(
             cursor, payload.client_email.lower().strip(),
             f"✅ Pedido {order_code} recibido",
-            f"Registramos tu pedido por ${payload.total:,.0f} COP ({payload.payment_method}). "
+            f"Registramos tu pedido por ${server_total:,.0f} COP ({payload.payment_method}). "
             "Te avisaremos cuando sea despachado en Neiva.".replace(",", "."),
             "order", f"/cotizacion.html?order={order_code}", client_id
         )
         notify_admins(
             cursor, f"🛒 Nuevo pedido {order_code}",
-            f"{payload.client_name.strip()} · ${payload.total:,.0f} COP · {payload.payment_method}".replace(",", "."),
+            f"{payload.client_name.strip()} · ${server_total:,.0f} COP · {payload.payment_method}".replace(",", "."),
             "order", "/admin.html#orders"
         )
         
@@ -659,14 +707,20 @@ def create_order(
             "ok": True,
             "order_code": order_code,
             "id": order_id,
-            "payment_status": payload.payment_status or "Aprobado",
+            "subtotal": server_subtotal,
+            "iva": server_iva,
+            "total": server_total,
+            "payment_status": initial_payment_status,
             "shipping_status": "En preparación",
             "receipt_url": f"/cotizacion.html?order={order_code}",
             "message": "¡Pedido registrado exitosamente en el sistema de Fotocopiadora SyP!"
         }
 
 @app.get("/api/v1/orders/{order_code}")
-def get_order_by_code(order_code: str):
+def get_order_by_code(
+    order_code: str,
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
     with get_db() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM orders WHERE order_code = ? OR id = ?", (order_code, order_code))
@@ -674,14 +728,41 @@ def get_order_by_code(order_code: str):
         if not row:
             raise HTTPException(status_code=404, detail="Pedido no encontrado.")
         
+        # Determinar si el solicitante es el dueño del pedido o un administrador
+        is_owner = False
+        if current_user:
+            if current_user.get("role") == "admin":
+                is_owner = True
+            elif current_user.get("id") and row["client_id"] and current_user.get("id") == row["client_id"]:
+                is_owner = True
+            elif current_user.get("email") and row["client_email"] and current_user["email"].lower() == row["client_email"].lower():
+                is_owner = True
+
+        email = row["client_email"]
+        phone = row["client_phone"]
+        nit = row["client_nit"]
+        address = row["delivery_address"]
+
+        if not is_owner:
+            # Enmascarar PII para visitantes no autenticados (SEC-03)
+            if email and "@" in email:
+                user_part, domain_part = email.split("@", 1)
+                email = f"{user_part[:2]}***@{domain_part}"
+            if phone:
+                phone = f"******{phone[-4:]}" if len(phone) >= 4 else "***"
+            if nit:
+                nit = f"***{nit[-4:]}" if len(nit) >= 4 else "***"
+            if address:
+                address = f"{address[:10]}... (Protegido)"
+
         return {
             "id": row["id"],
             "order_code": row["order_code"],
             "client_name": row["client_name"],
-            "client_email": row["client_email"],
-            "client_phone": row["client_phone"],
-            "client_nit": row["client_nit"],
-            "delivery_address": row["delivery_address"],
+            "client_email": email,
+            "client_phone": phone,
+            "client_nit": nit,
+            "delivery_address": address,
             "delivery_city": row["delivery_city"],
             "items": json.loads(row["items_json"]),
             "subtotal": row["subtotal"],
@@ -793,8 +874,13 @@ def update_order_status(
         return {"ok": True, "message": "Estado del pedido actualizado con éxito."}
 
 @app.post("/api/v1/counters")
-def submit_counter_report(payload: CounterReportCreate, current_user: dict = Depends(get_current_user)):
+def submit_counter_report(
+    payload: CounterReportCreate,
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
     rep_id = f"cnt_{uuid.uuid4().hex[:8]}"
+    client_id = current_user["id"] if current_user else None
+    client_name = (payload.client_name or (current_user["name"] if current_user else "Cliente Web SyP")).strip()
     with get_db() as conn:
         cursor = conn.cursor()
         cursor.execute("""
@@ -802,9 +888,17 @@ def submit_counter_report(payload: CounterReportCreate, current_user: dict = Dep
             id, client_id, client_name, equipment_model, mono_counter, color_counter, report_month, notes
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            rep_id, current_user["id"], current_user["name"], payload.equipment_model,
+            rep_id, client_id, client_name, payload.equipment_model,
             payload.mono_counter, payload.color_counter, payload.report_month, payload.notes or ""
         ))
+
+        # Notificar a los administradores del nuevo reporte de contador
+        notify_admins(
+            cursor, f"📊 Nuevo reporte de contador: {payload.equipment_model}",
+            f"{client_name} · B/N: {payload.mono_counter:,} · Color: {payload.color_counter:,} · Mes: {payload.report_month}".replace(",", "."),
+            "maintenance", "/admin.html#counters"
+        )
+
         return {"ok": True, "id": rep_id, "message": "Reporte de contador registrado con éxito."}
 
 @app.get("/api/v1/counters")

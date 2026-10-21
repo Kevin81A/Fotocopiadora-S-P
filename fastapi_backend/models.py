@@ -135,7 +135,7 @@ class OrderCreate(BaseModel):
     iva: float = Field(..., ge=0)
     total: float = Field(..., gt=0)
     payment_method: str = Field(..., pattern="^(PSE|Tarjeta de Crédito / Débito|Transferencia Bancolombia / Nequi|Crédito Empresarial 30 Días|WhatsApp Directo)$")
-    payment_status: Optional[str] = "Aprobado"
+    payment_status: Optional[str] = "Pendiente"
     notes: Optional[str] = None
 
 class OrderStatusUpdate(BaseModel):
@@ -164,6 +164,7 @@ class OrderResponse(BaseModel):
     created_at: Optional[str] = None
 
 class CounterReportCreate(BaseModel):
+    client_name: Optional[str] = None
     equipment_model: str
     mono_counter: int = Field(..., ge=0)
     color_counter: int = Field(0, ge=0)

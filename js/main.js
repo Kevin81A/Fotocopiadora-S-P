@@ -2980,6 +2980,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  // Registro de Service Worker para PWA (Página descargable / instalable)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then((reg) => {
+      // Si hay una nueva versión del Service Worker esperando, forzar actualización
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('[SyP PWA] Nueva versión disponible y actualizada.');
+            }
+          });
+        }
+      });
+    }).catch((err) => {
+      console.warn('[SyP PWA] Aviso de registro SW:', err);
+    });
+  }
 });
 
 

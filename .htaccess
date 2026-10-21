@@ -1,0 +1,26 @@
+# ============================================================
+# Fotocopiadora SyP — Apache Security Hardening
+# ============================================================
+
+# Desactivar listado de directorios
+Options -Indexes
+
+# Bloquear acceso a archivos sensibles y bases de datos
+<FilesMatch "(\.db|\.sqlite|\.sqlite3|\.py|\.env|\.md|\.jsonl|\.git|\.yml|\.yaml|\.log|\.bak|\.tmp)$">
+    Require all denied
+</FilesMatch>
+
+# Bloquear directorios ocultos (como .git) y carpetas de backend
+RedirectMatch 404 ^/\.git
+RedirectMatch 404 ^/fastapi_backend
+RedirectMatch 404 ^/backend
+RedirectMatch 404 ^/\.vscode
+RedirectMatch 404 ^/\.stitch
+
+# Cabeceras de seguridad HTTP
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

@@ -940,11 +940,13 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    const session = await SyP.verifyCurrentSession() || SyP.getSession();
+    // Validar sesión exclusivamente contra el servidor (Cero confianza en cliente - VULN-05)
+    const session = await SyP.verifyCurrentSession();
     const adminContent = document.getElementById('adminContent');
     const denied = document.getElementById('deniedContent');
 
     if (!session || session.role !== 'admin') {
+      if (typeof SyP !== 'undefined') SyP.logout();
       adminContent.style.display = 'none';
       denied.style.display = 'block';
       return;

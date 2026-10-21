@@ -11,10 +11,19 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from database import get_db
 import secrets
 
+_INSECURE_DEFAULT_SECRET = "syp_super_secret_jwt_key_neiva_huila_2026_ricoh_specialist"
+IS_PRODUCTION = os.environ.get("ENVIRONMENT", "development").lower() == "production"
+
 # Clave secreta robusta: de entorno o persistida en archivo protegido
 _SECRET_FILE = os.path.join(os.path.dirname(__file__), ".jwt_secret")
-if os.environ.get("SYP_JWT_SECRET"):
-    SECRET_KEY = os.environ["SYP_JWT_SECRET"]
+env_secret = os.environ.get("SYP_JWT_SECRET")
+
+if IS_PRODUCTION:
+    if not env_secret or env_secret == _INSECURE_DEFAULT_SECRET:
+        raise RuntimeError("ERROR CRÍTICO DE SEGURIDAD: En producción 'SYP_JWT_SECRET' debe configurarse con una clave de alta entropía.")
+    SECRET_KEY = env_secret
+elif env_secret:
+    SECRET_KEY = env_secret
 elif os.path.exists(_SECRET_FILE):
     with open(_SECRET_FILE, "r", encoding="utf-8") as _f:
         SECRET_KEY = _f.read().strip()
@@ -27,7 +36,7 @@ else:
         pass
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_DAYS = 7
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 
 security_scheme = HTTPBearer(auto_error=False)
 
@@ -46,7 +55,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     
     to_encode.update({"exp": expire, "iat": datetime.now(timezone.utc)})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

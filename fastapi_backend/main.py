@@ -7,8 +7,11 @@ import json
 import csv
 import io
 from datetime import datetime, timezone
+import time
+from collections import defaultdict
+from threading import Lock
 from typing import Optional, List
-from fastapi import FastAPI, HTTPException, Depends, status, Query, Response
+from fastapi import FastAPI, HTTPException, Depends, status, Query, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from database import get_db, init_db
 from security import (
@@ -45,10 +48,73 @@ from models import (
 # Inicializar Base de Datos al arrancar
 init_db()
 
+# ============================================================
+# CONTROL DE ENTORNO Y RATE LIMITING (VULN-07 & VULN-08)
+# ============================================================
+IS_PRODUCTION = os.environ.get("ENVIRONMENT", "development").lower() == "production"
+
+class InMemoryRateLimiter:
+    """Limitador de tasa de peticiones en memoria tipo Sliding Window (Throttling)"""
+    def __init__(self, requests_limit: int, window_seconds: int):
+        self.requests_limit = requests_limit
+        self.window_seconds = window_seconds
+        self.history = defaultdict(list)
+        self.lock = Lock()
+
+    def check(self, client_ip: str) -> bool:
+        now = time.time()
+        with self.lock:
+            valid_window = now - self.window_seconds
+            self.history[client_ip] = [t for t in self.history[client_ip] if t > valid_window]
+            if len(self.history[client_ip]) >= self.requests_limit:
+                return False
+            self.history[client_ip].append(now)
+            return True
+
+login_limiter = InMemoryRateLimiter(requests_limit=5, window_seconds=60)
+register_limiter = InMemoryRateLimiter(requests_limit=5, window_seconds=60)
+quote_limiter = InMemoryRateLimiter(requests_limit=10, window_seconds=60)
+contact_limiter = InMemoryRateLimiter(requests_limit=5, window_seconds=60)
+
+def rate_limit_login(request: Request):
+    ip = request.client.host if request.client else "unknown"
+    if not login_limiter.check(ip):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Demasiados intentos de inicio de sesión. Por favor espera un minuto antes de reintentar."
+        )
+
+def rate_limit_register(request: Request):
+    ip = request.client.host if request.client else "unknown"
+    if not register_limiter.check(ip):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Límite temporal de registros alcanzado. Espera un minuto."
+        )
+
+def rate_limit_quote(request: Request):
+    ip = request.client.host if request.client else "unknown"
+    if not quote_limiter.check(ip):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Límite de solicitudes de cotización alcanzado. Intenta de nuevo en un minuto."
+        )
+
+def rate_limit_contact(request: Request):
+    ip = request.client.host if request.client else "unknown"
+    if not contact_limiter.check(ip):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Límite de mensajes de contacto alcanzado. Intenta de nuevo en un minuto."
+        )
+
 app = FastAPI(
     title="Fotocopiadora SyP — API REST Oficial",
     description="Servidor API seguro para E-commerce, Catálogo Ricoh, Mantenimiento Técnico y Autenticación JWT.",
     version="1.0.0",
+    docs_url=None if IS_PRODUCTION else "/docs",
+    redoc_url=None if IS_PRODUCTION else "/redoc",
+    openapi_url=None if IS_PRODUCTION else "/openapi.json",
 )
 
 # Habilitar CORS con orígenes controlados para prevenir vulnerabilidades de cross-origin
@@ -150,7 +216,7 @@ def health_check():
 # ============================================================
 # 2. AUTHENTICATION & USERS ENDPOINTS (JWT)
 # ============================================================
-@app.post("/api/v1/auth/register", response_model=AuthTokenResponse, status_code=status.HTTP_201_CREATED)
+@app.post("/api/v1/auth/register", response_model=AuthTokenResponse, status_code=status.HTTP_201_CREATED, dependencies=[Depends(rate_limit_register)])
 def register_user(payload: UserRegisterRequest):
     email_norm = payload.email.lower().strip()
     
@@ -187,7 +253,7 @@ def register_user(payload: UserRegisterRequest):
         
         return AuthTokenResponse(access_token=access_token, user=user_res)
 
-@app.post("/api/v1/auth/login", response_model=AuthTokenResponse)
+@app.post("/api/v1/auth/login", response_model=AuthTokenResponse, dependencies=[Depends(rate_limit_login)])
 def login_user(payload: UserLoginRequest):
     email_norm = payload.email.lower().strip()
     
@@ -540,7 +606,7 @@ def update_request_status(
 # ============================================================
 # 5. QUOTES, CONTACT & COUNTER REPORTING ENDPOINTS
 # ============================================================
-@app.post("/api/v1/contact")
+@app.post("/api/v1/contact", dependencies=[Depends(rate_limit_contact)])
 def create_contact_message(payload: ContactMessageCreate):
     msg_id = f"msg_{uuid.uuid4().hex[:8]}"
     with get_db() as conn:
@@ -551,41 +617,116 @@ def create_contact_message(payload: ContactMessageCreate):
         """, (msg_id, payload.name, payload.email, payload.phone, payload.subject, payload.message))
         return {"ok": True, "id": msg_id, "message": "Mensaje recibido correctamente. Te contactaremos pronto."}
 
-@app.post("/api/v1/quotes")
-def save_quotation(payload: QuoteCreate):
+@app.post("/api/v1/quotes", dependencies=[Depends(rate_limit_quote)])
+def save_quotation(
+    payload: QuoteCreate,
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
     quote_code = f"COT-2026-{uuid.uuid4().hex[:6].upper()}"
     quote_id = f"q_{uuid.uuid4().hex[:8]}"
+
+    # Validar formato items_json
+    try:
+        items = json.loads(payload.items_json)
+        if not isinstance(items, list) or len(items) == 0:
+            raise ValueError("Items must be a non-empty list.")
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Formato inválido de productos en la cotización: {str(e)}"
+        )
+
     with get_db() as conn:
         cursor = conn.cursor()
+
+        # Recalcular precios e integridad de cotización en el servidor (VULN-04)
+        verified_items = []
+        catalog_total = 0.0
+        for item in items:
+            prod_id = str(item.get("id", "")).strip()
+            qty = max(1, int(item.get("qty", 1)))
+            cursor.execute("SELECT id, name, price FROM products WHERE id = ?", (prod_id,))
+            p_row = cursor.fetchone()
+            if p_row:
+                unit_price = float(p_row["price"])
+                p_name = p_row["name"]
+            else:
+                unit_price = float(item.get("price", 0))
+                p_name = item.get("name", "Producto Ricoh")
+            
+            line_total = unit_price * qty
+            catalog_total += line_total
+            verified_items.append({
+                "id": prod_id,
+                "name": p_name,
+                "price": unit_price,
+                "qty": qty,
+                "line_total": line_total
+            })
+
+        server_subtotal = round(catalog_total / 1.19)
+        server_iva = round(catalog_total - server_subtotal)
+        server_total = catalog_total
+
+        client_name = (payload.client_name or (current_user["name"] if current_user else "")).strip()
+        client_email = (payload.client_email or (current_user["email"] if current_user else "")).strip().lower()
+        client_phone = (payload.client_phone or (current_user["phone"] if current_user else "")).strip()
+
         cursor.execute("""
         INSERT INTO quotes (id, quote_code, client_name, client_email, client_phone, items_json, subtotal, iva, total, notes)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            quote_id, quote_code, payload.client_name or "", payload.client_email or "",
-            payload.client_phone or "", payload.items_json, payload.subtotal, payload.iva,
-            payload.total, payload.notes or ""
+            quote_id, quote_code, client_name, client_email,
+            client_phone, json.dumps(verified_items), server_subtotal, server_iva,
+            server_total, payload.notes.strip() if payload.notes else ""
         ))
         return {
             "ok": True,
             "quote_code": quote_code,
             "id": quote_id,
+            "subtotal": server_subtotal,
+            "iva": server_iva,
+            "total": server_total,
             "permalink_url": f"/cotizacion.html?code={quote_code}"
         }
 
 @app.get("/api/v1/quotes/{quote_code}")
-def get_quotation_by_code(quote_code: str):
+def get_quotation_by_code(
+    quote_code: str,
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
     with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM quotes WHERE quote_code = ?", (quote_code,))
+        cursor.execute("SELECT * FROM quotes WHERE quote_code = ? OR id = ?", (quote_code, quote_code))
         row = cursor.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Cotización no encontrada.")
         
+        # Determinar si el solicitante es el dueño o un administrador (VULN-03)
+        is_owner = False
+        if current_user:
+            if current_user.get("role") == "admin":
+                is_owner = True
+            elif current_user.get("email") and row["client_email"] and current_user["email"].lower() == row["client_email"].lower():
+                is_owner = True
+
+        email = row["client_email"]
+        phone = row["client_phone"]
+        name = row["client_name"]
+
+        if not is_owner and email:
+            # Enmascarar PII para visitantes no autenticados
+            if "@" in email:
+                user_part, domain_part = email.split("@", 1)
+                email = f"{user_part[:2]}***@{domain_part}"
+            if phone:
+                phone = f"******{phone[-4:]}" if len(phone) >= 4 else "***"
+
         return {
             "quote_code": row["quote_code"],
-            "client_name": row["client_name"],
-            "client_email": row["client_email"],
-            "client_phone": row["client_phone"],
+            "client_name": name,
+            "client_email": email,
+            "client_phone": phone,
             "items": json.loads(row["items_json"]),
             "subtotal": row["subtotal"],
             "iva": row["iva"],

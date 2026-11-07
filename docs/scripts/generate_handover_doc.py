@@ -407,6 +407,16 @@ def build_handover_document():
         doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
     # 3.1 Software y Código Fuente
+    doc.add_heading("3.0 Enlaces Oficiales de Acceso y Repositorio de Codigo", level=2)
+    p_links = doc.add_paragraph()
+    p_links.add_run(
+        "Para efectos de revision, auditoria tecnica y prueba funcional por parte del Instructor Evaluador y la Direccion del Negocio, se certifican los siguientes accesos directos:\n"
+        "\xe2\x80\xa2 Aplicacion Web Funcional en Vivo (Produccion): https://kevin81a.github.io/Fotocopiadora-S-P/\n"
+        "\xe2\x80\xa2 Repositorio Oficial en GitHub: https://github.com/Kevin81A/Fotocopiadora-S-P\n"
+        "\xe2\x80\xa2 Rama Principal Consolidada: main\n"
+        "\xe2\x80\xa2 Estado del Despliegue: Operativo 100% con protocolo seguro HTTPS y compatibilidad multiplataforma.\n\n"
+    )
+
     doc.add_heading("3.1 Componentes de Software y Código Fuente", level=2)
     sw_headers = ["Componente", "Ubicación en Repositorio", "Tecnología / Framework", "Estado de Entrega"]
     sw_data = [

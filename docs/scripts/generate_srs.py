@@ -346,6 +346,7 @@ def build_srs_document():
     p = doc.add_paragraph()
     r = p.add_run("1.2 Alcance del Producto de Software (SyP Web & REST API)\n")
     r.bold = True
+    p.add_run("? Acceso Web en Vivo: https://kevin81a.github.io/Fotocopiadora-S-P/\n? Repositorio GitHub: https://github.com/Kevin81A/Fotocopiadora-S-P\n\n")
     p.add_run(
         'El sistema informático denominado "Plataforma Digital Fotocopiadoras SyP" comprende dos subsistemas interconectados: '
         'un cliente frontend interactivo multipágina estructurado como Progressive Web App (PWA) con almacenamiento local y capacidades offline, '

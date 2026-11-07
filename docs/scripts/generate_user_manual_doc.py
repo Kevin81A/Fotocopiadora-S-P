@@ -384,6 +384,15 @@ def build_user_manual_document():
     # -------------------------------------------------------------
     doc.add_heading("2. Parte 1: Guía del Cliente y Tienda Virtual", level=1)
 
+    p_url = doc.add_paragraph()
+    r_url = p_url.add_run("Acceso Directo a la Plataforma Web en Vivo:\n")
+    r_url.bold = True
+    p_url.add_run(
+        "El cliente o evaluador puede ingresar directamente a la tienda virtual desde cualquier navegador web a traves del siguiente enlace oficial:\n"
+        "\xe2\x80\xa2 URL de Produccion: https://kevin81a.github.io/Fotocopiadora-S-P/\n"
+        "\xe2\x80\xa2 Repositorio Oficial en GitHub: https://github.com/Kevin81A/Fotocopiadora-S-P (rama main)\n\n"
+    )
+
     def render_manual_section(sec_id, sec_title, obj, steps, expected, screenshot_desc):
         h2 = doc.add_heading(f"2.{sec_id} {sec_title}", level=2)
         h2.paragraph_format.space_before = Pt(14)

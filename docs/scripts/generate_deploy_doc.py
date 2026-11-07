@@ -463,7 +463,7 @@ def build_deployment_document():
         "Abrir una terminal de PowerShell y clonar el repositorio del proyecto en la estación de trabajo:\n"
         "```powershell\n"
         "cd \"C:\\Users\\<TuUsuario>\\Proyectos\"\n"
-        "git clone https://github.com/tu-organizacion/syp-fotocopiadoras.git SYP\n"
+        "git clone https://github.com/Kevin81A/Fotocopiadora-S-P.git SYP\n"
         "cd SYP\n"
         "```"
     )
@@ -612,6 +612,19 @@ def build_deployment_document():
     )
 
     # -------------------------------------------------------------
+    p = doc.add_paragraph()
+    r = p.add_run("4.4 Despliegue Oficial en Produccion en GitHub Pages (Acceso Directo)\n")
+    r.bold = True
+    p.add_run(
+        "Como entorno de produccion en vivo y demostracion publica para el evaluador e instructor, el frontend "
+        "se encuentra desplegado y activo en la infraestructura de GitHub Pages:\n"
+        "\xe2\x80\xa2 URL Oficial de la Aplicacion en Produccion: https://kevin81a.github.io/Fotocopiadora-S-P/\n"
+        "\xe2\x80\xa2 Repositorio Oficial del Proyecto: https://github.com/Kevin81A/Fotocopiadora-S-P\n"
+        "\xe2\x80\xa2 Rama de Produccion: main\n"
+        "\xe2\x80\xa2 Modo de Entrega: HTTPS con cifrado TLS 1.3 y CDN de alta disponibilidad.\n"
+        "El evaluador puede acceder directamente al enlace anterior desde cualquier navegador de escritorio o movil para validar el funcionamiento integral de la tienda virtual, cotizador, buscador Ricoh SC y agendamiento tecnico.\n\n"
+    )
+
     # 5. GUÍA DE DESPLIEGUE EN PRODUCCIÓN (BACKEND EN VPS LINUX)
     # -------------------------------------------------------------
     doc.add_heading("5. Guía de Despliegue en Producción (Backend en VPS Linux)", level=1)

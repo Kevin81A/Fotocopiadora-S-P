@@ -2983,7 +2983,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Registro de Service Worker para PWA (Página descargable / instalable)
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').then((reg) => {
+    navigator.serviceWorker.register('./sw.js').then((reg) => {
       // Si hay una nueva versión del Service Worker esperando, forzar actualización
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;

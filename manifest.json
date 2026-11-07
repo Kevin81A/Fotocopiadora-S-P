@@ -2,7 +2,7 @@
   "name": "Fotocopiadora SyP — Impresoras & Servicio Técnico Ricoh Neiva",
   "short_name": "Fotocopiadora SyP",
   "description": "Venta, alquiler, renting y servicio técnico especializado de fotocopiadoras e impresoras Ricoh en Neiva, Huila.",
-  "start_url": "/index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#0B0B0C",
@@ -29,25 +29,25 @@
       "name": "Buscador de Errores SC Ricoh",
       "short_name": "Errores SC",
       "description": "Diagnóstico rápido de códigos de servicio Ricoh",
-      "url": "/servicio-tecnico.html#buscador-codigos-sc"
+      "url": "servicio-tecnico.html#buscador-codigos-sc"
     },
     {
       "name": "Catálogo de Equipos e Insumos",
       "short_name": "Catálogo",
       "description": "Ver fotocopiadoras, tóners y repuestos",
-      "url": "/productos.html"
+      "url": "productos.html"
     },
     {
       "name": "Calculadora de Renting",
       "short_name": "Renting",
       "description": "Simula tu ahorro mensual en copiado",
-      "url": "/servicio-tecnico.html#calculadora-renting"
+      "url": "servicio-tecnico.html#calculadora-renting"
     },
     {
       "name": "Contactar Asesor Directo",
       "short_name": "Asesor",
       "description": "Atención comercial y técnica en Neiva",
-      "url": "/contacto.html"
+      "url": "contacto.html"
     }
   ]
 }

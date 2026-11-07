@@ -1,180 +1,122 @@
-﻿# Fotocopiadora SyP — Web App
+# 🖨️ Plataforma Web & Backend — Fotocopiadora SyP
 
-> **"Precisión de planta. Servicio de barrio."**
-> A modern, fully functional front-end web application for **Fotocopiadora SyP**, a photocopier and printer sales & repair shop based in **Neiva, Huila, Colombia**.
-
----
-
-## 🖥️ Live Preview
-
-> Open `index.html` with [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) in VS Code, or run the included PowerShell server:
-> ```powershell
-> powershell -ExecutionPolicy Bypass -File servidor.ps1
-> ```
-> Then navigate to **http://localhost:5500**
+> **"Precisión de planta. Servicio de barrio."**  
+> Aplicación web integral de comercio electrónico, gestión de servicio técnico y administración comercial para **Fotocopiadoras SyP** (Neiva, Huila, Colombia).
 
 ---
 
-## 📸 Features
+## 🌐 Enlaces Oficiales del Proyecto
 
-- **Full multi-page website** — 7 pages, all internally linked
-- **Product catalog** with category filters, live search, and 16+ products
-- **Shopping cart** — persists across pages using `localStorage`
-- **WhatsApp Checkout** — cart generates a pre-filled WhatsApp message to confirm orders
-- **Technical Service booking** — logged-in clients can schedule maintenance visits
-- **Auth system** — login/register (simulated with `localStorage`), admin & client roles
-- **Admin panel** — view all service requests, filter by status, update status, export CSV, and send WhatsApp reminders to clients
-- **Contact page** — embedded Google Maps, contact form that builds a WhatsApp message
-- **Scroll reveal animations** — Intersection Observer API, no external libraries
-- **Fully responsive** — mobile-first, works on all screen sizes
-- **No dependencies** — pure HTML, CSS, and vanilla JavaScript
+| Recurso | Enlace Directo | Descripción |
+|---|---|---|
+| 🚀 **Sitio Web Funcional en Vivo** | **[https://kevin81a.github.io/Fotocopiadora-S-P/](https://kevin81a.github.io/Fotocopiadora-S-P/)** | **Despliegue activo en GitHub Pages** (acceso directo e interactivo) |
+| 💻 **Repositorio en GitHub** | **[https://github.com/Kevin81A/Fotocopiadora-S-P](https://github.com/Kevin81A/Fotocopiadora-S-P)** | Código fuente consolidado en la rama `main` |
 
 ---
 
-## 📁 Project Structure
+## 📑 Paquete Documental Completo para Revisión del Instructor
+
+Toda la documentación técnica y metodológica oficial exigida para el proyecto se encuentra en la carpeta [`docs/`](./docs/):
+
+1. **`01_SRS_Fotocopiadoras_SyP.docx`**: Especificación de Requisitos de Software bajo estándar IEEE 830 adaptado.
+2. **`02_Manual_de_Usuario_SyP.docx`**: Manual integral para clientes y personal administrativo.
+3. **`03_Manual_Tecnico_y_Arquitectura.docx`**: Arquitectura del sistema, capas de software y diagramas C4/UML.
+4. **`04_Diccionario_y_Modelo_Base_Datos.docx`**: Modelo relacional, tablas, tipos de datos, restricciones e índices.
+5. **`05_Manual_de_Instalacion_y_Despliegue.docx`**: Guía paso a paso para despliegue local y producción.
+6. **`06_Plan_y_Matriz_de_Pruebas.docx`**: Casos de prueba unitarios, de integración, seguridad y validación E2E.
+7. **`07_Acta_de_Entrega_y_Cierre.docx`**: Documento formal de entrega, hitos y conformidad del producto.
+8. **Auditorías Técnicas**:
+   - `docs/AUDITORIA_DISENO_FUNCIONALIDAD.md`: Auditoría de experiencia de usuario y funcionalidad.
+   - `docs/AUDITORIA_SEGURIDAD_STRIX.md`: Análisis de vulnerabilidades y hardening de seguridad.
+
+---
+
+## 📁 Estructura Consolidada del Proyecto (`main`)
 
 ```
-syp-web/
-├── .vscode/
-│   ├── settings.json        # Live Server config (port 5500)
-│   └── launch.json          # Chrome debug config
+Fotocopiadora-S-P/
 ├── css/
-│   └── style.css            # Complete design system (~1300 lines)
+│   └── style.css                     # Sistema de diseño completo (Variables CSS, Grid, Flexbox, Dark Mode)
 ├── js/
-│   ├── products.js          # Product data + SVG icons + formatCOP()
-│   ├── auth.js              # Auth & service requests (localStorage)
-│   └── main.js              # Cart, checkout modal, nav, animations
-├── index.html               # Homepage — hero, categories, featured products
-├── nosotros.html            # About — history, values, stats
-├── contacto.html            # Contact — map, hours, WhatsApp form
-├── productos.html           # Catalog — filters + search
-├── servicio-tecnico.html    # Service booking (requires login)
-├── login.html               # Login / Register
-├── admin.html               # Admin panel (requires admin role)
-├── servidor.ps1             # PowerShell static HTTP server (no Node needed)
-└── README.md
+│   ├── products.js                   # Catálogo de productos, compatibilidades e iconos
+│   ├── auth.js                       # Autenticación JWT, sesiones y lógica de cliente/admin
+│   └── main.js                       # Carrito, checkout WhatsApp/PSE, diagnóstico SC y PWA
+├── img/                              # Galería optimizada de equipos, insumos y repuestos
+├── docs/                             # Documentación formal completa (7 DOCX + Diagramas + Auditorías)
+├── fastapi_backend/                  # Backend REST API en Python FastAPI
+│   ├── main.py                       # Endpoints de autenticación, productos, pedidos, cotizaciones
+│   ├── models.py                     # Esquemas Pydantic y modelos relacionales
+│   ├── database.py                   # Conexión SQLite y pool de sesiones SQLAlchemy
+│   ├── security.py                   # Hashing Bcrypt, tokens JWT y control de acceso RBAC
+│   ├── seed_data.py                  # Script de sembrado de datos iniciales
+│   ├── test_api.py                   # Suite de pruebas automatizadas
+│   ├── requirements.txt              # Dependencias de Python
+│   └── syp.db                        # Base de datos pre-configurada
+├── index.html                        # Página de inicio (Hero, catálogo destacado, cotizador rápido)
+├── productos.html                    # Catálogo interactivo con filtros por categoría y búsqueda en vivo
+├── servicio-tecnico.html             # Módulo de solicitud de servicio, errores SC Ricoh y renting
+├── contacto.html                     # Información de contacto, mapa y canal WhatsApp
+├── nosotros.html                     # Historia empresarial, equipo y valores
+├── login.html                        # Portal de autenticación y registro de usuarios
+├── admin.html                        # Panel de control administrativo y analíticas
+├── cotizacion.html                   # Módulo de cotizaciones con desglose detallado
+├── offline.html                      # Vista de contingencia para navegación sin conexión
+├── sw.js                             # Service Worker v6 para soporte PWA y cache offline
+├── manifest.json                     # Manifiesto para instalación como aplicación web progresiva
+├── iniciar_servidores.ps1            # Script para iniciar Frontend y Backend en paralelo
+├── servidor.ps1                      # Servidor HTTP estático nativo en PowerShell
+└── README.md                         # Este documento de referencia
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🔐 Credenciales de Demostración
 
-### Option 1 — VS Code + Live Server (recommended)
+| Rol | Correo Electrónico | Contraseña | Acceso |
+|---|---|---|---|
+| **Administrador** | `admin@fotocopiadorasyp.com` | `admin123` | Panel administrativo (`admin.html`), gestión de pedidos, clientes y solicitudes |
+| **Cliente Demo** | `cliente@ejemplo.com` | `cliente123` | Solicitudes de servicio técnico, cotizaciones y pedidos |
 
-1. Install [VS Code](https://code.visualstudio.com/)
-2. Install the [Live Server extension](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
-3. Open the `syp-web/` folder in VS Code
-4. Right-click `index.html` → **"Open with Live Server"**
+---
 
-### Option 2 — PowerShell server (no Node.js required)
+## 🚀 Guía de Ejecución Local
 
+### Opción 1: Inicio Rápido con PowerShell (Frontend + Backend)
+Ejecute el script automatizado que levanta ambos entornos simultáneamente:
 ```powershell
-cd syp-web
+powershell -ExecutionPolicy Bypass -File iniciar_servidores.ps1
+```
+
+### Opción 2: Solo Frontend (Servidor Ligero)
+```powershell
 powershell -ExecutionPolicy Bypass -File servidor.ps1
 ```
+El navegador abrirá automáticamente **http://localhost:5500/index.html**.
 
-Opens automatically at **http://localhost:5500/index.html**
-
-### Option 3 — Any static server
-
-```bash
-# Python 3
-python -m http.server 5500
-
-# Node.js (if available)
-npx live-server --port=5500
+### Opción 3: Backend FastAPI Manual
+```powershell
+cd fastapi_backend
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
 ```
+- Documentación interactiva Swagger: **http://localhost:8000/docs**
+- Documentación alternativa ReDoc: **http://localhost:8000/redoc**
 
 ---
 
-## 🔐 Demo Credentials
+## 🛠️ Tecnologías Empleadas
 
-| Role | Email | Password |
-|------|-------|----------|
-| **Admin** | `admin@fotocopiadorasyp.com` | `admin123` |
-| **Client** | Register a new account on `/login.html` | — |
-
-> ⚠️ Auth is simulated with `localStorage`. No real backend — passwords are **not** hashed. Do not use real credentials.
-
----
-
-## 🛒 How the Cart Works
-
-1. Add products from any page (cart persists across navigation via `localStorage`)
-2. Click the **Cart** button in the header
-3. Click **"Proceder al pago"** — a confirmation modal opens
-4. Click **"Confirmar por WhatsApp"** — opens WhatsApp with the order pre-filled
-5. Cart clears automatically after confirmation
+- **Frontend**: HTML5 Semántico, CSS3 moderno (Custom Properties, CSS Grid, Flexbox), JavaScript ES6+ Vanilla (sin frameworks pesados para máxima velocidad).
+- **PWA (Progressive Web App)**: Service Worker v6 con caché híbrida (Stale-While-Revalidate) y manifiesto para instalación en móviles y escritorio.
+- **Backend API**: Python 3.10+, FastAPI, SQLAlchemy, SQLite, Pydantic v2.
+- **Seguridad**: Autenticación Bearer JWT, algoritmos de hashing Bcrypt, sanitización de entradas, protección contra IDOR y cabeceras de seguridad.
+- **Despliegue**: GitHub Pages (Frontend en producción) y Git para versionamiento.
 
 ---
 
-## 🔧 Tech Stack
+## 🏢 Contacto y Soporte Comercial
 
-| Layer | Technology |
-|-------|-----------|
-| Markup | HTML5 (semantic) |
-| Styles | CSS3 — custom design system, CSS Variables, Grid, Flexbox |
-| Scripts | Vanilla JavaScript (ES6+) |
-| Fonts | Google Fonts — Archivo Black, Inter, IBM Plex Mono |
-| Storage | `localStorage` (cart, auth, service requests) |
-| Server | PowerShell `System.Net.HttpListener` (dev only) |
-
----
-
-## 📄 Pages
-
-| Page | File | Description |
-|------|------|-------------|
-| Home | `index.html` | Hero, product categories, featured products, services |
-| Products | `productos.html` | Full catalog with search and category filters |
-| About | `nosotros.html` | Company history, values, stats |
-| Contact | `contacto.html` | Address, hours, Google Maps, WhatsApp form |
-| Service | `servicio-tecnico.html` | Schedule maintenance visits (client login required) |
-| Login | `login.html` | Login / register with tab switching |
-| Admin | `admin.html` | Service request management (admin login required) |
-
----
-
-## 🎨 Design System
-
-The site uses a custom **"Registration Mark"** design concept inspired by print press marks (the ⊕ symbol).
-
-**Color palette:**
-- `--ink: #0B0B0C` — Primary black
-- `--red: #E4002B` — Brand red
-- `--paper: #FAFAF8` — Background off-white
-- `--steel: #6B6D70` — Secondary text
-
-**Typography:**
-- `Archivo Black` — Display headings
-- `Inter` — Body text
-- `IBM Plex Mono` — Labels, prices, codes
-
----
-
-## 🗺️ Roadmap (Backend Phase)
-
-- [ ] PHP + MySQL backend (`api/` folder)
-- [ ] Real authentication with password hashing (`password_hash`)
-- [ ] Product database with images
-- [ ] Online payments (Wompi / PayU for Colombia)
-- [ ] Email notifications for service requests
-- [ ] WhatsApp Business API integration
-
----
-
-## 🤝 Business
-
-**Fotocopiadora SyP**
-- 📍 Avenida la Toma #3A-20, Neiva, Huila, Colombia
-- 📞 +57 314 380 4967 (Gladys) / +57 317 820 4193 (Juan)
-- 📘 [Facebook](https://web.facebook.com/copycaes/)
-- 📸 [Instagram](https://www.instagram.com/copycaess/)
-- 🕐 Mon–Fri: 8am–12pm · 2pm–6pm | Sat: 8am–12pm
-
----
-
-## 📝 License
-
-This project is proprietary software developed for **Fotocopiadora SyP**.
-All rights reserved © 2026 Fotocopiadora SyP.
+**Fotocopiadora SyP**  
+- **Dirección**: Avenida La Toma #3A-20, Neiva, Huila, Colombia  
+- **Atención al Cliente**: +57 314 380 4967 / +57 317 820 4193  
+- **Correo**: `Fotocopiadorassp@outlook.com`

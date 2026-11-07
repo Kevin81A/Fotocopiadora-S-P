@@ -3,23 +3,23 @@
    Estrategia: Híbrida (Stale-While-Revalidate + Network-First)
    ========================================================= */
 
-const CACHE_NAME = 'syp-cache-v5';
+const CACHE_NAME = 'syp-cache-v6';
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/productos.html',
-  '/servicio-tecnico.html',
-  '/nosotros.html',
-  '/contacto.html',
-  '/login.html',
-  '/cotizacion.html',
-  '/admin.html',
-  '/offline.html',
-  '/css/style.css',
-  '/js/products.js',
-  '/js/auth.js',
-  '/js/main.js',
-  '/manifest.json'
+  './',
+  './index.html',
+  './productos.html',
+  './servicio-tecnico.html',
+  './nosotros.html',
+  './contacto.html',
+  './login.html',
+  './cotizacion.html',
+  './admin.html',
+  './offline.html',
+  './css/style.css',
+  './js/products.js',
+  './js/auth.js',
+  './js/main.js',
+  './manifest.json'
 ];
 
 // Instalación: Precarga de la Shell de la Aplicación
@@ -72,7 +72,7 @@ self.addEventListener('fetch', (event) => {
         .catch(async () => {
           const cachedResponse = await caches.match(request);
           if (cachedResponse) return cachedResponse;
-          const offlinePage = await caches.match('/offline.html');
+          const offlinePage = (await caches.match('./offline.html')) || (await caches.match('offline.html'));
           return offlinePage || new Response('Modo sin conexión', { status: 503, headers: { 'Content-Type': 'text/plain' } });
         })
     );
